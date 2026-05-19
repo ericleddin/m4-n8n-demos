@@ -1,0 +1,663 @@
+{
+  "name": "W1T4 - Debugging & Fehlerhandling",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        160
+      ],
+      "id": "fc0b3560-d740-4c62-a083-13deed67038c",
+      "name": "Daily - 8 AM"
+    },
+    {
+      "parameters": {
+        "url": "https://techcrunch.com/category/artificial-intelligence/feed/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        -112
+      ],
+      "id": "115d6b75-5712-4beb-a120-ba0bc1482309",
+      "name": "RSS: techcrunch",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://www.heise.de/thema/Kuenstliche-Intelligenz/feed.rss",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        896
+      ],
+      "id": "d22f104e-f242-49aa-a4e9-84b6499361b2",
+      "name": "RSS: Heise",
+      "alwaysOutputData": false,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://www.technologyreview.com/feed/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        160
+      ],
+      "id": "9c165536-4b5a-408a-bfb8-9635fcae9d40",
+      "name": "RSS: MIT",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"from\": \"onboarding@resend.dev\",\n  \"to\": \"eric.leddin@konvergenz.studio\",\n  \"subject\": \"⚠️ KI News Briefing – Feed Fehler {{ $now.format('dd.MM.yyyy') }}\",\n  \"text\": \"Der Heise RSS Feed konnte heute nicht abgerufen werden (404). Bitte manuell prüfen: https://www.heise.de\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        448,
+        896
+      ],
+      "id": "5e6262fa-a5ca-4959-a1f7-3bdadc1aac43",
+      "name": "Email: Heise Fehler",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "SEDyCLA4bLWkBmys",
+          "name": "Resend - Eric"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "numberInputs": 5
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        448,
+        -160
+      ],
+      "id": "396b24b8-b632-4872-9c70-04ee62f1f6a9",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "69b5f118-228c-44cb-9f1b-c213f93c0d56",
+              "leftValue": "={{ $json.pubDate }}",
+              "rightValue": "={{ $now.minus(24, 'hours').toISO() }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "after"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        672,
+        -112
+      ],
+      "id": "10bba597-4908-463a-8631-aa1406d24a64",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "url": "https://www.wired.com/feed/tag/ai/latest/rss",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        352
+      ],
+      "id": "aba40252-6da7-45ef-aff0-421a1d1803a0",
+      "name": "RSS: Wired",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://the-decoder.de/feed/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        656
+      ],
+      "id": "cf5d2c65-0a17-41fa-9026-be4659c8fb34",
+      "name": "RSS: Decoder",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "title"
+            },
+            {
+              "fieldToAggregate": "link"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        -16
+      ],
+      "id": "acdc240c-0db9-4fb7-bef3-ddede0f79a13",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Hier sind aktuelle KI-News der letzten 24 Stunden mit Links:\n\n{{ $json.title.map((t, i) => `${t}: ${$json.link[i]}`).join('\\n') }}\n\nFasse jede News in 2 Sätzen auf Deutsch zusammen. Format: HTML mit folgender Struktur pro News:\n\n<h3><a href=\"LINK\">TITEL</a></h3>\n<p>ZUSAMMENFASSUNG</p>\n\nGib nur den HTML-Inhalt zurück, kein ```html oder andere Formatierung drumherum.",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        1344,
+        -16
+      ],
+      "id": "ee190f5d-f5bc-4a3c-8ad5-c7b4d97d869b",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-4o-mini",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        1424,
+        208
+      ],
+      "id": "2317e292-de6a-4e49-a397-774a6edc2e99",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "iNwU2uwlDz4l7tnF",
+          "name": "OpenRouter account - Eric Leddin"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"from\": \"onboarding@resend.dev\",\n  \"to\": \"eric.leddin@konvergenz.studio\",\n  \"subject\": \"🤖 KI News Briefing {{ $now.format('dd.MM.yyyy') }}\",\n  \"html\": {{ JSON.stringify($json.html_body) }}\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1920,
+        -16
+      ],
+      "id": "4098e9eb-0ff9-4cfe-8f78-c31573c2bb31",
+      "name": "Email: Daily News",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "SEDyCLA4bLWkBmys",
+          "name": "Resend - Eric"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "03431414-d5ba-40bd-9a55-3edff0547f9b",
+              "name": "=html_body",
+              "value": "=<h2>KI News Briefing – {{ $now.format('dd.MM.yyyy') }}</h2><p>Die wichtigsten KI-News der letzten 24 Stunden.</p><hr>{{ $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1696,
+        -16
+      ],
+      "id": "bacd8ea1-4c5a-4092-bb18-7e079474487d",
+      "name": "html body"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"from\": \"onboarding@resend.dev\",\n  \"to\": \"eric.leddin@konvergenz.studio\",\n  \"subject\": \"⚠️ KI News Briefing – Feed Fehler {{ $now.format('dd.MM.yyyy') }}\",\n  \"text\": \"Der Decoder RSS Feed konnte heute nicht abgerufen werden (404). Bitte manuell prüfen: https://www.heise.de\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        448,
+        704
+      ],
+      "id": "34ddc0ec-ceb0-48a5-84a4-5d428d30114d",
+      "name": "Email: Decoder Fehler",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "SEDyCLA4bLWkBmys",
+          "name": "Resend - Eric"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"from\": \"onboarding@resend.dev\",\n  \"to\": \"eric.leddin@konvergenz.studio\",\n  \"subject\": \"⚠️ KI News Briefing – Feed Fehler {{ $now.format('dd.MM.yyyy') }}\",\n  \"text\": \"Der Wired RSS Feed konnte heute nicht abgerufen werden (404). Bitte manuell prüfen: https://www.heise.de\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        448,
+        512
+      ],
+      "id": "5ee0c734-710d-49d8-82db-74a1277caa54",
+      "name": "Email: Wired Fehler",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "SEDyCLA4bLWkBmys",
+          "name": "Resend - Eric"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"from\": \"onboarding@resend.dev\",\n  \"to\": \"eric.leddin@konvergenz.studio\",\n  \"subject\": \"⚠️ KI News Briefing – Feed Fehler {{ $now.format('dd.MM.yyyy') }}\",\n  \"text\": \"Der MIT RSS Feed konnte heute nicht abgerufen werden (404). Bitte manuell prüfen: https://www.heise.de\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        448,
+        320
+      ],
+      "id": "1571e3d9-e91e-4a0f-a83e-85e2dfcdca0c",
+      "name": "Email: MIT Fehler",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "SEDyCLA4bLWkBmys",
+          "name": "Resend - Eric"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"from\": \"onboarding@resend.dev\",\n  \"to\": \"eric.leddin@konvergenz.studio\",\n  \"subject\": \"⚠️ KI News Briefing – Feed Fehler {{ $now.format('dd.MM.yyyy') }}\",\n  \"text\": \"Der techcrunch RSS Feed konnte heute nicht abgerufen werden (404). Bitte manuell prüfen: https://www.heise.de\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        448,
+        128
+      ],
+      "id": "839bb0d6-f4ce-4096-9a22-cffa00e24425",
+      "name": "Email: techcrunch Fehler",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "SEDyCLA4bLWkBmys",
+          "name": "Resend - Eric"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ad8f9cb9-e11b-4f73-a215-73bbf6f07dbd",
+              "leftValue": "={{ $input.all().length }}",
+              "rightValue": 3,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        896,
+        -112
+      ],
+      "id": "78c293cc-b3ad-4311-8629-71c465e129b0",
+      "name": "If < 3"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"from\": \"onboarding@resend.dev\",\n  \"to\": \"eric.leddin@konvergenz.studio\",\n  \"subject\": \"⚠️ KI News Briefing {{ $now.format('dd.MM.yyyy') }} – Zu wenig Artikel\",\n  \"html\": \"<h2>⚠️ KI News Briefing – {{ $now.format('dd.MM.yyyy') }}</h2><p>Heute wurden weniger als 3 aktuelle KI-News gefunden. Das Briefing wird nicht versendet.</p><p>Bitte die RSS Feeds manuell prüfen.</p>\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1120,
+        -208
+      ],
+      "id": "04ef4d3b-975d-4e6c-8f34-c9fe21321c32",
+      "name": "Email: Zu wenig KI-News heute",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "SEDyCLA4bLWkBmys",
+          "name": "Resend - Eric"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Daily - 8 AM": {
+      "main": [
+        [
+          {
+            "node": "RSS: techcrunch",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS: MIT",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS: Heise",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS: Wired",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS: Decoder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS: techcrunch": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Email: techcrunch Fehler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS: Heise": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 4
+          }
+        ],
+        [
+          {
+            "node": "Email: Heise Fehler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS: MIT": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ],
+        [
+          {
+            "node": "Email: MIT Fehler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS: Wired": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ],
+        [
+          {
+            "node": "Email: Wired Fehler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS: Decoder": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 3
+          }
+        ],
+        [
+          {
+            "node": "Email: Decoder Fehler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "If < 3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "html body",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "html body": {
+      "main": [
+        [
+          {
+            "node": "Email: Daily News",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If < 3": {
+      "main": [
+        [
+          {
+            "node": "Email: Zu wenig KI-News heute",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "4704dfcd-9ac4-439e-a128-2bc4d0ea3ea7",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f032027e20e9709391bcafe9291ae76dc2a07ff2b593bca6936b7404ddb31c33"
+  },
+  "id": "k9b4b1RrZA8Ts413",
+  "tags": []
+}
