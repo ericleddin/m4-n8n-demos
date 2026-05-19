@@ -1,0 +1,29 @@
+# === Inbox: raw workflow exports never get committed ===
+# Everything in inbox/ is ignored except the .gitkeep and README.
+# This also implicitly ignores inbox/_processed/ (the archive of originals).
+inbox/*
+!inbox/.gitkeep
+!inbox/README.md
+
+# === Python ===
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.egg-info/
+
+# === Environment / secrets (safety net) ===
+.env
+.env.*
+*.local
+credentials.json
+
+# === OS ===
+.DS_Store
+Thumbs.db
+
+# === Editors ===
+.vscode/
+.idea/
+*.swp
