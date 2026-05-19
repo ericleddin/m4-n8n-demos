@@ -45,4 +45,4 @@ Dieses Repository begleitet das **Modul 4** der KI-Zertifizierung am Syntax Inst
 
 ## 📝 Lizenz
 
-MIT – siehe `LICENSE` (folgt).
+MIT – siehe `LICENSE`.
