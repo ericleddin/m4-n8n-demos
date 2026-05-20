@@ -97,8 +97,8 @@ flowchart LR
     B2 --> M
     M --> End([Ende])
 
-    style B1 fill:#fff4cc,stroke:#d4a017
-    style B2 fill:#cce7ff,stroke:#1771c4
+    style B1 fill:#c8860a,stroke:#a06800,color:#fff
+    style B2 fill:#1771c4,stroke:#0f4f8c,color:#fff
 ```
 
 **Reihenfolge in n8n:** Erst läuft Branch 1 (gelb) komplett durch, dann Branch 2 (blau). Erst danach wird `Merge` ausgeführt.
@@ -134,9 +134,9 @@ flowchart LR
     T --> Mail[E-Mail senden]
     F --> Log[In CRM markieren]
 
-    style IF fill:#ffe5b4,stroke:#e67e22
-    style T fill:#d4edda,stroke:#28a745
-    style F fill:#f8d7da,stroke:#dc3545
+    style IF fill:#d4820a,stroke:#a06200,color:#fff
+    style T fill:#1e8449,stroke:#155d34,color:#fff
+    style F fill:#c0392b,stroke:#922b21,color:#fff
 ```
 
 ### 3.2 Switch-Node (Der Multi-Weichensteller)
@@ -153,7 +153,7 @@ flowchart LR
     SW -- 'ES' --> ES[Spanien-Pfad]
     SW -- "Fallback" --> X[Default-Pfad]
 
-    style SW fill:#ffe5b4,stroke:#e67e22
+    style SW fill:#d4820a,stroke:#a06200,color:#fff
 ```
 
 ### 3.3 Filter-Node (Der Türsteher)
@@ -168,8 +168,8 @@ flowchart LR
     F --> Out[("Output<br/>7 Items")]
     F -.verworfen.-> Trash[("3 Items<br/>verworfen")]
 
-    style F fill:#e8d4f2,stroke:#9b59b6
-    style Trash fill:#f5f5f5,stroke:#999,stroke-dasharray: 5 5
+    style F fill:#7d3c98,stroke:#5b2c6f,color:#fff
+    style Trash fill:#555555,stroke:#888,color:#ccc,stroke-dasharray: 5 5
 ```
 
 ---
@@ -197,8 +197,8 @@ flowchart LR
     W2 -. externer Callback .-> W2
     W2 --> D[Freigabe verarbeiten]
 
-    style W fill:#fff4cc,stroke:#d4a017
-    style W2 fill:#fff4cc,stroke:#d4a017
+    style W fill:#c8860a,stroke:#a06800,color:#fff
+    style W2 fill:#c8860a,stroke:#a06800,color:#fff
 ```
 
 Der Webhook-Modus ist mächtig: Hier kann z. B. ein Mensch in einer externen UI „Genehmigen" klicken, und der wartende Workflow setzt sich fort.
@@ -223,8 +223,8 @@ flowchart LR
     EW -.ruft auf.-> T
     R -.liefert zurück.-> EW
 
-    style EW fill:#cce7ff,stroke:#1771c4
-    style T fill:#cce7ff,stroke:#1771c4
+    style EW fill:#1771c4,stroke:#0f4f8c,color:#fff
+    style T fill:#1771c4,stroke:#0f4f8c,color:#fff
 ```
 
 **Wann nutzen?**
@@ -242,7 +242,7 @@ flowchart LR
     IF -- ja --> OK[Bestellung verarbeiten]
     IF -- nein --> SE["🛑 Stop and Error<br/>'Out of Stock'"]
 
-    style SE fill:#f8d7da,stroke:#dc3545
+    style SE fill:#c0392b,stroke:#922b21,color:#fff
 ```
 
 ---
@@ -262,7 +262,7 @@ flowchart LR
     In[("{ firstname: 'Anna',<br/>  lastname: 'Schmidt',<br/>  age: 30 }")] --> S[/"Edit Fields<br/>fullname = firstname + ' ' + lastname<br/>drop: firstname, lastname"/]
     S --> Out[("{ fullname: 'Anna Schmidt',<br/>  age: 30 }")]
 
-    style S fill:#d1ecf1,stroke:#0c5460
+    style S fill:#0e6b7a,stroke:#084f5a,color:#fff
 ```
 
 ### 5.2 Split Out – Das Auspacken
@@ -276,7 +276,7 @@ flowchart LR
     In[("1 Item:<br/>{ order: 'X',<br/>  produkte: [A, B, C] }")] --> SO[/"Split Out<br/>field: produkte"/]
     SO --> Out[("3 Items:<br/>{ order: 'X', produkte: A }<br/>{ order: 'X', produkte: B }<br/>{ order: 'X', produkte: C }")]
 
-    style SO fill:#d1ecf1,stroke:#0c5460
+    style SO fill:#0e6b7a,stroke:#084f5a,color:#fff
 ```
 
 ### 5.3 Aggregate – Das Einpacken
@@ -290,7 +290,7 @@ flowchart LR
     In[("3 Items:<br/>{ id: 1 }<br/>{ id: 2 }<br/>{ id: 3 }")] --> AG[/"Aggregate<br/>field: id<br/>output: ids"/]
     AG --> Out[("1 Item:<br/>{ ids: [1, 2, 3] }")]
 
-    style AG fill:#d1ecf1,stroke:#0c5460
+    style AG fill:#0e6b7a,stroke:#084f5a,color:#fff
 ```
 
 ---
@@ -314,7 +314,7 @@ flowchart LR
     A2[("Shop-Bestellungen<br/>Input 2")] --> M
     M --> Out[("Angereicherte<br/>Kundenliste")]
 
-    style M fill:#e2d4f0,stroke:#7b4dad
+    style M fill:#7b4dad,stroke:#5a3480,color:#fff
 ```
 
 ### 6.2 Loop Over Items (Das Fließband)
@@ -330,7 +330,7 @@ flowchart LR
     API --> L
     L -- "done output<br/>nach allen Batches" --> Done[Abschluss-Mail]
 
-    style L fill:#fff4cc,stroke:#d4a017
+    style L fill:#c8860a,stroke:#a06800,color:#fff
 ```
 
 **Zwei Ausgänge:**
@@ -403,9 +403,9 @@ flowchart LR
     H -- main --> S[Erfolgs-Pfad]
     H -- error --> E[Error-Pfad<br/>Slack-Alert + Retry-Queue]
 
-    style H fill:#fff4cc,stroke:#d4a017
-    style E fill:#f8d7da,stroke:#dc3545
-    style S fill:#d4edda,stroke:#28a745
+    style H fill:#c8860a,stroke:#a06800,color:#fff
+    style E fill:#c0392b,stroke:#922b21,color:#fff
+    style S fill:#1e8449,stroke:#155d34,color:#fff
 ```
 
 ### 8.3 Globaler Error Trigger
@@ -425,8 +425,8 @@ flowchart TB
     Fmt --> Slack[Slack-Channel #alerts]
     Fmt --> Mail[Resend-Mail an Owner]
 
-    style ET fill:#f8d7da,stroke:#dc3545
-    style X fill:#ffe5e5,stroke:#dc3545
+    style ET fill:#c0392b,stroke:#922b21,color:#fff
+    style X fill:#922b21,stroke:#7b241c,color:#fff
 ```
 
 Empfehlung: **immer einen Error-Workflow betreiben** und in den Workflow-Settings als Default-Error-Workflow eintragen.
