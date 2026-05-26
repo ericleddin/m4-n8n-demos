@@ -1,0 +1,413 @@
+{
+  "name": "W2T3 - Supabase Data Vectorizer",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "PDF zu Markdown",
+        "formDescription": "Lade eine PDF-Slide hoch zum Testen",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "PDF",
+              "fieldType": "file",
+              "acceptFileTypes": ".pdf"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        0,
+        0
+      ],
+      "id": "b05e70fb-f04a-449b-b1ec-4a2f9f14f938",
+      "name": "On form submission",
+      "webhookId": "b8c20bf4-d009-4038-b7bb-53cc92ba601f"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        592,
+        224
+      ],
+      "id": "bbc700df-32c7-4f66-a665-90b8c8555314",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "model": "=openai/text-embedding-3-small",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        432,
+        224
+      ],
+      "id": "102f7027-50f2-4738-a167-806308087b24",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "JOxIKqPlB5YoEEhu",
+          "name": "OpenAI Account - OpenRouter Key Eric"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "PDF",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        224,
+        0
+      ],
+      "id": "1eaf8bd3-6219-4f6a-9d6b-37ecc635f4b5",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "options": {
+          "queryName": "match_documents"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        448,
+        0
+      ],
+      "id": "ba85e345-91ec-49e7-b83c-5093a3789856",
+      "name": "Add Data to Supabase Vector Store",
+      "credentials": {
+        "supabaseApi": {
+          "id": "W0eyn3oDYgO1uj3u",
+          "name": "Supabase - Eric (RAG)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        16,
+        672
+      ],
+      "id": "8ed8d4b5-3768-478a-bdbd-e334befad3a0",
+      "name": "When chat message received",
+      "webhookId": "2331b5c1-7095-4a83-a5ac-28903770e16f"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        224,
+        672
+      ],
+      "id": "9a20e4ee-2771-4358-8aba-e414dc7316cd",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        96,
+        880
+      ],
+      "id": "87757e06-7c50-4ff1-96d7-007be947b231",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "iNwU2uwlDz4l7tnF",
+          "name": "OpenRouter account - Eric Leddin"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Nutze dieses Tool, wenn der Nutzer eine Frage zum KI-Automatisierungskurs stellt — zum Beispiel zu Kursinhalten, Konzepten, Tools, Workflows, Agenten oder dem Architektur-Spektrum. Das Tool durchsucht die Kursunterlagen semantisch und gibt die relevantesten Textabschnitte zurück.",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        576,
+        672
+      ],
+      "id": "92b9b97c-9c7b-4d2b-b481-5e7163aafe76",
+      "name": "Get Data from Supabase Vector Store",
+      "credentials": {
+        "supabaseApi": {
+          "id": "W0eyn3oDYgO1uj3u",
+          "name": "Supabase - Eric (RAG)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 📥 Ingestion Pipeline\nStartet via PDF-Upload im n8n-Formular. Extrahiert den Text und speichert die Embeddings in Supabase.",
+        "height": 80,
+        "width": 860,
+        "color": 4
+      },
+      "id": "efd86e59-559c-415d-9e6f-52e2c021ed30",
+      "name": "Note: Ingestion Pipeline",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -64,
+        -224
+      ]
+    },
+    {
+      "parameters": {
+        "content": "📤 PDF-Upload\nÖffnet ein n8n-Formular zum Hochladen einer PDF-Datei.",
+        "height": 80,
+        "width": 180,
+        "color": 3
+      },
+      "id": "49df1d0d-5205-4358-b961-6d214e6a6f70",
+      "name": "Note: Manual Trigger",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -64,
+        -112
+      ]
+    },
+    {
+      "parameters": {
+        "content": "📄 PDF to Text\nExtrahiert den Rohtext aus dem PDF.",
+        "height": 80,
+        "width": 180,
+        "color": 3
+      },
+      "id": "aa35eb35-8f44-47e1-a82f-fdfdc69c3522",
+      "name": "Note: Extract",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        192,
+        -112
+      ]
+    },
+    {
+      "parameters": {
+        "content": "🗄️ Vektorspeicher\nChunked, embedded (OpenAI) und speichert in Supabase.",
+        "height": 80,
+        "width": 252,
+        "color": 3
+      },
+      "id": "c73c5904-2592-4bd8-a87c-b4e4816f27b8",
+      "name": "Note: Vector Store",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        448,
+        -112
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        672,
+        880
+      ],
+      "id": "a7fa4ded-5272-4264-95d5-617e6f7f30a0",
+      "name": "Embeddings OpenAI1",
+      "credentials": {
+        "openAiApi": {
+          "id": "D0KZPxFPeedjtiEv",
+          "name": "OpenAI account - Eric"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 💬 Retrieval & Chat Pipeline\nNimmt Nutzerfragen per Chat entgegen. Der Agent entscheidet selbst, ob er die Vector-DB durchsucht, und antwortet auf Basis der gefundenen Chunks.",
+        "height": 96,
+        "width": 860,
+        "color": 5
+      },
+      "id": "783e2284-2a83-41e5-bf96-20a1b50266a8",
+      "name": "Note: Retrieval & Chat",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -48,
+        464
+      ]
+    },
+    {
+      "parameters": {
+        "content": "🤖 AI Agent\nEntscheidet welche Tools er nutzt und formuliert die Antwort auf Basis der gefundenen Chunks.",
+        "height": 84,
+        "width": 360,
+        "color": 3
+      },
+      "id": "82fa5e41-b103-4822-bc83-71bcbc7044bb",
+      "name": "Note: AI Agent",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        144,
+        576
+      ]
+    },
+    {
+      "parameters": {
+        "content": "🔍 Retrieval Tool\nSucht semantisch ähnliche Chunks aus dem Supabase Vektorspeicher.",
+        "height": 80,
+        "width": 296,
+        "color": 3
+      },
+      "id": "2dbfc234-76f4-4c3e-915d-34fc3ad607f9",
+      "name": "Note: Retrieval",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        528,
+        576
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Add Data to Supabase Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Add Data to Supabase Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Add Data to Supabase Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Data from Supabase Vector Store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Get Data from Supabase Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "d7192b23-b3e0-42fd-bd70-d2ba6d0df339",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f032027e20e9709391bcafe9291ae76dc2a07ff2b593bca6936b7404ddb31c33"
+  },
+  "id": "pzvRhkx4lLEoGUm0",
+  "tags": []
+}
