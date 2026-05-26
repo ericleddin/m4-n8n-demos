@@ -17,6 +17,10 @@ Dieses Repository sammelt n8n-Workflows als Live-Demos für den Kurs M4. Jeder W
 - ist von hardcoded API-Keys und persönlichen Daten bereinigt (Platzhalter `<<REPLACE_WITH_...>>` statt echter Werte)
 - wird von Studierenden lokal in ihrer eigenen n8n-Instanz importiert
 
+### `docs/` vs. `workflows/`
+
+`docs/` ist reserviert für ergänzende **Konzept-Dokumentation** (Hintergrund, Referenzen, Erklärtexte). Workflow-Demos gehören **nicht** dorthin — sie liegen ausschließlich in `workflows/` nach dem Schema aus Abschnitt 3. Wenn unsicher: Demo (.json + Setup-README) → `workflows/`, Lese-Material (.md ohne Workflow) → `docs/`.
+
 ---
 
 ## 2. Standard-Workflow für neue Demos

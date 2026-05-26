@@ -23,6 +23,17 @@ Jeder Workflow liegt in einem eigenen Ordner mit einer README, die erklärt:
 - Welche Credentials/API-Keys benötigt werden
 - Wo im Architektur-Spektrum er sich einordnet
 
+## 📚 Weiterführende Dokumentation
+
+Unter [docs/n8n_learning/](docs/n8n_learning/) findest du ergänzende Konzept-Dokumentation, die unabhängig von den einzelnen Workflow-Demos das nötige Hintergrundwissen vermittelt:
+
+- **Datenfluss-Kompendium** — n8n-interne Mechanik (Items, Connections, Error-Handling)
+- **LLM/Agent/Tools** — konzeptuelle Einordnung, Architektur-Muster, Anti-Patterns
+- **Developer Guide** — Vertiefung für Studierende mit Dev-Background
+- **AI-Tool-Ökosystem** — Überblick über Provider-SDKs, Frameworks und Vector Stores
+
+Lies dort, wenn du parallel zum praktischen Workflow-Bau das große Ganze verstehen willst.
+
 ## 🚀 Workflow importieren
 
 1. Öffne deine n8n-Instanz (lokal oder über die Syntax-Cloud)
