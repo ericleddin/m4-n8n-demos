@@ -3,13 +3,18 @@
 n8n Workflow Secret Scanner & Cleaner
 For the M4 - KI Experte course materials repo.
 
-Scans n8n workflow JSON exports for hardcoded API keys, tokens, and other
-secrets that should never be committed to a public repository.
+Scans n8n workflow exports (and HTML companion files) for hardcoded API keys,
+tokens, and personal/instance-specific values that should be normalized before
+publishing to a public repository.
 
 Three modes:
     scan   - read-only report of what was found (no files written)
     apply  - replace findings with descriptive placeholders in a given folder
     inbox  - full inbox flow: scan + clean + archive originals to _processed/
+
+Supported file types:
+    .json  (n8n workflow exports)
+    .html  (companion frontends that call workflows via webhook)
 
 Usage:
     python scripts/scan_secrets.py scan  workflows/
@@ -32,12 +37,6 @@ from typing import Callable, Iterator
 
 # ---------------------------------------------------------------------------
 # Pattern definitions
-# ---------------------------------------------------------------------------
-# Each pattern has:
-#   - regex:       a compiled regex
-#   - label:       human-readable name for the report
-#   - placeholder: either a string (used as the replacement) or a callable
-#                  that takes the regex match and returns the replacement
 # ---------------------------------------------------------------------------
 
 @dataclass
@@ -67,8 +66,22 @@ def _query_param_placeholder(match: re.Match) -> str:
     return f"{match.group(1)}=<<REPLACE_WITH_{param_name}>>"
 
 
-PATTERNS: list[Pattern] = [
-    # --- Provider-specific prefixed keys ---
+def _n8n_self_hosted_placeholder(match: re.Match) -> str:
+    """Replace a known self-hosted n8n base URL but preserve the path.
+
+    E.g. https://n8n.syntax-institut.de/webhook/kontakt
+         → <<REPLACE_WITH_YOUR_N8N_HOST>>/webhook/kontakt
+
+    Keeping the path makes the placeholder pedagogical: students see the
+    URL structure they need to recreate on their own instance.
+    """
+    path = match.group(1) or ""
+    return f"<<REPLACE_WITH_YOUR_N8N_HOST>>{path}"
+
+
+# --- Real secrets (API keys, tokens) ---
+SECRET_PATTERNS: list[Pattern] = [
+    # Provider-specific prefixed keys
     Pattern(re.compile(r"sk-ant-[A-Za-z0-9_\-]{20,}"),
             "Anthropic", "<<REPLACE_WITH_ANTHROPIC_KEY>>"),
     Pattern(re.compile(r"sk-or-v1-[A-Za-z0-9]{32,}"),
@@ -86,19 +99,37 @@ PATTERNS: list[Pattern] = [
     Pattern(re.compile(r"ghp_[A-Za-z0-9]{36}"),
             "GitHub PAT", "<<REPLACE_WITH_GITHUB_TOKEN>>"),
 
-    # --- JWT-style tokens (Supabase service keys, custom JWTs, etc.) ---
+    # JWT-style tokens (Supabase service keys, custom JWTs, etc.)
     Pattern(re.compile(r"eyJ[A-Za-z0-9_\-]{10,}\.eyJ[A-Za-z0-9_\-]{10,}\.[A-Za-z0-9_\-]+"),
             "JWT (e.g. Supabase)", "<<REPLACE_WITH_JWT_TOKEN>>"),
 
-    # --- URL query-parameter keys ---
-    # Matches ?appid=abc123…, &api_key=…, &access_token=… (value >= 20 chars)
+    # URL query-parameter keys (?appid=, &api_key=, &access_token=, ...)
     Pattern(re.compile(r"\b(appid|api_key|apikey|access_token|auth_token)=([A-Za-z0-9_\-]{20,})"),
             "URL Query Parameter", _query_param_placeholder),
 
-    # --- Bearer tokens in header values ---
+    # Bearer tokens in header values
     Pattern(re.compile(r"Bearer\s+([A-Za-z0-9_\-\.]{30,})"),
             "Bearer Token", "Bearer <<REPLACE_WITH_TOKEN>>"),
 ]
+
+# --- Personal / instance-specific patterns ---
+# Not secrets per se, but values that students need to swap when forking.
+# Add new maintainer patterns here as they join the project.
+PERSONAL_PATTERNS: list[Pattern] = [
+    # Eric Leddin
+    Pattern(re.compile(r"\beric\.leddin@konvergenz\.studio\b"),
+            "Personal Email (Eric)",
+            "<<REPLACE_WITH_YOUR_NOTIFICATION_EMAIL>>"),
+    Pattern(re.compile(r"https?://n8n\.syntax-institut\.de(/[^\s\"'<>]*)?"),
+            "n8n Host (Syntax)",
+            _n8n_self_hosted_placeholder),
+    Pattern(re.compile(r"https?://n8n\.fearofgod\.de(/[^\s\"'<>]*)?"),
+            "n8n Host (Personal)",
+            _n8n_self_hosted_placeholder),
+]
+
+# Combined list used by the scanning/replacement logic
+PATTERNS: list[Pattern] = SECRET_PATTERNS + PERSONAL_PATTERNS
 
 
 # ---------------------------------------------------------------------------
@@ -108,7 +139,7 @@ PATTERNS: list[Pattern] = [
 @dataclass
 class Finding:
     file: Path
-    json_path: str
+    location: str
     pattern_label: str
     snippet: str
 
@@ -176,16 +207,77 @@ def apply_replacements(s: str) -> tuple[str, int]:
     return s, count
 
 
-def find_workflow_files(folder: Path, recursive: bool = True) -> list[Path]:
-    """Find candidate workflow JSONs. Skips files containing '.cleaned'
-    and anything inside an '_processed' folder.
+SUPPORTED_EXTENSIONS = ("json", "html")
+
+
+def find_inbox_files(folder: Path, recursive: bool = True) -> list[Path]:
+    """Return supported files for processing, skipping cleaned/archived copies."""
+    files: list[Path] = []
+    for ext in SUPPORTED_EXTENSIONS:
+        pattern = f"**/*.{ext}" if recursive else f"*.{ext}"
+        for p in folder.glob(pattern):
+            if ".cleaned" in p.name:
+                continue
+            if "_processed" in p.parts:
+                continue
+            files.append(p)
+    return sorted(files)
+
+
+# ---------------------------------------------------------------------------
+# Per-file processing
+# ---------------------------------------------------------------------------
+
+def process_json(file: Path) -> tuple[str, int, list[tuple[str, str, str]]]:
+    """Returns (new_content, replacement_count, findings).
+
+    findings is a list of (pattern_label, json_path, redacted_snippet).
     """
-    pattern = "**/*.json" if recursive else "*.json"
-    return sorted(
-        p for p in folder.glob(pattern)
-        if ".cleaned" not in p.name
-        and "_processed" not in p.parts
+    data = json.loads(file.read_text(encoding="utf-8"))
+
+    findings: list[tuple[str, str, str]] = []
+    for json_path, value, _setter in list(walk_strings(data)):
+        for pat, match in scan_string(value):
+            snippet = redact(make_snippet(value, match), match)
+            findings.append((pat.label, json_path, snippet))
+
+    total_count = 0
+    for _json_path, value, setter in list(walk_strings(data)):
+        new_value, n = apply_replacements(value)
+        if n > 0:
+            setter(new_value)
+            total_count += n
+
+    return (
+        json.dumps(data, indent=2, ensure_ascii=False),
+        total_count,
+        findings,
     )
+
+
+def process_html(file: Path) -> tuple[str, int, list[tuple[str, str, str]]]:
+    """Returns (new_content, replacement_count, findings).
+
+    HTML is treated as a single string — much simpler than JSON walking.
+    """
+    content = file.read_text(encoding="utf-8")
+
+    findings: list[tuple[str, str, str]] = []
+    for pat in PATTERNS:
+        for match in pat.regex.finditer(content):
+            snippet = redact(make_snippet(content, match), match)
+            findings.append((pat.label, "(html body)", snippet))
+
+    new_content, count = apply_replacements(content)
+    return new_content, count, findings
+
+
+def process_file(file: Path) -> tuple[str, int, list[tuple[str, str, str]]]:
+    if file.suffix == ".json":
+        return process_json(file)
+    if file.suffix == ".html":
+        return process_html(file)
+    raise ValueError(f"Unsupported file type: {file.suffix}")
 
 
 # ---------------------------------------------------------------------------
@@ -194,19 +286,20 @@ def find_workflow_files(folder: Path, recursive: bool = True) -> list[Path]:
 
 def cmd_scan(folder: Path) -> int:
     findings: list[Finding] = []
-    files = find_workflow_files(folder)
+    files = find_inbox_files(folder)
 
     for file in files:
         try:
-            data = json.loads(file.read_text(encoding="utf-8"))
+            _new, _count, raw_findings = process_file(file)
         except json.JSONDecodeError as e:
             print(f"  ⚠️  Skipping {file} (invalid JSON: {e})", file=sys.stderr)
             continue
+        except Exception as e:
+            print(f"  ⚠️  Skipping {file} ({e})", file=sys.stderr)
+            continue
 
-        for json_path, value, _setter in list(walk_strings(data)):
-            for pat, match in scan_string(value):
-                snippet = redact(make_snippet(value, match), match)
-                findings.append(Finding(file, json_path, pat.label, snippet))
+        for label, location, snippet in raw_findings:
+            findings.append(Finding(file, location, label, snippet))
 
     if not findings:
         print(f"✅ No secrets found in {len(files)} file(s).")
@@ -218,37 +311,27 @@ def cmd_scan(folder: Path) -> int:
         if f.file != current_file:
             print(f"\n📄 {f.file}")
             current_file = f.file
-        print(f"  • [{f.pattern_label}] at {f.json_path}")
+        print(f"  • [{f.pattern_label}] at {f.location}")
         print(f"      {f.snippet}")
     print(f"\nRun 'apply' to replace these with placeholders.")
     return 1
 
 
 def cmd_apply(folder: Path, inplace: bool = False) -> int:
-    files = find_workflow_files(folder)
+    files = find_inbox_files(folder)
     total_changes = 0
     files_changed = 0
 
     for file in files:
         try:
-            data = json.loads(file.read_text(encoding="utf-8"))
+            new_content, file_changes, _findings = process_file(file)
         except json.JSONDecodeError as e:
             print(f"  ⚠️  Skipping {file} (invalid JSON: {e})", file=sys.stderr)
             continue
 
-        file_changes = 0
-        for _json_path, value, setter in list(walk_strings(data)):
-            new_value, n = apply_replacements(value)
-            if n > 0:
-                setter(new_value)
-                file_changes += n
-
         if file_changes > 0:
-            target = file if inplace else file.with_suffix(".cleaned.json")
-            target.write_text(
-                json.dumps(data, indent=2, ensure_ascii=False),
-                encoding="utf-8",
-            )
+            target = file if inplace else file.with_suffix(f".cleaned{file.suffix}")
+            target.write_text(new_content, encoding="utf-8")
             print(f"✏️  {file} → {target.name} ({file_changes} replacement(s))")
             total_changes += file_changes
             files_changed += 1
@@ -260,7 +343,7 @@ def cmd_apply(folder: Path, inplace: bool = False) -> int:
 
 
 def cmd_inbox(folder: Path) -> int:
-    """Full inbox flow: scan, clean, write .cleaned.json next to original,
+    """Full inbox flow: scan, clean, write .cleaned.<ext> next to original,
     then move original to _processed/ for archival.
     """
     if not folder.exists():
@@ -270,44 +353,27 @@ def cmd_inbox(folder: Path) -> int:
     archive_dir = folder / "_processed"
     archive_dir.mkdir(exist_ok=True)
 
-    # Only top-level .json files in the inbox (not in _processed/, not .cleaned)
-    files = find_workflow_files(folder, recursive=False)
+    files = find_inbox_files(folder, recursive=False)
 
     if not files:
-        print(f"📭 Inbox is empty: no new workflows in {folder}")
+        print(f"📭 Inbox is empty: no new files in {folder}")
         return 0
 
-    print(f"📥 Processing {len(files)} workflow(s) from {folder}\n")
+    print(f"📥 Processing {len(files)} file(s) from {folder}\n")
 
     total_changes = 0
     for file in files:
         try:
-            data = json.loads(file.read_text(encoding="utf-8"))
+            new_content, file_changes, findings = process_file(file)
         except json.JSONDecodeError as e:
             print(f"  ⚠️  Skipping {file.name} (invalid JSON: {e})", file=sys.stderr)
             continue
+        except ValueError as e:
+            print(f"  ⚠️  Skipping {file.name} ({e})", file=sys.stderr)
+            continue
 
-        # Collect findings for the report (before mutation)
-        findings_for_file: list[tuple[str, str, str]] = []
-        for json_path, value, _setter in list(walk_strings(data)):
-            for pat, match in scan_string(value):
-                snippet = redact(make_snippet(value, match), match)
-                findings_for_file.append((pat.label, json_path, snippet))
-
-        # Apply replacements
-        file_changes = 0
-        for _json_path, value, setter in list(walk_strings(data)):
-            new_value, n = apply_replacements(value)
-            if n > 0:
-                setter(new_value)
-                file_changes += n
-
-        # Write cleaned version
-        cleaned_path = file.with_suffix(".cleaned.json")
-        cleaned_path.write_text(
-            json.dumps(data, indent=2, ensure_ascii=False),
-            encoding="utf-8",
-        )
+        cleaned_path = file.with_suffix(f".cleaned{file.suffix}")
+        cleaned_path.write_text(new_content, encoding="utf-8")
 
         # Archive original — handle name collisions with a timestamp suffix
         archived_path = archive_dir / file.name
@@ -318,21 +384,21 @@ def cmd_inbox(folder: Path) -> int:
 
         # Report
         print(f"📄 {file.name}")
-        if findings_for_file:
-            print(f"   🔧 {file_changes} secret(s) replaced:")
-            for label, path, snippet in findings_for_file:
-                print(f"      • [{label}] {path}")
+        if findings:
+            print(f"   🔧 {file_changes} replacement(s):")
+            for label, location, snippet in findings:
+                print(f"      • [{label}] {location}")
                 print(f"          {snippet}")
         else:
-            print(f"   ✅ Already clean (no secrets found)")
+            print(f"   ✅ Already clean (no replacements needed)")
         print(f"   → cleaned:  {cleaned_path.name}")
         print(f"   → archived: _processed/{archived_path.name}\n")
 
         total_changes += file_changes
 
-    print(f"✨ Done. Processed {len(files)} file(s), {total_changes} secret(s) replaced.")
-    print(f"   Next step: review the .cleaned.json files, then move each into")
-    print(f"   workflows/woche-XX/tag-YY-name/workflow.json and add a README.")
+    print(f"✨ Done. Processed {len(files)} file(s), {total_changes} replacement(s) made.")
+    print(f"   Next step: review the .cleaned.* files, then move each into")
+    print(f"   workflows/woche-XX/tag-YY-name/ following CLAUDE.md conventions.")
     return 0
 
 
@@ -350,7 +416,7 @@ def main() -> None:
     p_apply = sub.add_parser("apply", help="Replace findings with placeholders")
     p_apply.add_argument("folder", type=Path)
     p_apply.add_argument("--inplace", action="store_true",
-                         help="Overwrite originals instead of writing .cleaned.json")
+                         help="Overwrite originals instead of writing .cleaned.<ext>")
 
     p_inbox = sub.add_parser("inbox", help="Process the inbox folder end-to-end")
     p_inbox.add_argument("folder", type=Path, nargs="?", default=Path("inbox"),
