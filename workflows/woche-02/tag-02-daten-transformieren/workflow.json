@@ -1,0 +1,342 @@
+{
+  "name": "W2T2 - Daten transformieren",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -208
+      ],
+      "id": "b508d83f-bc16-4543-944d-a18ae03a119b",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "feedback"
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        224,
+        -208
+      ],
+      "id": "749fefe4-453d-49bf-82f8-1bb17ff6fb76",
+      "name": "Feedback abfragen",
+      "credentials": {
+        "supabaseApi": {
+          "id": "56pbxWn3sMCHxPJA",
+          "name": "Supabase - Eric (M4)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "820a24be-9541-4e17-b083-ce314072ee73",
+              "leftValue": "={{ $json.bewertung }}",
+              "rightValue": 3,
+              "operator": {
+                "type": "number",
+                "operation": "lte"
+              }
+            },
+            {
+              "id": "07ff48f5-419b-43b0-9d46-330c52a6d826",
+              "leftValue": "={{ $json.erstellt_am }}",
+              "rightValue": "={{ $now.minus({days: 7}).toISO() }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "after"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        448,
+        -208
+      ],
+      "id": "bbf54818-3404-4c1b-a567-5f8f70006cf3",
+      "name": "Filter: weniger als 3 Sterne, innerhalb 7 Tage"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nconst text = items.map((item, index) => {\n  const datum = new Date(item.json.erstellt_am).toLocaleDateString('de-DE');\n  return `Feedback ${index + 1} (${datum}, Bewertung: ${item.json.bewertung}):\\n\"${item.json.kommentar}\"`;\n}).join('\\n\\n');\n\nreturn [{ json: { text } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        -208
+      ],
+      "id": "a1d78505-59ab-4b26-bc5e-0ef2b3167727",
+      "name": "Code: LLM Vorbereitung"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Fasse die folgenden Kundenbeschwerden zusammen und identifiziere die 3 häufigsten Probleme:\n\n{{ $json.text }}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        896,
+        -208
+      ],
+      "id": "649f12c9-0f40-41d0-96c4-9460854c4f5e",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": "~anthropic/claude-haiku-latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        976,
+        16
+      ],
+      "id": "da75df3a-f9ff-4f4a-8c3e-98fae4716f20",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "iNwU2uwlDz4l7tnF",
+          "name": "OpenRouter account - Eric Leddin"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "from",
+              "value": "onboarding@resend.dev"
+            },
+            {
+              "name": "to",
+              "value": "<<REPLACE_WITH_YOUR_NOTIFICATION_EMAIL>>"
+            },
+            {
+              "name": "subject",
+              "value": "=Kundenfeedback Analyse – {{ $now.format('dd.MM.yyyy') }}"
+            },
+            {
+              "name": "text",
+              "value": "={{ $json.text }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1248,
+        -208
+      ],
+      "id": "c2f9a8b2-caa4-4b85-b735-a0e65cc779ea",
+      "name": "Email: Feedback",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "SEDyCLA4bLWkBmys",
+          "name": "Resend - Eric"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "**Manueller Start**\nWorkflow wird per Klick ausgelöst, z.B. täglich oder zur Demo.",
+        "height": 138,
+        "width": 220
+      },
+      "id": "819912d3-d541-4b84-aacf-3f0f3405f097",
+      "name": "Sticky Note 7c56aec0",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -64,
+        -384
+      ]
+    },
+    {
+      "parameters": {
+        "content": "**Alle Einträge laden**\nHolt sämtliche Zeilen aus der Supabase-Tabelle \"feedback\".",
+        "height": 138,
+        "width": 172
+      },
+      "id": "2b7f26fe-96a8-46a4-80dc-807a9ff11ff7",
+      "name": "Sticky Note 90849b2d",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        192,
+        -384
+      ]
+    },
+    {
+      "parameters": {
+        "content": "**Filter: Relevante Beschwerden**\nNur Einträge mit Bewertung ≤ 3 UND Datum in den letzten 7 Tagen werden weitergeleitet.",
+        "height": 137,
+        "width": 220
+      },
+      "id": "8c6af0ba-9b48-4620-b0f9-5a1f81c2d214",
+      "name": "Sticky Note 192eb91d",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        384,
+        -384
+      ]
+    },
+    {
+      "parameters": {
+        "content": "**Daten für LLM aufbereiten**\nFormatiert alle Items zu einem lesbaren Textblock für den nächsten Schritt.",
+        "height": 138,
+        "width": 220
+      },
+      "id": "8e2cc4b6-32d0-4ca6-a9d5-6a5e8b0c32a5",
+      "name": "Sticky Note 4fb97884",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        624,
+        -384
+      ]
+    },
+    {
+      "parameters": {
+        "content": "**KI-Analyse**\nClaude (via OpenRouter) fasst die Beschwerden zusammen und nennt die 3 häufigsten Probleme.",
+        "height": 137,
+        "width": 220
+      },
+      "id": "737e0687-e466-4872-9f28-d2a7d851d142",
+      "name": "Sticky Note d7d000ec",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        896,
+        -384
+      ]
+    },
+    {
+      "parameters": {
+        "content": "**E-Mail-Report**\nSchickt die KI-Zusammenfassung per Resend-API an den Administrator.",
+        "height": 138,
+        "width": 220
+      },
+      "id": "317d5db6-eacf-41bb-a1ee-36bf6f891ea1",
+      "name": "Sticky Note f13da88e",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1200,
+        -384
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Feedback abfragen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Feedback abfragen": {
+      "main": [
+        [
+          {
+            "node": "Filter: weniger als 3 Sterne, innerhalb 7 Tage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter: weniger als 3 Sterne, innerhalb 7 Tage": {
+      "main": [
+        [
+          {
+            "node": "Code: LLM Vorbereitung",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: LLM Vorbereitung": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Email: Feedback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "8f83f6a5-8817-46f8-9b5d-85927e8f52e0",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f032027e20e9709391bcafe9291ae76dc2a07ff2b593bca6936b7404ddb31c33"
+  },
+  "id": "VbSOeNV2R3eMu8x5",
+  "tags": []
+}
