@@ -29,11 +29,39 @@ Prompt → Custom GPT → [Workflow] → Agent → Multi-Agent
 | Supabase | `Supabase API` | https://supabase.com/dashboard → Project Settings → API |
 | Resend | `HTTP Bearer Auth` | https://resend.com/api-keys |
 
-In Supabase muss eine Tabelle `contacts` mit den Spalten `name`, `email`, `nachricht` (alle `text`) existieren. Für den Bonus zusätzlich eine Primärschlüssel-Spalte `id`.
-
 ### Community Nodes
 
 Keine — nur Core-Nodes (`Form Trigger`, `Webhook`, `Set`, `Supabase`, `HTTP Request`, `If`).
+
+### Supabase: Tabelle anlegen
+
+Beide Workflows schreiben in eine Tabelle `contacts`. Falls du Supabase neu einrichtest:
+
+1. Projekt anlegen unter https://supabase.com → **New Project**
+2. Im Projekt-Dashboard auf **SQL Editor** und folgendes Schema ausführen:
+
+```sql
+   create table contacts (
+     id uuid default gen_random_uuid() primary key,
+     name text not null,
+     email text not null,
+     nachricht text,
+     created_at timestamptz default now()
+   );
+```
+
+3. **API-URL** und **Service Role Key** findest du unter **Project Settings → API** — beides brauchst du gleich für das `Supabase Api` Credential in n8n.
+
+**💡 Tipp: KI als Setup-Assistent nutzen**
+
+Falls dir das Setup unklar ist, kannst du Claude (oder eine andere KI) fragen:
+
+> Ich nutze Supabase zum ersten Mal und brauche eine Tabelle `contacts` mit den Spalten `id` (UUID, Primary Key, default `gen_random_uuid()`), `name` (text, not null), `email` (text, not null), `nachricht` (text), `created_at` (timestamptz, default `now()`). Erkläre mir Schritt für Schritt:
+> 1. Wie ich ein neues Supabase-Projekt anlege,
+> 2. Wie ich die Tabelle via SQL Editor erstelle,
+> 3. Wo ich die API-URL und den Service Role Key finde, um sie in n8n unter `Supabase Api` zu hinterlegen.
+
+So lernst du nebenbei, wie KI dich bei Setup-Aufgaben unterstützt — eine Kern-Kompetenz für M4.
 
 ## 📦 Workflow-Varianten
 
