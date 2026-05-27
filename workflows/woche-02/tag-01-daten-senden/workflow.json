@@ -1,0 +1,340 @@
+{
+  "name": "W2T1 - Daten senden",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Kontaktformular",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "name"
+            },
+            {
+              "fieldLabel": "email"
+            },
+            {
+              "fieldLabel": "nachricht"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        0,
+        -16
+      ],
+      "id": "0e528aa2-b272-4c09-a754-8980fe36e8bb",
+      "name": "Kontaktformular",
+      "webhookId": "01560827-dd9b-454a-bce9-6d4da26ffc96"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "82cf1f05-0e76-4a41-a7c9-5fd5e3643f58",
+              "name": "name",
+              "value": "={{ $json.name }}",
+              "type": "string"
+            },
+            {
+              "id": "9ce0c0a6-d1c8-4431-9d70-51180af4d676",
+              "name": "email",
+              "value": "={{ $json.email }}",
+              "type": "string"
+            },
+            {
+              "id": "6833038e-ca3d-4593-9c40-9bb0961cee61",
+              "name": "nachricht",
+              "value": "={{ $json.nachricht }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        -16
+      ],
+      "id": "2395fb06-9a94-404e-b586-e7c8a42cf1e8",
+      "name": "Set Fields"
+    },
+    {
+      "parameters": {
+        "tableId": "contacts",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "name",
+              "fieldValue": "={{ $json.name }}"
+            },
+            {
+              "fieldId": "email",
+              "fieldValue": "={{ $json.email }}"
+            },
+            {
+              "fieldId": "nachricht",
+              "fieldValue": "={{ $json.nachricht }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        448,
+        -16
+      ],
+      "id": "304e051b-3ee6-4579-8ff4-4aea86043682",
+      "name": "Neuer Kontakt",
+      "credentials": {
+        "supabaseApi": {
+          "id": "56pbxWn3sMCHxPJA",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"from\": \"onboarding@resend.dev\",\n  \"to\": \"<<REPLACE_WITH_YOUR_NOTIFICATION_EMAIL>>\",\n  \"subject\": \"Neuer Kontakt: {{ $json.name }}\",\n  \"text\": \"Name: {{ $json.name }}\\nE-Mail: {{ $json.email }}\\nNachricht: {{ $json.nachricht }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        672,
+        -16
+      ],
+      "id": "6f9eb526-1b27-4db0-bf26-bb9504ebaea8",
+      "name": "Email: Neuer Kontakt",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "SEDyCLA4bLWkBmys",
+          "name": "Resend account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "**Trigger: Kontaktformular**\nEinstiegspunkt des Workflows. Stellt dem Nutzer ein Web-Formular mit den Feldern Name, E-Mail und Nachricht bereit.",
+        "height": 200,
+        "width": 204
+      },
+      "id": "7410968a-630d-41f7-82a9-b897c8761f91",
+      "name": "Sticky Note 5f59a652",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -64,
+        -256
+      ]
+    },
+    {
+      "parameters": {
+        "content": "**Daten normalisieren**\nExtrahiert die drei Formular-Felder und stellt sie sauber strukturiert für alle folgenden Nodes bereit.",
+        "height": 200,
+        "width": 156
+      },
+      "id": "8d57edac-9650-48cc-bb9c-91ab7bad4099",
+      "name": "Sticky Note abd1bbb4",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        192,
+        -256
+      ]
+    },
+    {
+      "parameters": {
+        "content": "**Datenbank-Eintrag**\nSpeichert den neuen Kontakt dauerhaft in der Supabase-Tabelle \"contacts\".",
+        "height": 200,
+        "width": 150
+      },
+      "id": "4742a843-e5b5-4793-b7e7-62d131dcf5bb",
+      "name": "Sticky Note 4aff6828",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        416,
+        -256
+      ]
+    },
+    {
+      "parameters": {
+        "content": "**E-Mail-Benachrichtigung**\nSendet eine Benachrichtigungs-E-Mail via Resend-API an den Administrator.",
+        "height": 200,
+        "width": 156
+      },
+      "id": "db9ae68f-48b1-4942-aa2d-556513c81a4a",
+      "name": "Sticky Note 2c56a662",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        640,
+        -256
+      ]
+    },
+    {
+      "parameters": {
+        "content": "**Trigger 2: Webhook**\nEmpfängt JSON via HTTP POST. Wird von der HTML-Seite (oder jeder anderen App) aufgerufen.",
+        "height": 110,
+        "width": 220
+      },
+      "id": "d953f31a-d793-4bca-b5c8-2b4cce365019",
+      "name": "Sticky Note 91317fbb",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -48,
+        464
+      ]
+    },
+    {
+      "parameters": {
+        "content": "**Webhook-Daten normalisieren**\nExtrahiert name/email/nachricht aus dem Body-Objekt – damit der Folge-Node identische Daten erhält wie vom Form Trigger.",
+        "height": 162,
+        "width": 230
+      },
+      "id": "a31c8052-d76c-4e01-959a-40181514469b",
+      "name": "Sticky Note 98c3faa4",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        208,
+        464
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "kontakt",
+        "options": {}
+      },
+      "id": "6b815240-d6ed-4a10-bfb7-1b367084301a",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        272
+      ],
+      "webhookId": "22394864-a695-4a41-8dcc-d2e1948b8c68"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "wh-1",
+              "name": "name",
+              "value": "={{ $json.body.name }}",
+              "type": "string"
+            },
+            {
+              "id": "wh-2",
+              "name": "email",
+              "value": "={{ $json.body.email }}",
+              "type": "string"
+            },
+            {
+              "id": "wh-3",
+              "name": "nachricht",
+              "value": "={{ $json.body.nachricht }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f38a7319-8e84-4657-88a1-7a514c6b79bd",
+      "name": "Webhook: Felder normalisieren",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        272
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Kontaktformular": {
+      "main": [
+        [
+          {
+            "node": "Set Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Fields": {
+      "main": [
+        [
+          {
+            "node": "Neuer Kontakt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Neuer Kontakt": {
+      "main": [
+        [
+          {
+            "node": "Email: Neuer Kontakt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Webhook: Felder normalisieren",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook: Felder normalisieren": {
+      "main": [
+        [
+          {
+            "node": "Neuer Kontakt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "1d10b282-4ebd-4994-8f96-c99c9ce44208",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f032027e20e9709391bcafe9291ae76dc2a07ff2b593bca6936b7404ddb31c33"
+  },
+  "id": "WCHr1CijNt4El3Vn",
+  "tags": []
+}

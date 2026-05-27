@@ -69,7 +69,7 @@
         "genericAuthType": "httpBearerAuth",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"from\": \"onboarding@resend.dev\",\n  \"to\": \"eric.leddin@konvergenz.studio\",\n  \"subject\": \"Morgen-Briefing {{ $now.format('dd.MM.yyyy') }}\",\n  \"text\": \"{{ $json.text }}\"\n}",
+        "jsonBody": "={\n  \"from\": \"onboarding@resend.dev\",\n  \"to\": \"<<REPLACE_WITH_YOUR_NOTIFICATION_EMAIL>>\",\n  \"subject\": \"Morgen-Briefing {{ $now.format('dd.MM.yyyy') }}\",\n  \"text\": \"{{ $json.text }}\"\n}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
@@ -83,7 +83,7 @@
       "credentials": {
         "httpBearerAuth": {
           "id": "SEDyCLA4bLWkBmys",
-          "name": "Resend - Eric"
+          "name": "Resend account"
         }
       }
     },
@@ -117,7 +117,7 @@
       "credentials": {
         "openRouterApi": {
           "id": "iNwU2uwlDz4l7tnF",
-          "name": "OpenRouter account - Eric Leddin"
+          "name": "OpenRouter account"
         }
       }
     }

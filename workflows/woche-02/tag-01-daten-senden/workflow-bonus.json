@@ -1,0 +1,468 @@
+{
+  "name": "W2T1 - Daten senden (Bonus)",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "**Trigger**\nFormular mit Name, E-Mail und Nachricht.",
+        "height": 90,
+        "width": 220
+      },
+      "id": "78b540dc-4014-451a-bd47-15191bc6b9a5",
+      "name": "Sticky Note 84b59141",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -912,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "content": "**Daten normalisieren**\nFelder sauber für Folge-Nodes bereitstellen.",
+        "height": 90,
+        "width": 220
+      },
+      "id": "8196fe30-709b-4390-9917-52866ee41dac",
+      "name": "Sticky Note 019771d0",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -688,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "content": "**Kontakt suchen**\nSucht in Supabase nach der E-Mail.\n⚠️ alwaysOutputData: leeres Item wenn kein Treffer.",
+        "height": 110,
+        "width": 220
+      },
+      "id": "560b1fdf-9a0d-4f36-824f-c59eb78a5996",
+      "name": "Sticky Note d1b1ec6d",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -464,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "content": "**Weiche**\nPrüft ob id vorhanden → Update oder Insert.",
+        "height": 90,
+        "width": 220
+      },
+      "id": "baa5ba70-5889-48a2-bf72-11d88b430654",
+      "name": "Sticky Note 5857fedd",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "content": "**Kontakt updaten**\nName und Nachricht in Supabase überschreiben.",
+        "height": 90,
+        "width": 220
+      },
+      "id": "5832dd8a-aca6-438f-b4b5-bb4acc869719",
+      "name": "Sticky Note f90c5279",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "content": "**Neuer Eintrag**\nKontakt als neue Zeile in Supabase anlegen.",
+        "height": 90,
+        "width": 220
+      },
+      "id": "b8697cbe-df44-4af8-8185-1eeb485fab0c",
+      "name": "Sticky Note 8a254b38",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -16,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "content": "**E-Mail: Update**\nAdmin per Resend über Änderung informieren.",
+        "height": 90,
+        "width": 220
+      },
+      "id": "b516d356-5620-41fc-93ae-e8980c473856",
+      "name": "Sticky Note 6d0bf243",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        224,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "content": "**E-Mail: Neu**\nAdmin per Resend über neuen Kontakt informieren.",
+        "height": 90,
+        "width": 220
+      },
+      "id": "1e607e25-d41e-455e-a0d0-7f75ff196cce",
+      "name": "Sticky Note 9af64925",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        208,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "formTitle": "Kontaktformular",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "name"
+            },
+            {
+              "fieldLabel": "email"
+            },
+            {
+              "fieldLabel": "nachricht"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "daecd936-236a-4973-acb5-1ef1e33ba656",
+      "name": "Kontaktformular",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        -848,
+        240
+      ],
+      "webhookId": "f31823ca-7821-4758-a56f-e9113e105c5d"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "82cf1f05-0e76-4a41-a7c9-5fd5e3643f58",
+              "name": "name",
+              "value": "={{ $json.name }}",
+              "type": "string"
+            },
+            {
+              "id": "9ce0c0a6-d1c8-4431-9d70-51180af4d676",
+              "name": "email",
+              "value": "={{ $json.email }}",
+              "type": "string"
+            },
+            {
+              "id": "6833038e-ca3d-4593-9c40-9bb0961cee61",
+              "name": "nachricht",
+              "value": "={{ $json.nachricht }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "54dacdc3-ed4c-443f-8614-8b3fc8f02270",
+      "name": "Set Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -624,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "contacts",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "email",
+              "condition": "eq",
+              "keyValue": "={{ $('Set Fields').item.json.email }}"
+            }
+          ]
+        }
+      },
+      "id": "b6a6929f-fccb-4d71-be97-85953aee5b5a",
+      "name": "Prüfen: bestehender Kontakt",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        240
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "56pbxWn3sMCHxPJA",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "2812d2d6-a7d7-4645-854e-67056dd1af98",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "3fc3a7ed-be7a-4175-b81b-415e5386e66f",
+      "name": "If",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -176,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "contacts",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "email",
+              "condition": "eq",
+              "keyValue": "={{ $('Set Fields').item.json.email }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "name",
+              "fieldValue": "={{ $('Set Fields').item.json.name }}"
+            },
+            {
+              "fieldId": "nachricht",
+              "fieldValue": "={{ $('Set Fields').item.json.nachricht }}"
+            }
+          ]
+        }
+      },
+      "id": "d0f891c5-935c-460f-bc4e-2865d43d1b9d",
+      "name": "Kontakt aktualisieren",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        48,
+        144
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "56pbxWn3sMCHxPJA",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"from\": \"onboarding@resend.dev\",\n  \"to\": \"<<REPLACE_WITH_YOUR_NOTIFICATION_EMAIL>>\",\n  \"subject\": \"Kontakt Aktualisiert: {{ $json.name }}\",\n  \"text\": \"Name: {{ $json.name }}\\nE-Mail: {{ $json.email }}\\nNachricht: {{ $json.nachricht }}\"\n}",
+        "options": {}
+      },
+      "id": "2545cf14-c2f3-419c-aa0f-743ac01925a3",
+      "name": "Email: Kontakt aktualisieren",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        272,
+        144
+      ],
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "SEDyCLA4bLWkBmys",
+          "name": "Resend account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "contacts",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "name",
+              "fieldValue": "={{ $('Set Fields').item.json.name }}"
+            },
+            {
+              "fieldId": "email",
+              "fieldValue": "={{ $('Set Fields').item.json.email }}"
+            },
+            {
+              "fieldId": "nachricht",
+              "fieldValue": "={{ $('Set Fields').item.json.nachricht }}"
+            }
+          ]
+        }
+      },
+      "id": "e1cd5043-f720-4c6f-a54c-ecc3d477e20b",
+      "name": "Neuer Kontakt",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        48,
+        336
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "56pbxWn3sMCHxPJA",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"from\": \"onboarding@resend.dev\",\n  \"to\": \"<<REPLACE_WITH_YOUR_NOTIFICATION_EMAIL>>\",\n  \"subject\": \"Neuer Kontakt: {{ $json.name }}\",\n  \"text\": \"Name: {{ $json.name }}\\nE-Mail: {{ $json.email }}\\nNachricht: {{ $json.nachricht }}\"\n}",
+        "options": {}
+      },
+      "id": "0c5aa71e-4048-4ad1-a61c-1d5980cbf74e",
+      "name": "Email: Neuer Kontakt",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        272,
+        336
+      ],
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "SEDyCLA4bLWkBmys",
+          "name": "Resend account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Kontaktformular": {
+      "main": [
+        [
+          {
+            "node": "Set Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Fields": {
+      "main": [
+        [
+          {
+            "node": "Prüfen: bestehender Kontakt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prüfen: bestehender Kontakt": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Kontakt aktualisieren",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Neuer Kontakt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kontakt aktualisieren": {
+      "main": [
+        [
+          {
+            "node": "Email: Kontakt aktualisieren",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Neuer Kontakt": {
+      "main": [
+        [
+          {
+            "node": "Email: Neuer Kontakt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "1e6cba53-e1c4-4da7-9d26-c5190ae8a60e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f032027e20e9709391bcafe9291ae76dc2a07ff2b593bca6936b7404ddb31c33"
+  },
+  "id": "slALvzk6HGiIgMBZ",
+  "tags": []
+}

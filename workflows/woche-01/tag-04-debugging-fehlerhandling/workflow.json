@@ -74,7 +74,7 @@
         "genericAuthType": "httpBearerAuth",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"from\": \"onboarding@resend.dev\",\n  \"to\": \"eric.leddin@konvergenz.studio\",\n  \"subject\": \"⚠️ KI News Briefing – Feed Fehler {{ $now.format('dd.MM.yyyy') }}\",\n  \"text\": \"Der Heise RSS Feed konnte heute nicht abgerufen werden (404). Bitte manuell prüfen: https://www.heise.de\"\n}",
+        "jsonBody": "={\n  \"from\": \"onboarding@resend.dev\",\n  \"to\": \"<<REPLACE_WITH_YOUR_NOTIFICATION_EMAIL>>\",\n  \"subject\": \"⚠️ KI News Briefing – Feed Fehler {{ $now.format('dd.MM.yyyy') }}\",\n  \"text\": \"Der Heise RSS Feed konnte heute nicht abgerufen werden (404). Bitte manuell prüfen: https://www.heise.de\"\n}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
@@ -88,7 +88,7 @@
       "credentials": {
         "httpBearerAuth": {
           "id": "SEDyCLA4bLWkBmys",
-          "name": "Resend - Eric"
+          "name": "Resend account"
         }
       }
     },
@@ -222,7 +222,7 @@
       "credentials": {
         "openRouterApi": {
           "id": "iNwU2uwlDz4l7tnF",
-          "name": "OpenRouter account - Eric Leddin"
+          "name": "OpenRouter account"
         }
       }
     },
@@ -234,7 +234,7 @@
         "genericAuthType": "httpBearerAuth",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"from\": \"onboarding@resend.dev\",\n  \"to\": \"eric.leddin@konvergenz.studio\",\n  \"subject\": \"🤖 KI News Briefing {{ $now.format('dd.MM.yyyy') }}\",\n  \"html\": {{ JSON.stringify($json.html_body) }}\n}",
+        "jsonBody": "={\n  \"from\": \"onboarding@resend.dev\",\n  \"to\": \"<<REPLACE_WITH_YOUR_NOTIFICATION_EMAIL>>\",\n  \"subject\": \"🤖 KI News Briefing {{ $now.format('dd.MM.yyyy') }}\",\n  \"html\": {{ JSON.stringify($json.html_body) }}\n}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
@@ -248,7 +248,7 @@
       "credentials": {
         "httpBearerAuth": {
           "id": "SEDyCLA4bLWkBmys",
-          "name": "Resend - Eric"
+          "name": "Resend account"
         }
       }
     },
@@ -283,7 +283,7 @@
         "genericAuthType": "httpBearerAuth",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"from\": \"onboarding@resend.dev\",\n  \"to\": \"eric.leddin@konvergenz.studio\",\n  \"subject\": \"⚠️ KI News Briefing – Feed Fehler {{ $now.format('dd.MM.yyyy') }}\",\n  \"text\": \"Der Decoder RSS Feed konnte heute nicht abgerufen werden (404). Bitte manuell prüfen: https://www.heise.de\"\n}",
+        "jsonBody": "={\n  \"from\": \"onboarding@resend.dev\",\n  \"to\": \"<<REPLACE_WITH_YOUR_NOTIFICATION_EMAIL>>\",\n  \"subject\": \"⚠️ KI News Briefing – Feed Fehler {{ $now.format('dd.MM.yyyy') }}\",\n  \"text\": \"Der Decoder RSS Feed konnte heute nicht abgerufen werden (404). Bitte manuell prüfen: https://www.heise.de\"\n}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
@@ -297,7 +297,7 @@
       "credentials": {
         "httpBearerAuth": {
           "id": "SEDyCLA4bLWkBmys",
-          "name": "Resend - Eric"
+          "name": "Resend account"
         }
       }
     },
@@ -309,7 +309,7 @@
         "genericAuthType": "httpBearerAuth",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"from\": \"onboarding@resend.dev\",\n  \"to\": \"eric.leddin@konvergenz.studio\",\n  \"subject\": \"⚠️ KI News Briefing – Feed Fehler {{ $now.format('dd.MM.yyyy') }}\",\n  \"text\": \"Der Wired RSS Feed konnte heute nicht abgerufen werden (404). Bitte manuell prüfen: https://www.heise.de\"\n}",
+        "jsonBody": "={\n  \"from\": \"onboarding@resend.dev\",\n  \"to\": \"<<REPLACE_WITH_YOUR_NOTIFICATION_EMAIL>>\",\n  \"subject\": \"⚠️ KI News Briefing – Feed Fehler {{ $now.format('dd.MM.yyyy') }}\",\n  \"text\": \"Der Wired RSS Feed konnte heute nicht abgerufen werden (404). Bitte manuell prüfen: https://www.heise.de\"\n}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
@@ -323,7 +323,7 @@
       "credentials": {
         "httpBearerAuth": {
           "id": "SEDyCLA4bLWkBmys",
-          "name": "Resend - Eric"
+          "name": "Resend account"
         }
       }
     },
@@ -335,7 +335,7 @@
         "genericAuthType": "httpBearerAuth",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"from\": \"onboarding@resend.dev\",\n  \"to\": \"eric.leddin@konvergenz.studio\",\n  \"subject\": \"⚠️ KI News Briefing – Feed Fehler {{ $now.format('dd.MM.yyyy') }}\",\n  \"text\": \"Der MIT RSS Feed konnte heute nicht abgerufen werden (404). Bitte manuell prüfen: https://www.heise.de\"\n}",
+        "jsonBody": "={\n  \"from\": \"onboarding@resend.dev\",\n  \"to\": \"<<REPLACE_WITH_YOUR_NOTIFICATION_EMAIL>>\",\n  \"subject\": \"⚠️ KI News Briefing – Feed Fehler {{ $now.format('dd.MM.yyyy') }}\",\n  \"text\": \"Der MIT RSS Feed konnte heute nicht abgerufen werden (404). Bitte manuell prüfen: https://www.heise.de\"\n}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
@@ -349,7 +349,7 @@
       "credentials": {
         "httpBearerAuth": {
           "id": "SEDyCLA4bLWkBmys",
-          "name": "Resend - Eric"
+          "name": "Resend account"
         }
       }
     },
@@ -361,7 +361,7 @@
         "genericAuthType": "httpBearerAuth",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"from\": \"onboarding@resend.dev\",\n  \"to\": \"eric.leddin@konvergenz.studio\",\n  \"subject\": \"⚠️ KI News Briefing – Feed Fehler {{ $now.format('dd.MM.yyyy') }}\",\n  \"text\": \"Der techcrunch RSS Feed konnte heute nicht abgerufen werden (404). Bitte manuell prüfen: https://www.heise.de\"\n}",
+        "jsonBody": "={\n  \"from\": \"onboarding@resend.dev\",\n  \"to\": \"<<REPLACE_WITH_YOUR_NOTIFICATION_EMAIL>>\",\n  \"subject\": \"⚠️ KI News Briefing – Feed Fehler {{ $now.format('dd.MM.yyyy') }}\",\n  \"text\": \"Der techcrunch RSS Feed konnte heute nicht abgerufen werden (404). Bitte manuell prüfen: https://www.heise.de\"\n}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
@@ -375,7 +375,7 @@
       "credentials": {
         "httpBearerAuth": {
           "id": "SEDyCLA4bLWkBmys",
-          "name": "Resend - Eric"
+          "name": "Resend account"
         }
       }
     },
@@ -420,7 +420,7 @@
         "genericAuthType": "httpBearerAuth",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"from\": \"onboarding@resend.dev\",\n  \"to\": \"eric.leddin@konvergenz.studio\",\n  \"subject\": \"⚠️ KI News Briefing {{ $now.format('dd.MM.yyyy') }} – Zu wenig Artikel\",\n  \"html\": \"<h2>⚠️ KI News Briefing – {{ $now.format('dd.MM.yyyy') }}</h2><p>Heute wurden weniger als 3 aktuelle KI-News gefunden. Das Briefing wird nicht versendet.</p><p>Bitte die RSS Feeds manuell prüfen.</p>\"\n}",
+        "jsonBody": "={\n  \"from\": \"onboarding@resend.dev\",\n  \"to\": \"<<REPLACE_WITH_YOUR_NOTIFICATION_EMAIL>>\",\n  \"subject\": \"⚠️ KI News Briefing {{ $now.format('dd.MM.yyyy') }} – Zu wenig Artikel\",\n  \"html\": \"<h2>⚠️ KI News Briefing – {{ $now.format('dd.MM.yyyy') }}</h2><p>Heute wurden weniger als 3 aktuelle KI-News gefunden. Das Briefing wird nicht versendet.</p><p>Bitte die RSS Feeds manuell prüfen.</p>\"\n}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
@@ -434,7 +434,7 @@
       "credentials": {
         "httpBearerAuth": {
           "id": "SEDyCLA4bLWkBmys",
-          "name": "Resend - Eric"
+          "name": "Resend account"
         }
       }
     }
