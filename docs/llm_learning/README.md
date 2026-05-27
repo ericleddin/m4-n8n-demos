@@ -6,21 +6,36 @@ Community-Beiträge mit ergänzender Konzept-Dokumentation rund um LLM-Entwicklu
 
 ## 📂 Inhalte
 
-- **[best_practice_tech_stack_2026.md](best_practice_tech_stack_2026.md)** — Die wichtigste Datei für den Einstieg: vollständiger Tech-Stack von Solo-Projekt bis Enterprise, mit Cloud-Diensten, EU/DSGVO-Bewertung und konkreten Kostenangaben pro Stufe.
-- **[llm_app_techstack_overview.md](llm_app_techstack_overview.md)** — Das **Warum** hinter den Stack-Entscheidungen: LiteLLM, pgvector vs. Qdrant, RAG-Pipeline, semantisches Caching, OTel, Fine-Tuning vs. RAG. Konzepte statt Tool-Listen.
-- **[langfuse_vs_langsmith.md](langfuse_vs_langsmith.md)** — Direktvergleich der beiden führenden LLM-Observability-Plattformen: Architektur, Kosten, Integration, Codebeispiele und Entscheidungshilfe.
-- **[observability_monitoring_tools.md](observability_monitoring_tools.md)** — Überblick über die drei Observability-Schichten (Logs, Metrics, Traces) und konkrete Tool-Empfehlungen von Netdata/Dozzle auf dem Homelab bis Datadog im Enterprise.
-- **[ki-infrastruktur_agent_scaling_guide.md](ki-infrastruktur_agent_scaling_guide.md)** — Strategische Perspektive auf KI-Infrastruktur und Agenten-Systeme: Vertrauensentscheidungen bei API-Quellen, Datensicherheit, Flexibilität und Skalierbarkeit.
+### Grundlagen
+- **[glossar.md](glossar.md)** — Alle Fachbegriffe kurz erklärt: Token, Embedding, RAG, Vector DB, Inference, Prompt und mehr. Beim ersten Lesen überfliegen, danach zum Nachschlagen.
+- **[llm_prompt_engineering.md](llm_prompt_engineering.md)** — Wie man LLMs richtig anspricht: System-Prompt, Few-Shot, Chain-of-Thought, Sicherheit, Versionierung. Der praktischste Einstieg.
+- **[rag_konzept_und_praxis.md](rag_konzept_und_praxis.md)** — RAG von Grund auf erklärt: Indexierung, Retrieval, Chunking, Embedding-Wahl, häufige Fehler und Qualitätsmessung.
+- **[llm_kosten_und_token.md](llm_kosten_und_token.md)** — Wie Token-Preise funktionieren, was typische Calls kosten, die größten Kostenfallen und wie man sie vermeidet.
+- **[lokale_llms_ollama.md](lokale_llms_ollama.md)** — LLMs lokal betreiben mit Ollama: Hardware, Setup, Modellwahl, Integration mit n8n und Langfuse.
+
+### Stack & Infrastruktur
+- **[best_practice_tech_stack_2026.md](best_practice_tech_stack_2026.md)** — Vollständiger Tech-Stack von Solo-Projekt bis Enterprise, mit TS/Python-Vergleich, Cloud-Diensten und EU/DSGVO-Bewertung.
+- **[llm_app_techstack_overview.md](llm_app_techstack_overview.md)** — Das **Warum** hinter den Stack-Entscheidungen: LiteLLM, pgvector vs. Qdrant, semantisches Caching, OTel, Fine-Tuning vs. RAG.
+- **[ki-infrastruktur_agent_scaling_guide.md](ki-infrastruktur_agent_scaling_guide.md)** — Strategische Perspektive auf KI-Infrastruktur und Agenten-Systeme: API-Quellen, Frameworks, Observability.
+
+### Observability
+- **[langfuse_vs_langsmith.md](langfuse_vs_langsmith.md)** — Direktvergleich der beiden führenden LLM-Observability-Plattformen mit Architektur, Kosten und Entscheidungshilfe.
+- **[observability_monitoring_tools.md](observability_monitoring_tools.md)** — Die drei Observability-Schichten (Logs, Metrics, Traces) und Tool-Empfehlungen von Homelab bis Enterprise.
 
 ## 🗺️ Empfohlene Lesereihenfolge
 
 ```
 Neu im Thema?
-└── 1. best_practice_tech_stack_2026.md      ← Orientierung verschaffen
-    2. llm_app_techstack_overview.md          ← Bausteine verstehen
-    3. langfuse_vs_langsmith.md               ← Observability konkret
-    4. observability_monitoring_tools.md      ← Monitoring-Schichten
-    5. ki-infrastruktur_agent_scaling_guide.md ← Strategische Tiefe
+└── 1. glossar.md                        ← Begriffe klären
+    2. llm_prompt_engineering.md         ← Ersten LLM-Call verstehen
+    3. rag_konzept_und_praxis.md         ← Eigene Daten einbinden
+    4. llm_kosten_und_token.md           ← Kosten im Griff
+    5. best_practice_tech_stack_2026.md  ← Gesamtbild
+    6. llm_app_techstack_overview.md     ← Konzepte vertiefen
+    7. langfuse_vs_langsmith.md          ← Observability konkret
+    8. observability_monitoring_tools.md ← Monitoring-Schichten
+    9. lokale_llms_ollama.md             ← Lokal & datenschutzkonform
+   10. ki-infrastruktur_agent_scaling_guide.md ← Strategische Tiefe
 ```
 
 ## 🤝 Beiträge willkommen
