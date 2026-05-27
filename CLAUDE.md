@@ -311,6 +311,7 @@ Für Repo-weite Änderungen (Doku, Skripte, Setup): konventionelles Format ohne 
 - **Neue Maintainer ergänzen** ihre persönlichen Patterns in `scripts/scan_secrets.py` unter `PERSONAL_PATTERNS`. Beispiele dort dienen als Template.
 - Wenn `git status` Dateien aus `inbox/` zeigt (außer `.gitkeep` und `README.md`): STOP, `.gitignore` prüfen.
 - **Niemals** echte API-Keys in Commit-Messages oder PR-Beschreibungen.
+- **Bei Updates an `scripts/scan_secrets.py` (neue Patterns)**: Das Skript muss anschließend einmal mit `python scripts/scan_secrets.py apply workflows/ --inplace` über `workflows/` laufen, damit bestehende Files den neuen Patterns entsprechen. Konventions-Erweiterungen wirken sonst nur prospektiv, nicht retroaktiv.
 
 ---
 
