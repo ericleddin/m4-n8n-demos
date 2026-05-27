@@ -196,20 +196,28 @@ Stand                                                            bei Dokumentän
 Klein (Einstieg):
 ├── pgvector          Vector DB als Postgres-Extension — kein extra Service
 ├── OpenAI Embeddings text-embedding-3-small
-└── LangChain /       Orchestrierung des RAG-Flows
-    LlamaIndex
+└── Direkter API-Call Embeddings erstellen + pgvector abfragen + OpenAI aufrufen
+                      Kein Framework — du siehst genau was passiert
+                      (n8n als Alternative wenn kein Code gewünscht)
 
 Mittel (Produktion):
 ├── Qdrant            Dedizierte Vector DB, DSGVO 🇩🇪
 ├── Eigenes Embedding nomic-embed-text (lokal) für Datenschutz
-└── LiteLLM           Gateway für LLM-Calls
-    + Langfuse        Tracing der RAG-Qualität (welche Chunks wurden genutzt?)
+├── LiteLLM           Gateway für LLM-Calls + semantisches Caching
+└── Langfuse          Tracing: welche Chunks wurden genutzt? War die Antwort gut?
 
 Groß (Scale):
-├── Weaviate Cluster  Hybrid Search, GraphQL
+├── Weaviate Cluster  Hybrid Search (semantisch + Keyword), GraphQL
 ├── Re-Ranking        Cohere Rerank oder lokales Modell
-└── Eval-Pipeline     Langfuse Evals: war der Kontext relevant? war die Antwort korrekt?
+├── LlamaIndex        Wenn RAG-Pipelines komplex werden (Parent-Child, HyDE, ...)
+└── Eval-Pipeline     Langfuse Evals: Faithfulness, Relevance, Answer Quality
 ```
+
+> **Warum kein LangChain für den Einstieg?**
+> LangChain abstrahiert jeden Schritt — praktisch zum Lernen, problematisch zum Debuggen.
+> Wenn etwas falsch läuft (falscher Chunk, schlechte Antwort), siehst du nicht wo.
+> Direkter API-Call macht den RAG-Flow transparent: du verstehst was passiert.
+> LlamaIndex lohnt sich erst wenn die Pipelines wirklich komplex werden.
 
 ---
 

@@ -135,19 +135,26 @@ Ersparnis: 40–70% bei wiederkehrenden ähnlichen Fragen
 Tool: LiteLLM Proxy + Redis
 ```
 
+LiteLLM betreibt das semantische Caching selbst — der Provider bekommt dabei gar keinen Call.
+
 ### Prompt Caching
 
-OpenAI und Anthropic cachen lange System-Prompts automatisch:
+Prompt Caching ist eine **Provider-seitige** Funktion: Anthropic und OpenAI speichern den
+KV-Attention-State langer, stabiler Prompt-Prefixe auf ihren Servern.
 
 ```
 System-Prompt (1.000 Tokens) + User-Frage (50 Tokens)
 
 Ohne Caching:  1.050 Tokens × $2.50/1M = $0.0026
-Mit Caching:   50 Tokens normal + 1.000 Tokens gecacht (90% Rabatt)
+Mit Caching:   50 Tokens normal + 1.000 Tokens gecacht (~90% Rabatt)
                = $0.000125 + $0.00025 = $0.000375  ← 7× günstiger
 ```
 
-→ Prompt Caching aktiviert sich automatisch bei langen, stabilen Prompts.
+→ Bei **OpenAI** aktiviert sich Prompt Caching automatisch (ab 1.024 Tokens Prefix).
+→ Bei **Anthropic** musst du `cache_control` im API-Call setzen.
+→ **LiteLLM leitet diese Parameter transparent durch** — Prompt Caching funktioniert
+  also auch wenn LiteLLM als Gateway davor sitzt. Beides zusammen zu nutzen ist möglich:
+  LiteLLM-seitiges semantisches Caching + Provider-seitiges Prompt Caching ergänzen sich.
 
 ### Batch Processing
 

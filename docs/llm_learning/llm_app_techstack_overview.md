@@ -148,6 +148,26 @@ Funktioniert über Embedding-Ähnlichkeit: beide Fragen landen als Vektor nah be
 
 **Tool:** LiteLLM Proxy + Redis (eingebaut, kein Extra-Setup nötig)
 
+### Prompt Caching — Provider-seitig, ergänzt semantisches Caching
+
+Semantisches Caching (LiteLLM) und Prompt Caching (Provider) sind verschiedene Hebel:
+
+```
+Semantisches Caching:  LiteLLM erkennt ähnliche Anfragen → gibt gespeicherte Antwort zurück,
+                       Provider wird gar nicht aufgerufen.
+                       Einsparung: 40–70% der Calls
+
+Prompt Caching:        Der Provider (OpenAI/Anthropic) speichert den KV-Attention-State
+                       deines System-Prompts. Der LLM-Call findet trotzdem statt —
+                       aber die gecachten Tokens kosten ~90% weniger.
+                       Einsparung: 7× günstiger für den stabilen Prompt-Anteil
+```
+
+LiteLLM leitet Prompt-Caching-Parameter transparent an den Provider durch — beide Mechanismen
+lassen sich gleichzeitig nutzen und addieren sich.
+
+→ Details & Preisbeispiele: [llm_kosten_und_token.md](llm_kosten_und_token.md)
+
 ---
 
 ## OpenTelemetry — alles verbinden

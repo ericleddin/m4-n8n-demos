@@ -94,15 +94,16 @@ für Routing, Fallbacks, Caching, Rate-Limiting.
 
 | Tool | Stärke | Wann nutzen? |
 |---|---|---|
-| **LangChain** | Riesiges Ökosystem, viele Integrationen | Wenn schnell was bauen, viele Tutorials |
-| **LlamaIndex** | RAG-fokussiert, Dokumenten-Pipelines | Wenn Hauptfeature RAG/Suche ist |
+| **Direkter API-Call** | Kein Overhead, volle Kontrolle, alles sichtbar | **Einstieg** — immer erst das |
+| **Pydantic AI** | Type-safe, Python-nativ, leichtgewichtig, gut debuggbar | Wenn Orchestrierung nötig wird (PY) |
+| **Vercel AI SDK** | TypeScript/Next.js nativ, Streaming out-of-the-box | Wenn Orchestrierung nötig wird (TS) |
+| **LlamaIndex** | RAG-fokussiert, Dokumenten-Pipelines | Wenn RAG-Pipeline komplex wird |
 | **LangGraph** | Agents & Workflows als Graph | Komplexe Multi-Step Agents |
-| **Pydantic AI** | Type-safe, Python-nativ, leichtgewichtig | Moderner Ansatz, weniger Magic |
-| **Vercel AI SDK** | TypeScript/Next.js nativ | Frontend-nahe KI-Features, Streaming |
-| **Direkter API-Call** | Kein Overhead, volle Kontrolle | Wenn nur 1-2 LLM-Calls nötig |
+| **LangChain** | Riesiges Ökosystem, viele Tutorials | ⚠️ Gut zum Lernen, in Produktion oft zu viel Abstraktion — schwer debuggbar, viele Teams ersetzen es später |
 
-> **2026-Trend:** Viele Teams steigen von LangChain auf **direktere Ansätze**
-> (Pydantic AI, direkter SDK-Call) um — weniger Magie, besser debuggbar.
+> **Faustregel:** Direkter API-Call → Pydantic AI / Vercel AI SDK → LlamaIndex → LangGraph.
+> LangChain überspringen oder nur zum Lernen nutzen, nicht als Produktions-Fundament.
+> → Begründung: [rag_konzept_und_praxis.md](rag_konzept_und_praxis.md)
 
 ---
 
@@ -261,15 +262,18 @@ Wann Kubernetes?
 
 | Schicht | TypeScript | Gleich | Python |
 |---|---|---|---|
-| **LLM** | | OpenAI direkt (oder Mistral für EU) | |
+| **LLM** | | OpenAI direkt (oder Mistral 🇪🇺 für EU) · *Datenschutz ab Tag 1? → Ollama + Phi-4 lokal* | |
 | **Framework** | Vercel AI SDK | — | direkter `openai`-SDK-Call |
 | **Backend** | Next.js API Routes | — | FastAPI |
 | **Datenbank** | | Supabase (Postgres + Auth + pgvector) | |
-| **Observability** | | Langfuse Cloud (Hobby = kostenlos) + Sentry Free | |
+| **Observability** | | Langfuse Cloud Hobby (kostenlos) + Sentry Free · *DSGVO-kritisch? → Langfuse self-hosted* | |
 | **Auth** | Supabase Auth oder Clerk Free Tier | — | Supabase Auth |
 | **Hosting** | Vercel + Railway | — | Railway / Render |
 | **Secrets** | | .env lokal → Plattform-Env-Vars in Prod | |
 | **CI/CD** | | GitHub Actions | |
+
+> 💡 **Gratis-Optimierung für Klein:** Prompt Caching einschalten (Anthropic/OpenAI) — gleichbleibende
+> System-Prompts werden ~7× günstiger. Kein Code-Aufwand, sofortiger Effekt.
 
 ---
 
@@ -280,7 +284,7 @@ Wann Kubernetes?
 | Schicht | TypeScript | Gleich | Python |
 |---|---|---|---|
 | **LLM** | | Azure OpenAI (EU) oder Mistral AI | |
-| **Gateway** | | LiteLLM self-hosted (Fallback + Caching) | |
+| **Gateway** | | LiteLLM self-hosted — Fallback-Routing + semantisches Caching (eigene Schicht) + Prompt-Caching-Passthrough zu OpenAI/Anthropic | |
 | **Framework** | Vercel AI SDK + tRPC | — | Pydantic AI oder LlamaIndex |
 | **Backend** | Next.js | — | FastAPI |
 | **ORM** | Prisma | — | SQLAlchemy / Tortoise |

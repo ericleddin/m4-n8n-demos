@@ -61,12 +61,33 @@ Ohne Überwachung sind Agenten eine Black Box. Diese Tools machen sichtbar, was 
 
 ---
 
+## 4. Die Wissensbasis: RAG vs. Fine-Tuning
+
+Bevor du eine Infrastruktur aufbaust, musst du entscheiden: Wie kommt dein Domänenwissen ins Modell?
+
+| Ansatz | Prinzip | Wann sinnvoll? |
+|---|---|---|
+| **RAG** (Retrieval Augmented Generation) | Eigene Dokumente werden bei jeder Anfrage als Kontext nachgeschlagen — das Modell selbst bleibt unverändert | Daten ändern sich regelmäßig · Antworten sollen belegbar sein · schnelle Umsetzung (Tage) |
+| **Fine-Tuning** | Das Modell wird auf eigenen Daten neu trainiert — Verhalten und Stil werden dauerhaft eingearbeitet | Einheitlicher Schreibstil wichtig · Sehr hohe Anfragemengen · Daten ändern sich selten |
+
+```
+Faustregel:
+├── RAG zuerst — fast immer die richtige erste Wahl
+├── Fine-Tuning wenn RAG das Problem nicht löst
+└── Beide kombinieren für Spezial-Fälle (z.B. Fine-Tuning für Stil + RAG für aktuelle Daten)
+```
+
+→ Ausführliche Erklärung: [rag_konzept_und_praxis.md](rag_konzept_und_praxis.md)
+
+---
+
 ## Zusammenfassung & Empfehlung
 
 ```
-Maximale Sicherheit    → AWS Bedrock als API-Quelle
-Komplexe Agenten-Logik → LangGraph oder CrewAI
-Überwachung            → Langfuse (self-hosted) oder LangSmith
+Eigenes Wissen einbinden → RAG (Standard-Fall) — pgvector zum Einstieg, Qdrant für Produktion
+Maximale Sicherheit      → AWS Bedrock als API-Quelle
+Komplexe Agenten-Logik   → LangGraph oder CrewAI
+Überwachung              → Langfuse (self-hosted) oder LangSmith
 ```
 
 **Nächste Frage:** Welcher Anwendungsfall steht im Vordergrund —
