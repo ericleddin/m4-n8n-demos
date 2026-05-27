@@ -6,11 +6,11 @@ Community-Beiträge mit ergänzender Konzept-Dokumentation rund um LLM-Entwicklu
 
 ## 📂 Inhalte
 
-- **[best_practice_tech_stack_2026.md](dozent/m4-n8n-demos/docs/llm_learning/best_practice_tech_stack_2026.md)** — Die wichtigste Datei für den Einstieg: vollständiger Tech-Stack von Solo-Projekt bis Enterprise, mit Cloud-Diensten, EU/DSGVO-Bewertung und konkreten Kostenangaben pro Stufe.
-- **[llm_app_techstack_overview.md](dozent/m4-n8n-demos/docs/llm_learning/llm_app_techstack_overview.md)** — Das **Warum** hinter den Stack-Entscheidungen: LiteLLM, pgvector vs. Qdrant, RAG-Pipeline, semantisches Caching, OTel, Fine-Tuning vs. RAG. Konzepte statt Tool-Listen.
-- **[langfuse_vs_langsmith.md](dozent/m4-n8n-demos/docs/llm_learning/langfuse_vs_langsmith.md)** — Direktvergleich der beiden führenden LLM-Observability-Plattformen: Architektur, Kosten, Integration, Codebeispiele und Entscheidungshilfe.
-- **[observability_monitoring_tools.md](dozent/m4-n8n-demos/docs/llm_learning/observability_monitoring_tools.md)** — Überblick über die drei Observability-Schichten (Logs, Metrics, Traces) und konkrete Tool-Empfehlungen von Netdata/Dozzle auf dem Homelab bis Datadog im Enterprise.
-- **[ki-infrastruktur_agent_scaling_guide.md](dozent/m4-n8n-demos/docs/llm_learning/ki-infrastruktur_agent_scaling_guide.md)** — Strategische Perspektive auf KI-Infrastruktur und Agenten-Systeme: Vertrauensentscheidungen bei API-Quellen, Datensicherheit, Flexibilität und Skalierbarkeit.
+- **[best_practice_tech_stack_2026.md](best_practice_tech_stack_2026.md)** — Die wichtigste Datei für den Einstieg: vollständiger Tech-Stack von Solo-Projekt bis Enterprise, mit Cloud-Diensten, EU/DSGVO-Bewertung und konkreten Kostenangaben pro Stufe.
+- **[llm_app_techstack_overview.md](llm_app_techstack_overview.md)** — Das **Warum** hinter den Stack-Entscheidungen: LiteLLM, pgvector vs. Qdrant, RAG-Pipeline, semantisches Caching, OTel, Fine-Tuning vs. RAG. Konzepte statt Tool-Listen.
+- **[langfuse_vs_langsmith.md](langfuse_vs_langsmith.md)** — Direktvergleich der beiden führenden LLM-Observability-Plattformen: Architektur, Kosten, Integration, Codebeispiele und Entscheidungshilfe.
+- **[observability_monitoring_tools.md](observability_monitoring_tools.md)** — Überblick über die drei Observability-Schichten (Logs, Metrics, Traces) und konkrete Tool-Empfehlungen von Netdata/Dozzle auf dem Homelab bis Datadog im Enterprise.
+- **[ki-infrastruktur_agent_scaling_guide.md](ki-infrastruktur_agent_scaling_guide.md)** — Strategische Perspektive auf KI-Infrastruktur und Agenten-Systeme: Vertrauensentscheidungen bei API-Quellen, Datensicherheit, Flexibilität und Skalierbarkeit.
 
 ## 🗺️ Empfohlene Lesereihenfolge
 

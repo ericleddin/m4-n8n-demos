@@ -57,7 +57,7 @@ Ohne Überwachung sind Agenten eine Black Box. Diese Tools machen sichtbar, was 
 | **Langfuse** | Metriken über Kosten, Geschwindigkeit und Antwortqualität in Echtzeit — self-hostbar | [langfuse.com](https://langfuse.com/) |
 | **LangSmith** | Debugging: jeden einzelnen Denkschritt eines Agenten visualisieren | [smith.langchain.com](https://smith.langchain.com/) |
 
-→ Ausführlicher Vergleich: [langfuse_vs_langsmith.md](dozent/m4-n8n-demos/docs/llm_learning/langfuse_vs_langsmith.md)
+→ Ausführlicher Vergleich: [langfuse_vs_langsmith.md](langfuse_vs_langsmith.md)
 
 ---
 

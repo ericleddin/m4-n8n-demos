@@ -2,7 +2,7 @@
 
 > Dieses Dokument erklärt das **Warum** hinter den Stack-Entscheidungen.
 > Die konkreten Tool-Empfehlungen pro Größe und Sprache stehen in
-> [best_practice_tech_stack_2026.md](dozent/m4-n8n-demos/docs/llm_learning/best_practice_tech_stack_2026.md).
+> [best_practice_tech_stack_2026.md](best_practice_tech_stack_2026.md).
 
 ---
 
