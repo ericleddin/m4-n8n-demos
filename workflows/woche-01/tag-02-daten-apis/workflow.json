@@ -62,11 +62,11 @@
       "credentials": {
         "httpHeaderAuth": {
           "id": "BONIbPrb2VuXRMNC",
-          "name": "OpenRouter - Syntax (Eric)"
+          "name": "OpenRouter account"
         },
         "openRouterApi": {
           "id": "3V3ptTerXeMV1wEw",
-          "name": "OpenRouter - Eric"
+          "name": "OpenRouter account"
         }
       }
     },

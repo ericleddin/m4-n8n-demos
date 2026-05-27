@@ -210,7 +210,7 @@
       "credentials": {
         "supabaseApi": {
           "id": "56pbxWn3sMCHxPJA",
-          "name": "Supabase - Eric (M4)"
+          "name": "Supabase account"
         }
       }
     },
@@ -285,7 +285,7 @@
       "credentials": {
         "supabaseApi": {
           "id": "56pbxWn3sMCHxPJA",
-          "name": "Supabase - Eric (M4)"
+          "name": "Supabase account"
         }
       }
     },
@@ -311,7 +311,7 @@
       "credentials": {
         "httpBearerAuth": {
           "id": "SEDyCLA4bLWkBmys",
-          "name": "Resend - Eric"
+          "name": "Resend account"
         }
       }
     },
@@ -346,7 +346,7 @@
       "credentials": {
         "supabaseApi": {
           "id": "56pbxWn3sMCHxPJA",
-          "name": "Supabase - Eric (M4)"
+          "name": "Supabase account"
         }
       }
     },
@@ -372,7 +372,7 @@
       "credentials": {
         "httpBearerAuth": {
           "id": "SEDyCLA4bLWkBmys",
-          "name": "Resend - Eric"
+          "name": "Resend account"
         }
       }
     }

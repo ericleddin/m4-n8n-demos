@@ -55,7 +55,7 @@
       "credentials": {
         "openAiApi": {
           "id": "JOxIKqPlB5YoEEhu",
-          "name": "OpenAI Account - OpenRouter Key Eric"
+          "name": "OpenAI account"
         }
       }
     },
@@ -98,7 +98,7 @@
       "credentials": {
         "supabaseApi": {
           "id": "W0eyn3oDYgO1uj3u",
-          "name": "Supabase - Eric (RAG)"
+          "name": "Supabase account"
         }
       }
     },
@@ -144,7 +144,7 @@
       "credentials": {
         "openRouterApi": {
           "id": "iNwU2uwlDz4l7tnF",
-          "name": "OpenRouter account - Eric Leddin"
+          "name": "OpenRouter account"
         }
       }
     },
@@ -171,7 +171,7 @@
       "credentials": {
         "supabaseApi": {
           "id": "W0eyn3oDYgO1uj3u",
-          "name": "Supabase - Eric (RAG)"
+          "name": "Supabase account"
         }
       }
     },
@@ -254,7 +254,7 @@
       "credentials": {
         "openAiApi": {
           "id": "D0KZPxFPeedjtiEv",
-          "name": "OpenAI account - Eric"
+          "name": "OpenAI account"
         }
       }
     },

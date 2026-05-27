@@ -88,7 +88,7 @@
       "credentials": {
         "httpBearerAuth": {
           "id": "SEDyCLA4bLWkBmys",
-          "name": "Resend - Eric"
+          "name": "Resend account"
         }
       }
     },
@@ -222,7 +222,7 @@
       "credentials": {
         "openRouterApi": {
           "id": "iNwU2uwlDz4l7tnF",
-          "name": "OpenRouter account - Eric Leddin"
+          "name": "OpenRouter account"
         }
       }
     },
@@ -248,7 +248,7 @@
       "credentials": {
         "httpBearerAuth": {
           "id": "SEDyCLA4bLWkBmys",
-          "name": "Resend - Eric"
+          "name": "Resend account"
         }
       }
     },
@@ -297,7 +297,7 @@
       "credentials": {
         "httpBearerAuth": {
           "id": "SEDyCLA4bLWkBmys",
-          "name": "Resend - Eric"
+          "name": "Resend account"
         }
       }
     },
@@ -323,7 +323,7 @@
       "credentials": {
         "httpBearerAuth": {
           "id": "SEDyCLA4bLWkBmys",
-          "name": "Resend - Eric"
+          "name": "Resend account"
         }
       }
     },
@@ -349,7 +349,7 @@
       "credentials": {
         "httpBearerAuth": {
           "id": "SEDyCLA4bLWkBmys",
-          "name": "Resend - Eric"
+          "name": "Resend account"
         }
       }
     },
@@ -375,7 +375,7 @@
       "credentials": {
         "httpBearerAuth": {
           "id": "SEDyCLA4bLWkBmys",
-          "name": "Resend - Eric"
+          "name": "Resend account"
         }
       }
     },
@@ -434,7 +434,7 @@
       "credentials": {
         "httpBearerAuth": {
           "id": "SEDyCLA4bLWkBmys",
-          "name": "Resend - Eric"
+          "name": "Resend account"
         }
       }
     }
