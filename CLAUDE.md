@@ -36,6 +36,7 @@ Für jede neue Demo gilt diese Pipeline:
    Das Skript bereinigt Secrets und persönliche Daten, erzeugt `<name>.cleaned.<ext>`-Dateien und archiviert die Originale nach `inbox/_processed/`. Unterstützte Formate: `.json` und `.html`.
 4. **Zielordner anlegen** nach Schema (Abschnitt 3) und alle zugehörigen Dateien dorthin verschieben.
 5. **README erstellen** nach Pflicht-Vorlage (Abschnitt 4).
+5a. **Sticky-Notes-Konsistenz prüfen**: Vor dem Commit verifizieren, dass alle `n8n-nodes-base.stickyNote`-Nodes im `workflow.json` das tatsächliche Workflow-Verhalten beschreiben. Häufige Drift-Quellen: kopierte Notes aus einer früheren Iteration, Notes, die fehlende oder noch nicht angebundene Sub-Nodes erwähnen, Notes mit veralteten Trigger-Bezeichnungen. Bei Drift: Note-Text direkt in `workflow.json` (`parameters.content`) korrigieren, nicht nur im README.
 6. **Commit pro Demo** (alle Files einer Demo in einem Commit), Message-Format siehe Abschnitt 7.
 7. **Push.**
 
@@ -203,6 +204,8 @@ Im Setup-Abschnitt: für jede Companion-Datei einen eigenen Schritt erklären (z
 - **Credentials-Tabelle**: nur Services, die im Workflow tatsächlich vorkommen
 - **Setup**: jeden Platzhalter `<<REPLACE_WITH_...>>` namentlich erwähnen, inkl. derer in Companion-Files
 - **Variationen**: 3-4 Bullets, müssen zur konkreten Demo passen. Mindestens eine sollte eine **"saubere Praxis"-Verbesserung** sein (z.B. "Webhook-Auth aktivieren", "hardcoded Werte zu echten Credentials refactoren").
+- **Bei Workflows mit externem Datenbank-Setup**: Schema-Realitäts-Check vor Commit. Wenn die Tabellenstruktur aus dem Workflow abgeleitet wird, beim Halt-2-Review explizit den User um das echte `CREATE TABLE`-Statement bitten, um abgeleitete Annahmen abzugleichen. Spalten, Constraints, Nullable-Status und Defaults weichen oft von Inferenz ab. Bei Test-Daten gilt: zeitlose Inserts (`now() - interval '...'`) ins Repo, absolute Timestamps nur für ephemere Live-Demos.
+- **Verweis auf `docs/n8n_learning/`**: Bei Workflows mit thematischer Überlappung zu den Konzept-Dokumenten am Ende der README einen kurzen Verweis einbauen ("Tiefergehende Erklärung in `docs/n8n_learning/<datei>.md`."). Mapping: Agent/Tool-Workflows → `llm_agent_tools_intro.md`. Datenfluss-Konzepte (IF, Switch, Merge, Loop) → `n8n_datenfluss_kompendium.md`. Code-Node-Vertiefungen → `n8n_developer_guide.md`.
 
 ---
 
