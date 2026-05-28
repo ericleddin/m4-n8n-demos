@@ -16,6 +16,9 @@ Community-Beiträge mit ergänzender Konzept-Dokumentation rund um LLM-Entwicklu
 ### Sicherheit & Datenschutz
 - **[rag_dsgvo_pseudonymisierung.md](rag_dsgvo_pseudonymisierung.md)** — Architektur-Blueprint für DSGVO-konformes RAG: wie PII per NER erkannt, durch semantische Platzhalter maskiert und über eine lokale Mapping-Datenbank de-pseudonymisiert wird — ohne die Vektorsuche zu zerstören.
 
+### Agenten-Architektur
+- **[agenten_architektur_patterns.md](agenten_architektur_patterns.md)** — Wann Agent statt Workflow, Tool-Design-Prinzipien, Memory-Patterns (Buffer/Summary/Vector), Multi-Agent-Patterns (Supervisor, Pipeline, Handoff), Failure-Modes und Produktions-Checkliste.
+
 ### Stack & Infrastruktur
 - **[best_practice_tech_stack_2026.md](best_practice_tech_stack_2026.md)** — Vollständiger Tech-Stack von Solo-Projekt bis Enterprise, mit TS/Python-Vergleich, Cloud-Diensten und EU/DSGVO-Bewertung.
 - **[llm_app_techstack_overview.md](llm_app_techstack_overview.md)** — Das **Warum** hinter den Stack-Entscheidungen: LiteLLM, pgvector vs. Qdrant, semantisches Caching, OTel, Fine-Tuning vs. RAG.
@@ -39,7 +42,8 @@ Neu im Thema?
     8. observability_monitoring_tools.md ← Monitoring-Schichten
     9. lokale_llms_ollama.md                  ← Lokal & datenschutzkonform
    10. rag_dsgvo_pseudonymisierung.md         ← PII schützen in RAG-Systemen
-   11. ki-infrastruktur_agent_scaling_guide.md ← Strategische Tiefe
+   11. agenten_architektur_patterns.md          ← Agenten bauen & absichern
+   12. ki-infrastruktur_agent_scaling_guide.md ← Strategische Tiefe
 ```
 
 ## 🤝 Beiträge willkommen
