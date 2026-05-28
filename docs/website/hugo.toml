@@ -1,16 +1,16 @@
 baseURL = "/"
 title = "M4 – KI Experte: Workflows & Agenten"
-theme = "hugo-book"
+theme = "hugo-theme-relearn"
 defaultContentLanguage = "de"
 
 [params]
-  BookTheme = "dark"
-  BookToC = true
-  BookSearch = true
-  BookRepo = ""
-  BookSection = "/"
-  BookMenuFromSection = "/"
-  BookDateFormat = "02.01.2006"
+  themeVariant = "relearn-dark"
+  disableBreadcrumb = false
+  disableAssetsBusting = false
+  mermaidInitialize = '{ "theme": "dark" }'
+
+[params.search]
+  disable = false
 
 [markup]
   [markup.goldmark.renderer]
@@ -20,9 +20,9 @@ defaultContentLanguage = "de"
     lineNos = false
 
 [outputs]
-  home = ["HTML"]
-  page = ["HTML"]
-  section = ["HTML"]
+  home = ["HTML", "RSS"]
+  section = ["HTML", "RSS", "PRINT"]
+  page = ["HTML", "RSS", "PRINT"]
 
 [module]
   [[module.mounts]]
