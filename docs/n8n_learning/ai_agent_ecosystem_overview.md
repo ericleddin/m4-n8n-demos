@@ -1,3 +1,8 @@
+---
+title: "AI Agent Ecosystem"
+weight: 20
+---
+
 # AI Agent Development – Ökosystem-Übersicht (TS & Python)
 
 Kompakter Wegweiser durch das Framework- und Tool-Ökosystem für die Entwicklung von AI-Agents. Fokus: TypeScript und Python gleichgewichtet, mit Bewertung nach Verbreitung, Community und Produktionsreife (Rock-Solid-Level).

@@ -1,3 +1,8 @@
+---
+title: "LLM, Agent & Tools – Einführung"
+weight: 10
+---
+
 # LLM, Agent & Tools – Einführung und Architektur-Muster
 
 Dieser Guide ist eine konzeptuelle Einführung in moderne AI-Workflows: Was ist ein LLM, was ist ein Agent, was sind Tools – und wie baut man daraus produktionstaugliche Architekturen? Die Beispiele nutzen n8n-Begriffe, die Konzepte gelten aber identisch in LangChain, LangGraph, Vercel AI SDK oder selbstgebauten Agents.

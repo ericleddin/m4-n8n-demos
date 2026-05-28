@@ -1,3 +1,8 @@
+---
+title: "n8n Datenfluss Kompendium"
+weight: 40
+---
+
 # n8n Datenfluss & Kontrollstrukturen – Das Master-Kompendium (v2)
 
 Dieses Kompendium ist das vollständige Nachschlagewerk für alle Kontroll- und Datenfluss-Nodes in n8n. Es erklärt das Datenmodell, wie Daten durch Workflows fließen, wie Weichen gestellt werden, wie Items geformt werden, wie Sub-Workflows orchestriert werden und wie Fehler visuell abgefangen werden. Praxisnahe Metaphern und Mermaid-Diagramme machen die Konzepte greifbar.

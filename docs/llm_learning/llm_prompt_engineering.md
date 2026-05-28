@@ -1,3 +1,8 @@
+---
+title: "Prompt Engineering"
+weight: 20
+---
+
 # Prompt Engineering
 
 > Prompt Engineering ist die Kunst, LLMs so anzusprechen dass sie das liefern was du brauchst.

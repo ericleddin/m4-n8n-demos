@@ -1,3 +1,8 @@
+---
+title: "Kosten und Token"
+weight: 40
+---
+
 # LLM-Kosten & Token-Management
 
 > LLM-APIs kosten Geld pro Token — und Kosten können schnell explodieren

@@ -1,3 +1,8 @@
+---
+title: "Langfuse vs. LangSmith"
+weight: 70
+---
+
 # Langfuse vs. LangSmith
 
 > Beide Tools sind **LLM Observability Platforms** — sie tracken, evaluieren und debuggen

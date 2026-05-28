@@ -1,3 +1,8 @@
+---
+title: "Lokale LLMs mit Ollama"
+weight: 90
+---
+
 # Lokale LLMs mit Ollama
 
 > Ollama lässt dich Open-Source-LLMs auf deinem eigenen Rechner oder Server laufen —

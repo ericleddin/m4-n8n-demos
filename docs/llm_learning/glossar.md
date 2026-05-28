@@ -1,3 +1,8 @@
+---
+title: "Glossar"
+weight: 10
+---
+
 # Glossar — LLM & KI-Entwicklung
 
 > Begriffe die in den Docs immer wieder auftauchen, hier kurz und konkret erklärt.

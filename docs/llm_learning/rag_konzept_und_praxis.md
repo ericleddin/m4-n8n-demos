@@ -1,3 +1,8 @@
+---
+title: "RAG – Konzept und Praxis"
+weight: 30
+---
+
 # RAG — Konzept und Praxis
 
 > RAG (Retrieval Augmented Generation) ist die wichtigste Technik um LLMs

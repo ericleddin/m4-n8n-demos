@@ -1,3 +1,8 @@
+---
+title: "n8n & LLM Integration"
+weight: 30
+---
+
 # n8n & LLM — Integration in der Praxis
 
 > n8n ist die Klammer die alles verbindet: LLM-Calls, Datenbanken, APIs, Webhooks.

@@ -1,0 +1,54 @@
+baseURL = "/"
+title = "M4 – KI Experte: Workflows & Agenten"
+theme = "hugo-book"
+defaultContentLanguage = "de"
+
+[params]
+  BookTheme = "dark"
+  BookToC = true
+  BookSearch = true
+  BookRepo = ""
+  BookSection = "/"
+  BookMenuFromSection = "/"
+  BookDateFormat = "02.01.2006"
+
+[markup]
+  [markup.goldmark.renderer]
+    unsafe = true
+  [markup.highlight]
+    style = "monokai"
+    lineNos = false
+
+[outputs]
+  home = ["HTML"]
+  page = ["HTML"]
+  section = ["HTML"]
+
+[module]
+  [[module.mounts]]
+    source = "content"
+    target = "content"
+  [[module.mounts]]
+    source = "../llm_learning"
+    target = "content/llm_learning"
+  [[module.mounts]]
+    source = "../n8n_learning"
+    target = "content/n8n_learning"
+  [[module.mounts]]
+    source = "layouts"
+    target = "layouts"
+  [[module.mounts]]
+    source = "static"
+    target = "static"
+  [[module.mounts]]
+    source = "assets"
+    target = "assets"
+  [[module.mounts]]
+    source = "archetypes"
+    target = "archetypes"
+  [[module.mounts]]
+    source = "i18n"
+    target = "i18n"
+  [[module.mounts]]
+    source = "data"
+    target = "data"
