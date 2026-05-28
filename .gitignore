@@ -30,8 +30,9 @@ Thumbs.db
 
 docs/.claude/
 
-# === Hugo build output ===
+# === Hugo build output & lokale Abhängigkeiten ===
 docs/website/public/
 docs/website/resources/
 docs/website/.hugo_build.lock
 docs/website/hugo_http.log
+docs/website/themes/
