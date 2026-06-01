@@ -1,0 +1,895 @@
+{
+  "name": "W3T1 - Refactorig - Monolith zu modular",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "9b42ce3d-e60c-40a6-b5d0-537cd3acb9b9",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -368,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "v1",
+              "name": "kundeId",
+              "value": "K-1001",
+              "type": "string"
+            },
+            {
+              "id": "v2",
+              "name": "typ",
+              "value": "Beschwerde",
+              "type": "string"
+            },
+            {
+              "id": "v3",
+              "name": "text",
+              "value": "Das Produkt kam kaputt an, sehr schlecht.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a2aa2f23-f5ec-4a22-9e32-a8098a097703",
+      "name": "Edit Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -160,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.example.com/crm/kunde",
+        "options": {}
+      },
+      "id": "f35e6d35-d9d5-41c8-b2e6-f5bee229b329",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        32,
+        -48
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "return { json: Object.assign({}, $json, { firma: 'Firma GmbH', umsatz: 12345 }) };"
+      },
+      "id": "b840cdc3-1be1-48f7-9002-314568d27394",
+      "name": "Function 1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "v4",
+              "name": "zwischenschritt",
+              "value": "ok",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "f9920b75-e891-4c44-813b-fecaaa63fbbb",
+      "name": "Edit Fields 1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        432,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const t = ($json.text || '').toLowerCase(); let kategorie = 'anfrage'; if (t.includes('beschwerde') || t.includes('kaputt') || t.includes('schlecht')) kategorie = 'beschwerde'; return { json: Object.assign({}, $json, { kategorie: kategorie, bearbeitet: true }) };"
+      },
+      "id": "2c9ec312-6b0f-4507-a677-1561d358a44e",
+      "name": "Function 2",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        640,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "return { json: Object.assign({}, $json, { firma: 'Firma GmbH', umsatz: 12345 }) };"
+      },
+      "id": "fd08c81e-19d9-439f-ac36-de20cd83e1b8",
+      "name": "Function 3",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        832,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "v5",
+              "name": "antwort",
+              "value": "Wir kuemmern uns darum.",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "eba58c5c-9561-4041-adfd-b1c821370bca",
+      "name": "Edit Fields 2",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1040,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.example.com/antwort/senden",
+        "options": {}
+      },
+      "id": "c9b90cc8-b96e-4d3d-bec1-775a09d891ee",
+      "name": "HTTP Request 1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1232,
+        -48
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {},
+      "id": "2021711f-c81e-457f-aea7-b57dfa8e93bc",
+      "name": "No Operation, do nothing",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1440,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "n1",
+              "name": "kundeId",
+              "value": "K-1001",
+              "type": "string"
+            },
+            {
+              "id": "n2",
+              "name": "typ",
+              "value": "Beschwerde",
+              "type": "string"
+            },
+            {
+              "id": "n3",
+              "name": "text",
+              "value": "Das Produkt kam kaputt an, sehr schlecht.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "32c29373-0cab-4040-8bfa-3b90fa0f7399",
+      "name": "Ticket-Daten",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        384,
+        608
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "n77KEUdHbxU3oAJg",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/n77KEUdHbxU3oAJg",
+          "cachedResultName": "W3T1 - SUB - Kundendaten anreichern"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "kundeId": "={{ $json.kundeId }}"
+          },
+          "matchingColumns": [
+            "kundeId"
+          ],
+          "schema": [
+            {
+              "id": "kundeId",
+              "displayName": "kundeId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "734c6861-d5df-4fac-a2c0-755d5ce4e39a",
+      "name": "Kundendaten anreichern (Sub)",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        624,
+        608
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "nf",
+              "name": "fehler",
+              "value": "Sub fehlgeschlagen - Fallback aktiv",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "6e9db2cd-2f58-466c-8ad6-749cea9f7d88",
+      "name": "Fehler-Fallback",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        624,
+        816
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Ticket-Daten').item.json.typ }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "rightValue": "Beschwerde"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Ticket-Daten').item.json.typ }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "rightValue": "Anfrage"
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "id": "3d33ecff-5e4d-4100-b017-305e1d343876",
+      "name": "Nach Typ verzweigen",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        864,
+        608
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e1",
+              "name": "aktion",
+              "value": "Eskaliert, Prio hoch",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "f0cfee4a-6f17-4558-baa3-91c9553a102e",
+      "name": "Eskalieren (Prio hoch)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1120,
+        464
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "aktion",
+              "value": "Standard-Antwort gesendet",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "ab951de7-5ac0-437f-a5a8-34d1944dc44a",
+      "name": "Standard-Antwort",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1120,
+        624
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "m1",
+              "name": "aktion",
+              "value": "Manuell pruefen",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "8c9af253-f4fe-4746-aad8-a34167bcd7f0",
+      "name": "Manuell pruefen",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1120,
+        784
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## VORHER — Monolith\nLineare Kette, generische Namen (\"HTTP Request\", \"Function 1/2/3\"), **Enrich-Logik doppelt** (Function 1 = Function 3), keine Fehlerpfade, hardcodierte URLs.",
+        "height": 120,
+        "width": 1980,
+        "color": 2
+      },
+      "id": "fe36302a-a74e-4f1f-a023-f32f82f70cd9",
+      "name": "Vorher",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -384,
+        -336
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## NACHHER — refactored in 4 Schritten\n1. Benennung  2. Branching (Switch)  3. Auslagerung (Sub-Workflow)  4. Fehlerbehandlung (Try/Catch)",
+        "height": 120,
+        "width": 1444,
+        "color": 4
+      },
+      "id": "057440a2-d055-4549-a120-e04fafbcae6a",
+      "name": "Nachher",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        160,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Generischer Trigger.",
+        "height": 120,
+        "width": 180
+      },
+      "id": "6f8ae65f-a860-4eca-a812-19e118586c7c",
+      "name": "v-t",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -368,
+        -192
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Edit Fields: eingehendes Ticket — nichtssagender Name.",
+        "height": 120,
+        "width": 180
+      },
+      "id": "1eb844c7-2a57-4e54-87d9-4d1781d39456",
+      "name": "v-s1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -160,
+        -192
+      ]
+    },
+    {
+      "parameters": {
+        "content": "HTTP Request: Kunde holen. Generischer Name, hardcodierte URL.",
+        "height": 120,
+        "width": 180
+      },
+      "id": "07768aa7-6c8b-481b-90a1-940bc6547f3f",
+      "name": "v-h1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        32,
+        -192
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Function 1: Daten anreichern (Block A).",
+        "height": 120,
+        "width": 180
+      },
+      "id": "b38640c7-f25c-42f9-8dde-8c0dbf7acf84",
+      "name": "v-f1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        240,
+        -192
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Edit Fields 1: Zwischenformat.",
+        "height": 120,
+        "width": 180
+      },
+      "id": "25a537ba-1456-4eef-9e64-a115c71ce7f9",
+      "name": "v-s2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        432,
+        -192
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Function 2: Kategorie inline bestimmen — alles in einem Schritt.",
+        "height": 120,
+        "width": 180
+      },
+      "id": "1235e221-6068-405d-bf99-0c34fe1ae5d9",
+      "name": "v-f2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        640,
+        -192
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Function 3: reichert NOCHMAL an — Duplikat von Function 1 (Copy-Paste).",
+        "height": 120,
+        "width": 180
+      },
+      "id": "986734b2-d279-4182-86f6-6a4831693818",
+      "name": "v-f3",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        832,
+        -192
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Edit Fields 2: Antwort bauen.",
+        "height": 120,
+        "width": 180
+      },
+      "id": "1057a2f2-3de4-42d6-b7c9-b684e2b8b001",
+      "name": "v-s3",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1040,
+        -192
+      ]
+    },
+    {
+      "parameters": {
+        "content": "HTTP Request 1: Antwort senden.",
+        "height": 120,
+        "width": 180
+      },
+      "id": "c94a400a-0280-4725-b82d-d71dee2b66dd",
+      "name": "v-h2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1232,
+        -192
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Ende. Im ganzen Strang kein Fehlerpfad.",
+        "height": 120,
+        "width": 180
+      },
+      "id": "27b45294-ccc6-4ae1-91eb-bbfb2faccb01",
+      "name": "v-no",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1440,
+        -192
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Sauberer Trigger: Support-Ticket.",
+        "height": 120,
+        "width": 180
+      },
+      "id": "afd3cf2d-38c7-4819-ba37-f1350ff785d3",
+      "name": "a-t",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        176,
+        464
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Schritt 1 (Benennung): \"Ticket-Daten\" — kundeId, typ, text.",
+        "height": 120,
+        "width": 180
+      },
+      "id": "e33bb1e4-a2cd-4623-a9a7-98a4c7a64851",
+      "name": "a-td",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        384,
+        464
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Schritt 3 (Auslagerung): doppelte Enrich-Logik → Sub-Workflow.",
+        "height": 120,
+        "width": 190
+      },
+      "id": "dbc29daa-99dd-40d5-b4c8-437d0162b2ca",
+      "name": "a-sub",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        608,
+        464
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Schritt 2 (Branching): Switch nach Typ statt alles inline.",
+        "height": 120,
+        "width": 190
+      },
+      "id": "d9f69865-7414-4552-b95d-031894e86bfe",
+      "name": "a-sw",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        848,
+        464
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Beschwerde → eskalieren (Prio hoch).",
+        "height": 100,
+        "width": 200
+      },
+      "id": "a1455dbc-0a81-406e-9fe5-12b34c0e6bb2",
+      "name": "a-esk",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1328,
+        464
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Anfrage → Standard-Antwort.",
+        "height": 90,
+        "width": 190
+      },
+      "id": "7555ddae-b06b-468b-9a49-4f662f431d53",
+      "name": "a-std",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1328,
+        624
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Default → manuell pruefen.",
+        "height": 90,
+        "width": 190
+      },
+      "id": "3a0fe770-dd85-4d51-bbf2-9ab7b0de5814",
+      "name": "a-man",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1328,
+        784
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Schritt 4 (Fehlerbehandlung): Try/Catch — Error-Output des Sub landet hier (Fallback).",
+        "height": 120,
+        "width": 200
+      },
+      "id": "fc873e41-54fb-46b1-85da-d707ce18f4c3",
+      "name": "a-err",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        368,
+        816
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Ticket-Daten",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Function 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function 1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields 1": {
+      "main": [
+        [
+          {
+            "node": "Function 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function 2": {
+      "main": [
+        [
+          {
+            "node": "Function 3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function 3": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields 2": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request 1": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ticket-Daten": {
+      "main": [
+        [
+          {
+            "node": "Kundendaten anreichern (Sub)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kundendaten anreichern (Sub)": {
+      "main": [
+        [
+          {
+            "node": "Nach Typ verzweigen",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fehler-Fallback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Nach Typ verzweigen": {
+      "main": [
+        [
+          {
+            "node": "Eskalieren (Prio hoch)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Standard-Antwort",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Manuell pruefen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "ebededaf-00d6-4b91-8c91-6b071637e436",
+  "meta": {
+    "instanceId": "f032027e20e9709391bcafe9291ae76dc2a07ff2b593bca6936b7404ddb31c33"
+  },
+  "id": "Fj2KEnPOyXT1UVQV",
+  "tags": []
+}

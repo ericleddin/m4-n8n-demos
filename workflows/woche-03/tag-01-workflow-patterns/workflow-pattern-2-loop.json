@@ -1,0 +1,266 @@
+{
+  "name": "W3T1 - Pattern 2 - Loop",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "a95991ee-7846-42d1-9e07-fd68103fc70e",
+      "name": "Start (Demo)",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const firmen = ['Acme GmbH', 'Beta AG', 'Gamma KG', 'Delta SE', 'Epsilon GmbH'];\nreturn firmen.map((f, i) => ({ json: { lead_nr: i + 1, name: 'Lead ' + (i + 1), firma: f } }));"
+      },
+      "id": "3a310a67-983a-4c17-8b05-3ec1a022bc19",
+      "name": "5 Leads erzeugen",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -16,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{ json: { verarbeitet: $input.all().length, hinweis: 'Lead 3 ist fehlgeschlagen, der Loop lief trotzdem komplett durch' } }];"
+      },
+      "id": "a6dedf4a-81e6-45bd-a93b-9e6d11dd873e",
+      "name": "Zusammenfassung",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        464,
+        432
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "if ($json.lead_nr === 3) {\n  throw new Error('API-Fehler bei Lead 3 (simuliert) - Loop laeuft trotzdem weiter');\n}\nreturn { json: Object.assign({}, $json, { lead_score: Math.floor(Math.random() * 100), angereichert: true }) };"
+      },
+      "id": "26404e02-4420-4f0d-aa12-e5bc8add0939",
+      "name": "Lead anreichern (Fehler bei #3)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        464,
+        176
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "amount": 1
+      },
+      "id": "e63767fa-53ce-4b18-aa5f-6d736925b647",
+      "name": "Wartezeit (Rate Limiting)",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        672,
+        176
+      ],
+      "webhookId": "d2f87f71-ef9f-43df-bca4-f4255783165a"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "b9a46198-cad1-461b-9d6d-8ce11c407aba",
+      "name": "Leads durchlaufen",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        224,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Pattern 2 — Loop (Loop Over Items)\n**Wichtig zuerst:** n8n iteriert in den meisten Nodes **implizit** ueber alle Items. Den expliziten Loop-Node braucht man nur fuer Batching / Sequenz / Rate-Limiting.\n\n- **Rate Limiting:** Wait-Node zwischen den Durchlaeufen (hier 1s)\n- **Fehler im Loop:** Lead 3 wirft einen Fehler — \"Continue On Fail\", der Loop laeuft trotzdem komplett durch",
+        "height": 166,
+        "width": 720,
+        "color": 4
+      },
+      "id": "6b39786e-a2fe-40c0-b828-29d677e35bea",
+      "name": "Info Loop",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -272,
+        -176
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Manueller Start der Demo.",
+        "height": 110,
+        "width": 190
+      },
+      "id": "9ca758b4-0150-4a75-abec-f56446316d18",
+      "name": "n-trigger",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Code erzeugt 5 Beispiel-Leads (Liste).",
+        "height": 110,
+        "width": 190
+      },
+      "id": "d0bf0c33-dc3f-4bb4-b248-68da630a2ff0",
+      "name": "n-gen",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -16,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Loop Over Items: Batch-Groesse 1 → verarbeitet jeden Lead einzeln, einer nach dem anderen.",
+        "height": 120,
+        "width": 190
+      },
+      "id": "191a89f8-7e77-47ba-947c-fb083c834f57",
+      "name": "n-loop",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        224,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Reichert jeden Lead an. Wirft bewusst einen Fehler bei Lead 3 — \"Continue On Fail\" faengt ihn ab.",
+        "height": 120,
+        "width": 200
+      },
+      "id": "8bb5986c-9ddc-45ec-872d-21fdeda49368",
+      "name": "n-enrich",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        432,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Wait 1s zwischen den Durchlaeufen → schont das API-Rate-Limit.",
+        "height": 120,
+        "width": 190
+      },
+      "id": "127f5b28-b3a0-49dd-8fe7-ffc440e0918b",
+      "name": "n-wait",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        656,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Nach dem Loop: Zusammenfassung aller Durchlaeufe.",
+        "height": 100,
+        "width": 200
+      },
+      "id": "a2baadec-2935-4977-8b99-db1b3e771993",
+      "name": "n-sum",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        464,
+        576
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Start (Demo)": {
+      "main": [
+        [
+          {
+            "node": "5 Leads erzeugen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "5 Leads erzeugen": {
+      "main": [
+        [
+          {
+            "node": "Leads durchlaufen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lead anreichern (Fehler bei #3)": {
+      "main": [
+        [
+          {
+            "node": "Wartezeit (Rate Limiting)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wartezeit (Rate Limiting)": {
+      "main": [
+        [
+          {
+            "node": "Leads durchlaufen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leads durchlaufen": {
+      "main": [
+        [
+          {
+            "node": "Zusammenfassung",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Lead anreichern (Fehler bei #3)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "d676c262-fd2e-4abe-9c8f-3c8f6b57a1b4",
+  "meta": {
+    "instanceId": "f032027e20e9709391bcafe9291ae76dc2a07ff2b593bca6936b7404ddb31c33"
+  },
+  "id": "nlYVlCH5yYiZPGux",
+  "tags": []
+}

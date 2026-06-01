@@ -1,0 +1,228 @@
+{
+  "name": "W3T1 - Pattern 4 - Sub-Workflow",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "4b670bdc-1c8b-4fe6-bb1f-6bd4c202f840",
+      "name": "Start (Demo)",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "k1",
+              "name": "kundeId",
+              "value": "K-1001",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b4f5311d-82bb-4be2-9cee-8b5dd4773770",
+      "name": "Kunde festlegen",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -16,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "n77KEUdHbxU3oAJg",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/n77KEUdHbxU3oAJg",
+          "cachedResultName": "W3T1 - SUB - Kundendaten anreichern"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "kundeId": "={{ $json.kundeId }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "kundeId",
+              "displayName": "kundeId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "231c8ed0-1f7c-4f0c-bad1-b626b758ce45",
+      "name": "SUB - Kundendaten anreichern",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        224,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e1",
+              "name": "verarbeitet",
+              "value": true,
+              "type": "boolean"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "946edc98-b5b4-44fc-b3b8-cd0a0d5cd5a9",
+      "name": "Ergebnis verwenden",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        464,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Pattern 4 — Sub-Workflow\nKomplexitaet auslagern: Der Haupt-Workflow ruft den Sub \"Kundendaten anreichern\" auf — wie eine Funktion.\n\n**Vorteile:** Wiederverwendbarkeit, Wartbarkeit (Aenderung an einer Stelle), schlanker Haupt-Workflow. **Wann:** dieselbe Logik in mehreren Workflows, oder ein Workflow wird zu gross.",
+        "height": 190,
+        "width": 560,
+        "color": 4
+      },
+      "id": "5f931e46-efc7-4d92-979c-e1ef7d4d2fc4",
+      "name": "Info Pattern 4",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -272,
+        -224
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Manueller Start der Demo.",
+        "height": 110,
+        "width": 190
+      },
+      "id": "bb7b21d9-4a19-4d3f-881e-f766ddf81f8a",
+      "name": "n-trigger",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Legt die kundeId fest — der Input, den der Sub erwartet.",
+        "height": 110,
+        "width": 190
+      },
+      "id": "ae119835-874a-4207-b038-e708ab838614",
+      "name": "n-kid",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -16,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Ruft den Sub-Workflow auf (wie eine Funktion) und uebergibt kundeId. Bekommt angereicherte Daten zurueck.",
+        "height": 130,
+        "width": 200
+      },
+      "id": "f94f21e2-b875-47bf-9132-95f46bb13cc1",
+      "name": "n-sub",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        224,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Verwendet das Ergebnis aus dem Sub weiter.",
+        "height": 110,
+        "width": 190
+      },
+      "id": "a5959ef3-32fa-4430-8a7a-b80ff1252ade",
+      "name": "n-erg",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        464,
+        144
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Start (Demo)": {
+      "main": [
+        [
+          {
+            "node": "Kunde festlegen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kunde festlegen": {
+      "main": [
+        [
+          {
+            "node": "SUB - Kundendaten anreichern",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SUB - Kundendaten anreichern": {
+      "main": [
+        [
+          {
+            "node": "Ergebnis verwenden",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "508eecd0-5570-4340-95de-aca15b2fb788",
+  "meta": {
+    "instanceId": "f032027e20e9709391bcafe9291ae76dc2a07ff2b593bca6936b7404ddb31c33"
+  },
+  "id": "yAiYFXh4sucxgZci",
+  "tags": []
+}
