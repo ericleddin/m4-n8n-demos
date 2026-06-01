@@ -1,0 +1,252 @@
+{
+  "name": "W3T2 - C - PII-Anonymisierung",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "6984d27a-709d-4c61-8145-06e6f36d4a2e",
+      "name": "Beschwerde eingegangen",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -272,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "p1",
+              "name": "name",
+              "value": "Maria Schmidt",
+              "type": "string"
+            },
+            {
+              "id": "p2",
+              "name": "email",
+              "value": "maria.schmidt@example.com",
+              "type": "string"
+            },
+            {
+              "id": "p3",
+              "name": "text",
+              "value": "Hallo, ich bin Maria Schmidt (maria.schmidt@example.com). Mein Paket kam kaputt an und ich moechte eine Erstattung.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "79fc391f-17e4-45ca-9bef-0eb3875011c1",
+      "name": "Kundenbeschwerde (mit PII)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -48,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "let t = $json.text || '';\nt = t.replace(/[\\w.+-]+@[\\w-]+\\.[\\w.-]+/g, '[EMAIL]');\nconst name = $json.name || '';\nif (name) { t = t.split(name).join('[NAME]'); }\nreturn { json: { anonymizedText: t } };"
+      },
+      "id": "896dc61c-2fc0-470d-ad5b-ce296f5deb5d",
+      "name": "PII anonymisieren",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        176,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.anonymizedText }}",
+        "options": {
+          "systemMessage": "Fasse die folgende Kundenbeschwerde in einem Satz sachlich zusammen."
+        }
+      },
+      "id": "7657d69f-9f44-46fe-83d7-f6d94e174f50",
+      "name": "Beschwerde zusammenfassen",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        416,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-4o-mini",
+        "options": {}
+      },
+      "id": "6a4e0630-3703-469c-a7b9-3bd8f59bc60a",
+      "name": "OpenRouter Modell",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        336,
+        352
+      ],
+      "credentials": {
+        "openRouterApi": {
+          "id": "iNwU2uwlDz4l7tnF",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## DSGVO: PII-Anonymisierung vor dem LLM\nDrei Pruefschritte: Was sind die Daten? Wo werden sie verarbeitet? Ist es verhaeltnismaessig?\n\n**Hier:** Eine Kundenbeschwerde wird VOR dem LLM-Aufruf anonymisiert — Name und E-Mail werden maskiert. Das LLM bekommt nur den anonymisierten Text. Frage: Braucht das LLM ueberhaupt Name + E-Mail? Nein.",
+        "height": 150,
+        "width": 760,
+        "color": 4
+      },
+      "id": "77d52e94-eb74-41ba-956b-324822a033e5",
+      "name": "Info PII",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -304,
+        -304
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Start: eine Beschwerde kommt rein.",
+        "height": 100,
+        "width": 190
+      },
+      "id": "c2062e89-ecac-4cff-bd41-f939fb138a62",
+      "name": "n-t",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -272,
+        -16
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Rohdaten mit PII: Name, E-Mail, Freitext.",
+        "height": 110,
+        "width": 190
+      },
+      "id": "bc61d30b-6647-4958-99bb-262c152a0d25",
+      "name": "n-set",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -48,
+        -16
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Maskiert E-Mail (Regex) und Name → gibt NUR anonymizedText weiter (Datenminimierung).",
+        "height": 130,
+        "width": 200
+      },
+      "id": "a273a7a0-c5b9-4c05-a7e6-d630d8349dbc",
+      "name": "n-anon",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        176,
+        -16
+      ]
+    },
+    {
+      "parameters": {
+        "content": "LLM fasst zusammen — sieht nur den anonymisierten Text, keine PII.",
+        "height": 120,
+        "width": 200
+      },
+      "id": "f5662603-8a7d-4e32-aacc-7cbe8194be8c",
+      "name": "n-agent",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        416,
+        -32
+      ]
+    },
+    {
+      "parameters": {
+        "content": "OpenRouter-Modell (gpt-4o-mini).",
+        "height": 90,
+        "width": 200
+      },
+      "id": "7b04a07b-e85a-467d-855f-5b1c5e833f8c",
+      "name": "n-model",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        320,
+        464
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Beschwerde eingegangen": {
+      "main": [
+        [
+          {
+            "node": "Kundenbeschwerde (mit PII)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kundenbeschwerde (mit PII)": {
+      "main": [
+        [
+          {
+            "node": "PII anonymisieren",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PII anonymisieren": {
+      "main": [
+        [
+          {
+            "node": "Beschwerde zusammenfassen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Modell": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Beschwerde zusammenfassen",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "260b4745-3450-467a-99ab-3246f00d3a43",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f032027e20e9709391bcafe9291ae76dc2a07ff2b593bca6936b7404ddb31c33"
+  },
+  "id": "xK2ERK1wPoUVIW6N",
+  "tags": []
+}
