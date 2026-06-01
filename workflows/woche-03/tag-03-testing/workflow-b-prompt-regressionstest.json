@@ -1,0 +1,355 @@
+{
+  "name": "W3T3 - B - Prompt-Regressionstest",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "90b2d1df-ffa6-47e5-9ab6-aaa20389d498",
+      "name": "Regressionstest starten",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -272,
+        64
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  { json: { nr: 1, frage: 'Was ist ein Webhook?', erwartet: 'Automatische HTTP-Benachrichtigung bei einem Ereignis; der Begriff Webhook bleibt englisch.' } },\n  { json: { nr: 2, frage: 'Wofuer steht die Abkuerzung API?', erwartet: 'Application Programming Interface - Schnittstelle zwischen Programmen.' } },\n  { json: { nr: 3, frage: 'Was bedeutet HTTP-Status 404?', erwartet: 'Die angeforderte Ressource wurde nicht gefunden.' } },\n  { json: { nr: 4, frage: 'Unterschied zwischen GET und POST?', erwartet: 'GET liest Daten, POST sendet bzw. erstellt Daten.' } },\n  { json: { nr: 5, frage: 'Was ist ein Rate Limit?', erwartet: 'Begrenzung der Anzahl erlaubter Anfragen pro Zeitraum.' } }\n];"
+      },
+      "id": "54c8911b-6304-496c-9f55-1909b15145b6",
+      "name": "Referenz-Set Baseline",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -48,
+        64
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.frage }}",
+        "options": {
+          "systemMessage": "Du bist ein hilfreicher technischer Support-Assistent. Antworte praezise in 1-2 Saetzen."
+        }
+      },
+      "id": "23db3997-2830-43c4-95d3-a176fd29f40d",
+      "name": "Antwort generieren",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        176,
+        64
+      ]
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-4o-mini",
+        "options": {}
+      },
+      "id": "17e89374-24bb-4ba1-af14-66771621cde9",
+      "name": "Modell (Antwort)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        256,
+        288
+      ],
+      "credentials": {
+        "openRouterApi": {
+          "id": "iNwU2uwlDz4l7tnF",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Frage: {{ $('Referenz-Set Baseline').item.json.frage }}\nErwartete Kernaussage: {{ $('Referenz-Set Baseline').item.json.erwartet }}\nTatsaechliche Antwort: {{ $json.output }}",
+        "options": {
+          "systemMessage": "Du pruefst, ob die tatsaechliche Antwort die erwartete Kernaussage inhaltlich erfuellt (Formulierung ist egal). Antworte in EINER Zeile, beginnend mit PASS oder FAIL, dann \" - \" und eine kurze Begruendung."
+        }
+      },
+      "id": "af7e1ff3-f947-42f7-94fa-930ff7d32b76",
+      "name": "Judge PASS oder FAIL",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        528,
+        64
+      ]
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-4o-mini",
+        "options": {}
+      },
+      "id": "bd6819a6-cc1e-49a0-be0e-1277a7f55c4b",
+      "name": "Modell (Judge)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        608,
+        288
+      ],
+      "credentials": {
+        "openRouterApi": {
+          "id": "iNwU2uwlDz4l7tnF",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "r1",
+              "name": "nr",
+              "value": "={{ $('Referenz-Set Baseline').item.json.nr }}",
+              "type": "number"
+            },
+            {
+              "id": "r2",
+              "name": "frage",
+              "value": "={{ $('Referenz-Set Baseline').item.json.frage }}",
+              "type": "string"
+            },
+            {
+              "id": "r3",
+              "name": "antwort",
+              "value": "={{ $('Antwort generieren').item.json.output }}",
+              "type": "string"
+            },
+            {
+              "id": "r4",
+              "name": "urteil",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "27ec59f7-fcaf-48d4-89c0-c0721a7b5aff",
+      "name": "Ergebnis-Zeile",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        880,
+        64
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst pass = items.filter(i => String(i.json.urteil || '').toUpperCase().startsWith('PASS')).length;\nreturn [{ json: { gesamt: items.length, bestanden: pass, durchgefallen: items.length - pass } }];"
+      },
+      "id": "a92dba0d-e8fc-496a-a5f8-57cd81a922c2",
+      "name": "Auswertung",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1104,
+        64
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Prompt-Regressionstest (LLM-as-Judge)\nBaseline: 5 Fragen mit erwarteter Kernaussage. Der Prompt-unter-Test beantwortet jede Frage, ein zweites LLM (Judge) bewertet PASS/FAIL gegen die Baseline.\n\n**Live-Demo:** im Node \"Antwort generieren\" den System-Prompt aendern (z.B. \"Antworte nur auf Deutsch und uebersetze ALLE Fachbegriffe\") → erneut laufen lassen → Frage 1 (Webhook) kippt meist auf FAIL.\n\n**Ehrlich:** Der Judge ist selbst ein LLM und nicht 100% deterministisch — auch dein Test ist probabilistisch. Fuer harte Faelle deterministische Checks ergaenzen.",
+        "height": 190,
+        "width": 780,
+        "color": 4
+      },
+      "id": "1c8e0dca-ab3a-468d-b1f4-5580c2e59d48",
+      "name": "Info Regression",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -304,
+        -320
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Startet den Regressionstest.",
+        "height": 100,
+        "width": 190
+      },
+      "id": "f6510f35-716b-4844-ac99-e39672496147",
+      "name": "n-t",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -304,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Baseline: 5 Fragen + erwartete Kernaussage. Das ist die Referenz.",
+        "height": 120,
+        "width": 190
+      },
+      "id": "7f67aa0a-516b-4afc-9f96-d5704141c945",
+      "name": "n-ref",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -64,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Prompt UNTER TEST: beantwortet jede Frage. Hier den System-Prompt fuer die Live-Demo aendern.",
+        "height": 130,
+        "width": 190
+      },
+      "id": "7cf2db23-98e3-460c-92e2-8a4ad043a37b",
+      "name": "n-ans",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        144,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Judge-LLM: vergleicht Antwort mit erwarteter Kernaussage → PASS oder FAIL.",
+        "height": 130,
+        "width": 190
+      },
+      "id": "19d3a742-471b-476c-b8e7-23fcd59e941f",
+      "name": "n-judge",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        528,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Baut die Ergebnis-Zeile: Frage, Antwort, Urteil.",
+        "height": 110,
+        "width": 190
+      },
+      "id": "b4388fd1-d9c7-4fe9-9ed7-8637ae72d94f",
+      "name": "n-erg",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        832,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Zaehlt bestanden / durchgefallen.",
+        "height": 100,
+        "width": 190
+      },
+      "id": "1a787db3-2d62-4f51-b067-c725a47aa4c0",
+      "name": "n-aus",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1088,
+        -80
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Regressionstest starten": {
+      "main": [
+        [
+          {
+            "node": "Referenz-Set Baseline",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Referenz-Set Baseline": {
+      "main": [
+        [
+          {
+            "node": "Antwort generieren",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Antwort generieren": {
+      "main": [
+        [
+          {
+            "node": "Judge PASS oder FAIL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Modell (Antwort)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Antwort generieren",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Judge PASS oder FAIL": {
+      "main": [
+        [
+          {
+            "node": "Ergebnis-Zeile",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Modell (Judge)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Judge PASS oder FAIL",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ergebnis-Zeile": {
+      "main": [
+        [
+          {
+            "node": "Auswertung",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "6fefc7f9-aaa5-4581-a650-16006d012aba",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f032027e20e9709391bcafe9291ae76dc2a07ff2b593bca6936b7404ddb31c33"
+  },
+  "id": "U6VvEhn5Eg2uwtPY",
+  "tags": []
+}
