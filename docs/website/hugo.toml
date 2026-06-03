@@ -1,0 +1,54 @@
+baseURL = "/"
+title = "M4 – KI Experte: Workflows & Agenten"
+theme = "hugo-theme-relearn"
+defaultContentLanguage = "de"
+
+[params]
+  themeVariant = "relearn-dark"
+  disableBreadcrumb = false
+  disableAssetsBusting = false
+  mermaidInitialize = '{ "theme": "dark" }'
+
+[params.search]
+  disable = false
+
+[markup]
+  [markup.goldmark.renderer]
+    unsafe = true
+  [markup.highlight]
+    style = "monokai"
+    lineNos = false
+
+[outputs]
+  home = ["HTML", "RSS"]
+  section = ["HTML", "RSS", "PRINT"]
+  page = ["HTML", "RSS", "PRINT"]
+
+[module]
+  [[module.mounts]]
+    source = "content"
+    target = "content"
+  [[module.mounts]]
+    source = "../llm_learning"
+    target = "content/llm_learning"
+  [[module.mounts]]
+    source = "../n8n_learning"
+    target = "content/n8n_learning"
+  [[module.mounts]]
+    source = "layouts"
+    target = "layouts"
+  [[module.mounts]]
+    source = "static"
+    target = "static"
+  [[module.mounts]]
+    source = "assets"
+    target = "assets"
+  [[module.mounts]]
+    source = "archetypes"
+    target = "archetypes"
+  [[module.mounts]]
+    source = "i18n"
+    target = "i18n"
+  [[module.mounts]]
+    source = "data"
+    target = "data"

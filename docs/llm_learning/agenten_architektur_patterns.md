@@ -1,3 +1,8 @@
+---
+title: "Agenten-Architektur Patterns"
+weight: 110
+---
+
 # Agenten-Architektur: Best-Practice-Patterns
 
 Dieses Dokument beschreibt, wann ein Agent die richtige Wahl ist, wie man ihn sinnvoll aufbaut und welche Patterns sich in der Praxis bewährt haben — inklusive der typischen Fallen.

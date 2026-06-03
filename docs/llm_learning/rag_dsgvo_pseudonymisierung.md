@@ -1,3 +1,8 @@
+---
+title: "DSGVO-konformes RAG"
+weight: 100
+---
+
 # Architektur-Blueprint: DSGVO-konformes RAG mittels Pseudonymisierung (Maskierung)
 
 Dieses Dokument beschreibt den technischen Ansatz, wie personenbezogene Daten (PII) vor der Verarbeitung durch Online-Embedding-Modelle und Vektordatenbanken geschützt werden, ohne die semantische Mustersuche zu zerstören.

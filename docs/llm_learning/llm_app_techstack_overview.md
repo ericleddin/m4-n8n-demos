@@ -1,3 +1,8 @@
+---
+title: "Tech-Stack Konzepte"
+weight: 60
+---
+
 # LLM-App Konzepte & Entscheidungshilfen
 
 > Dieses Dokument erklärt das **Warum** hinter den Stack-Entscheidungen.

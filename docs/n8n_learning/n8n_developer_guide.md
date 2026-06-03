@@ -1,3 +1,8 @@
+---
+title: "n8n für Entwickler"
+weight: 50
+---
+
 # n8n für Entwickler – Praktischer Einstieg in Code, AI & Custom Logic
 
 Dieser Guide richtet sich an Entwickler, die n8n als Orchestrierungs-Layer einsetzen wollen und wissen müssen: **Was kann ich im Code-Node tun, was ist der schnellste Weg zu AI-Workflows, und wann verlasse ich n8n besser nach außen in einen TS-Service?** Alle Diagramme folgen dem gemeinsamen Farbschema des Kompendiums.

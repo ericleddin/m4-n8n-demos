@@ -1,3 +1,8 @@
+---
+title: "Übersicht LLM Learning"
+weight: 1
+---
+
 # LLM Learning Documentation
 
 Community-Beiträge mit ergänzender Konzept-Dokumentation rund um LLM-Entwicklung, Observability und KI-Infrastruktur. Die Dateien hier sind keine Code-Demos, sondern vertiefende Erklärungen — zur Orientierung, zum Nachschlagen oder als Ergänzung zum Live-Unterricht.

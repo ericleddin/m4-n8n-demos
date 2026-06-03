@@ -1,3 +1,8 @@
+---
+title: "KI-Infrastruktur & Scaling"
+weight: 120
+---
+
 # KI-Infrastruktur & Agenten-Systeme — Strategische Übersicht
 
 > Kernaspekte für den professionellen Einsatz von LLMs und KI-Agenten:

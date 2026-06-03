@@ -1,3 +1,8 @@
+---
+title: "Übersicht n8n Learning"
+weight: 1
+---
+
 # n8n Learning Documentation
 
 Community-Beiträge mit ergänzender Konzept-Dokumentation zum M4-Curriculum. Die Dateien hier sind keine Workflow-Demos, sondern vertiefende Erklärungen — zur Vorbereitung, zum Nachschlagen oder als Ergänzung zum Live-Unterricht.

@@ -27,3 +27,12 @@ Thumbs.db
 .vscode/
 .idea/
 *.swp
+
+docs/.claude/
+
+# === Hugo build output & lokale Abhängigkeiten ===
+docs/website/public/
+docs/website/resources/
+docs/website/.hugo_build.lock
+docs/website/hugo_http.log
+docs/website/themes/

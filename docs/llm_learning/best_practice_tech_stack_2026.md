@@ -1,3 +1,8 @@
+---
+title: "Best-Practice Tech Stack 2026"
+weight: 50
+---
+
 # Best-Practice Tech Stack 2026 — Development, Betrieb & LLM
 
 > **Philosophie deines Dozenten:** *"Nimm den Cloud-Dienst"* ist fast immer richtig

@@ -1,3 +1,8 @@
+---
+title: "Observability & Monitoring"
+weight: 80
+---
+
 # Observability & Monitoring — Von klein/on-premise bis groß/Cloud
 
 > Observability beantwortet die Frage: **"Was passiert gerade in meinem System?"**
