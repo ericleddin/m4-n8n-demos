@@ -1,0 +1,109 @@
+{
+  "name": "W3T1 - SUB - Kundendaten anreichern",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "kundeId"
+            }
+          ]
+        }
+      },
+      "id": "2451961b-dc44-4a52-bf0e-fc1d464a885d",
+      "name": "Aufruf von Haupt-Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -224,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "return { json: { kundeId: $json.kundeId, firma: 'Firma zu ' + $json.kundeId, umsatz: 12345, region: 'DACH', angereichert: true } };"
+      },
+      "id": "e624fa27-8765-433a-bad4-e8b4b6d0681e",
+      "name": "Kundendaten anreichern",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        16,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## SUB — Kundendaten anreichern\nEigenstaendiger Workflow, der von anderen aufgerufen wird — wie eine **Funktion**: einmal bauen, mehrfach verwenden.\n\nInput: kundeId → angereicherte Kundendaten zurueck. Wird von Pattern 4 und vom Refactoring-Beispiel (Monolith zu modular) aufgerufen, nicht eigenstaendig nutzbar.",
+        "height": 190,
+        "width": 520,
+        "color": 4
+      },
+      "id": "aa8d7324-ccc0-49d8-9ca2-27e2b72fee0c",
+      "name": "Info Sub",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -256,
+        -304
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Einstiegspunkt: wird vom Haupt-Workflow aufgerufen und erhaelt die kundeId.",
+        "height": 120,
+        "width": 190
+      },
+      "id": "fef13fed-c5c5-4ac0-952c-bb760ec5ffc0",
+      "name": "n-trigger",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -224,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Reichert die Kundendaten an (Firma, Umsatz, Region) und gibt sie an den Aufrufer zurueck.",
+        "height": 120,
+        "width": 200
+      },
+      "id": "7db5e979-28af-42c8-9254-5c44aa5c08dd",
+      "name": "n-enrich",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        16,
+        -48
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Aufruf von Haupt-Workflow": {
+      "main": [
+        [
+          {
+            "node": "Kundendaten anreichern",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "3b0d9439-0233-46a6-bcf3-83c2ebb6a64f",
+  "meta": {
+    "instanceId": "f032027e20e9709391bcafe9291ae76dc2a07ff2b593bca6936b7404ddb31c33"
+  },
+  "id": "n77KEUdHbxU3oAJg",
+  "tags": []
+}

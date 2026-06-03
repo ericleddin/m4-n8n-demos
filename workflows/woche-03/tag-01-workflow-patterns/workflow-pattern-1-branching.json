@@ -1,0 +1,502 @@
+{
+  "name": "W3T1 - Pattern 1 - Branching",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "aad7ea0a-5fca-4c7a-8c27-47b7732ab696",
+      "name": "E-Mail-Eingang (Demo)",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -96,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "von",
+              "value": "kunde@example.com",
+              "type": "string"
+            },
+            {
+              "id": "a2",
+              "name": "betreff",
+              "value": "Hallo",
+              "type": "string"
+            },
+            {
+              "id": "a3",
+              "name": "emailText",
+              "value": "Wie ist das wetter heute?",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "61b44f03-ce2f-4f5a-89c2-73348f008c24",
+      "name": "Beispiel-E-Mail",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        128,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Betreff: {{ $json.betreff }}\nText: {{ $json.emailText }}",
+        "options": {
+          "systemMessage": "Du bist ein E-Mail-Klassifikator fuer ein Support-Postfach. Ordne die E-Mail genau einer Kategorie zu: Beschwerde, Anfrage oder Spam. Antworte mit GENAU einem Wort (nur die Kategorie), ohne Satzzeichen und ohne Erklaerung."
+        }
+      },
+      "id": "cb1c3c0f-a702-48a8-a65a-70ea445e09d2",
+      "name": "E-Mail klassifizieren",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        368,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-4o-mini",
+        "options": {}
+      },
+      "id": "af942c10-c7a7-4297-b186-1eafdc6fe80f",
+      "name": "OpenRouter Modell",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        288,
+        720
+      ],
+      "credentials": {
+        "openRouterApi": {
+          "id": "iNwU2uwlDz4l7tnF",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    },
+                    "rightValue": "Beschwerde",
+                    "id": "205db0be-4811-469e-8e4b-54c7377e9533"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    },
+                    "rightValue": "Anfrage",
+                    "id": "3c493c4b-595c-4dac-ad91-07163c19e869"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    },
+                    "rightValue": "Spam",
+                    "id": "73400210-8d1a-4986-9e9c-81ab6fb3beba"
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "id": "5a93333f-0083-4df7-a9db-68c9e9c37b2f",
+      "name": "Nach Kategorie routen",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        624,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b1",
+              "name": "aktion",
+              "value": "Ticket erstellt",
+              "type": "string"
+            },
+            {
+              "id": "b2",
+              "name": "prioritaet",
+              "value": "hoch",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "9b2cada8-cd40-4f8b-a40d-609f934f6067",
+      "name": "Ticket Prio HOCH (Mock)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        912,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c1",
+              "name": "aktion",
+              "value": "Automatische Antwort generiert",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "6aa4d0e6-d6f9-4e2e-ac70-0871cf8c3305",
+      "name": "Auto-Antwort aus RAG (Mock)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        912,
+        448
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d1",
+              "name": "aktion",
+              "value": "Als Spam geloggt",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "67c40864-958c-4180-96d8-f7a341254c4a",
+      "name": "Loggen & ignorieren (Mock)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        912,
+        752
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e1",
+              "name": "aktion",
+              "value": "Keine Kategorie erkannt - manuell pruefen",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "2b6e1b94-09ce-4c1a-bc68-059e2b5002a6",
+      "name": "Manuell pruefen (Default)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        912,
+        1040
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Pattern 1 — Branching (Switch + Default)\nLLM klassifiziert die E-Mail, der Switch routet je nach Kategorie auf einen eigenen Weg.\n\n**Folien-Tipp:** Immer einen Default-Zweig definieren (hier: \"Manuell pruefen\"). Folie sagt \"If/Else\" = Binaerfall; bei 3+ Wegen nimmt man Switch.",
+        "height": 150,
+        "width": 700,
+        "color": 4
+      },
+      "id": "0af3c0df-fcb2-4783-a857-31e27ddc7c12",
+      "name": "Info Branching",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -128,
+        32
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Manueller Start der Demo (Klick auf \"Test workflow\").",
+        "height": 110,
+        "width": 190
+      },
+      "id": "0ae7c6cb-37cd-48e2-a487-91bb4336131c",
+      "name": "n-trigger",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -96,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Beispiel-E-Mail: Betreff + Text als Eingabe. Hier Text aendern, um andere Kategorien zu testen.",
+        "height": 110,
+        "width": 190
+      },
+      "id": "a7dd4187-2ebe-432a-9ec0-7fda73ad5d2c",
+      "name": "n-set",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        128,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "content": "LLM klassifiziert die Mail in EIN Wort: Beschwerde / Anfrage / Spam.",
+        "height": 120,
+        "width": 190
+      },
+      "id": "01a001bb-a06b-410d-8185-564ef9b61d93",
+      "name": "n-agent",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        368,
+        336
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Switch verzweigt nach Kategorie. Output 4 = Fallback (Default).",
+        "height": 120,
+        "width": 190
+      },
+      "id": "827b417a-9deb-4e56-8839-578f944501b7",
+      "name": "n-switch",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        624,
+        336
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Beschwerde → Ticket mit Prioritaet \"hoch\" erstellen.",
+        "height": 110,
+        "width": 200
+      },
+      "id": "bd732365-50d0-44b2-992a-49c926f7c13b",
+      "name": "n-b1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        912,
+        32
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Anfrage → automatische Antwort aus RAG generieren.",
+        "height": 100,
+        "width": 200
+      },
+      "id": "d9382d46-a751-41a3-a284-49c35d1d3a24",
+      "name": "n-b2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        912,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Spam → loggen und ignorieren.",
+        "height": 100,
+        "width": 200
+      },
+      "id": "1093f54e-7fe9-4ba8-a1fc-afc5e256ab34",
+      "name": "n-b3",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        912,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Default → keine Kategorie erkannt, manuell pruefen.",
+        "height": 100,
+        "width": 200
+      },
+      "id": "0d59c906-797a-46cf-8793-123c8d385314",
+      "name": "n-b4",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        912,
+        928
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "E-Mail-Eingang (Demo)": {
+      "main": [
+        [
+          {
+            "node": "Beispiel-E-Mail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Beispiel-E-Mail": {
+      "main": [
+        [
+          {
+            "node": "E-Mail klassifizieren",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "E-Mail klassifizieren": {
+      "main": [
+        [
+          {
+            "node": "Nach Kategorie routen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Modell": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "E-Mail klassifizieren",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Nach Kategorie routen": {
+      "main": [
+        [
+          {
+            "node": "Ticket Prio HOCH (Mock)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Auto-Antwort aus RAG (Mock)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loggen & ignorieren (Mock)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Manuell pruefen (Default)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "edca2f07-0400-4c89-a210-4b5ea913787d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f032027e20e9709391bcafe9291ae76dc2a07ff2b593bca6936b7404ddb31c33"
+  },
+  "id": "bZxDnTSaVnfI7tKQ",
+  "tags": []
+}

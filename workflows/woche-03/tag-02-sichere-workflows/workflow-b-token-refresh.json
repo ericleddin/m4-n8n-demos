@@ -1,0 +1,320 @@
+{
+  "name": "W3T2 - B - Token-Refresh",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "1eed6608-a365-4655-bd8e-4799abe096c4",
+      "name": "API-Anfrage starten",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        128,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "s1",
+              "name": "statusCode",
+              "value": 401,
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "05c62f4c-60bd-4a33-a7fe-07fb771850e8",
+      "name": "API-Antwort simulieren (401)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        352,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.statusCode }}",
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              },
+              "rightValue": 401
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "80ef3155-639c-4dd9-b91b-909cfa413c8b",
+      "name": "Token abgelaufen? (401)",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        576,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "t1",
+              "name": "neuerAccessToken",
+              "value": "tok_neu_abc123",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "e354c38a-75ad-489c-bf0d-9102da9f0b07",
+      "name": "Token erneuern (Mock)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        816,
+        -16
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "r1",
+              "name": "statusCode",
+              "value": 200,
+              "type": "number"
+            },
+            {
+              "id": "r2",
+              "name": "ergebnis",
+              "value": "Erfolgreich nach Refresh",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "d9e93a2c-b6bd-409e-9ad8-e5970833ca9f",
+      "name": "Urspruenglichen Call wiederholen",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1040,
+        -16
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "v1",
+              "name": "ergebnis",
+              "value": "Antwort direkt verarbeitet",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "6ffa9346-3b36-43cf-8f8c-503b3f52544e",
+      "name": "Antwort verarbeiten (200)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        816,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Token-Refresh-Pattern\nAccess Token ist kurzlebig (30-60 Min). Laeuft er ab → API antwortet **401 Unauthorized**.\n\nAblauf: 401 erkennen → Refresh Token gegen neuen Access Token tauschen → urspruenglichen Call wiederholen.\n\n**Produktionsfehler:** Workflow laeuft Wochen, dann laeuft der Refresh Token ab → alles steht still.",
+        "height": 150,
+        "width": 720,
+        "color": 4
+      },
+      "id": "6da19b26-f216-4740-aada-cedc3b43f95e",
+      "name": "Info Token-Refresh",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        96,
+        -352
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Startet die API-Anfrage.",
+        "height": 100,
+        "width": 190
+      },
+      "id": "9719b536-70b6-40cc-8beb-32fd31e5d571",
+      "name": "n-t",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        128,
+        -32
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Simuliert die API-Antwort — hier statusCode 401 (Token abgelaufen). Auf 200 aendern, um den anderen Pfad zu zeigen.",
+        "height": 130,
+        "width": 190
+      },
+      "id": "9b5dd392-b586-4889-bd27-8fb03a5f41e1",
+      "name": "n-set",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        352,
+        -64
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Prueft: statusCode == 401? Wenn ja → Refresh-Pfad, sonst direkt verarbeiten.",
+        "height": 130,
+        "width": 190
+      },
+      "id": "b985a0ab-c0ff-45bc-8e11-8a7d2e5633b9",
+      "name": "n-if",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        576,
+        -64
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Token erneuern: Refresh Token gegen neuen Access Token tauschen (Mock).",
+        "height": 120,
+        "width": 200
+      },
+      "id": "2120866e-3210-4da1-b69f-227976e7f351",
+      "name": "n-tok",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        816,
+        -160
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Urspruenglichen Call mit neuem Token wiederholen → 200.",
+        "height": 120,
+        "width": 200
+      },
+      "id": "e76e4a9b-92ca-4f53-bbbc-733cf98dc2a3",
+      "name": "n-call",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1024,
+        -160
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Kein 401 → Antwort direkt verarbeiten.",
+        "height": 100,
+        "width": 200
+      },
+      "id": "15aee111-c723-41fc-b502-6aa20c99049d",
+      "name": "n-ver",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        816,
+        400
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "API-Anfrage starten": {
+      "main": [
+        [
+          {
+            "node": "API-Antwort simulieren (401)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "API-Antwort simulieren (401)": {
+      "main": [
+        [
+          {
+            "node": "Token abgelaufen? (401)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Token abgelaufen? (401)": {
+      "main": [
+        [
+          {
+            "node": "Token erneuern (Mock)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Antwort verarbeiten (200)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Token erneuern (Mock)": {
+      "main": [
+        [
+          {
+            "node": "Urspruenglichen Call wiederholen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "76e400fd-a52e-4c70-ad1c-9b4f0e7f6ad6",
+  "meta": {
+    "instanceId": "f032027e20e9709391bcafe9291ae76dc2a07ff2b593bca6936b7404ddb31c33"
+  },
+  "id": "NiqnWEKNbyqR1Anx",
+  "tags": []
+}

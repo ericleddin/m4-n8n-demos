@@ -1,0 +1,367 @@
+{
+  "name": "W3T3 - A - Testdaten Happy/Edge/Fehler",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "aacd3581-e923-43c6-ac53-c4d7a8d3066b",
+      "name": "Testlauf starten",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -256,
+        -112
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const langerText = 'Sehr langer Text. '.repeat(60);\nconst faelle = [\n  { nr: 1, kategorie: 'Happy Path', betreff: 'Rechnung Frage', absender: 'anna@example.com', body: 'Wann kommt meine Rechnung?', erwartet: 'verarbeitet' },\n  { nr: 2, kategorie: 'Happy Path', betreff: 'Lob', absender: 'ben@example.com', body: 'Toller Service, danke!', erwartet: 'verarbeitet' },\n  { nr: 3, kategorie: 'Happy Path', betreff: 'Terminanfrage', absender: 'cara@example.com', body: 'Koennen wir Montag sprechen?', erwartet: 'verarbeitet' },\n  { nr: 4, kategorie: 'Edge Case', betreff: '', absender: 'dora@example.com', body: 'Hallo, kurze Frage.', erwartet: 'verarbeitet, Betreff = (kein Betreff)' },\n  { nr: 5, kategorie: 'Edge Case', betreff: 'Langer Text', absender: 'egon@example.com', body: langerText, erwartet: 'verarbeitet' },\n  { nr: 6, kategorie: 'Edge Case', betreff: 'Fuenf €uro & <html>', absender: 'fia@example.com', body: 'Gruesse ueber Groesse 😀', erwartet: 'verarbeitet' },\n  { nr: 7, kategorie: 'Edge Case', betreff: 'Question', absender: 'geo@example.com', body: 'Hello, where is my order?', erwartet: 'verarbeitet' },\n  { nr: 8, kategorie: 'Fehler', betreff: 'Leer', absender: 'hans@example.com', body: '', erwartet: 'abgefangen (Body leer)' },\n  { nr: 9, kategorie: 'Fehler', betreff: 'Anonym', absender: '', body: 'Wer bin ich?', erwartet: 'abgefangen (Absender fehlt)' },\n  { nr: 10, kategorie: 'Fehler', betreff: '', absender: '', body: '', erwartet: 'abgefangen' }\n];\nreturn faelle.map(f => ({ json: f }));"
+      },
+      "id": "b5557dc4-ab1d-431b-829f-7f5ea4478521",
+      "name": "Testdaten erzeugen (10 Faelle)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -48,
+        -112
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const j = $json;\nconst absenderFehlt = !j.absender || String(j.absender).trim() === '';\nconst bodyLeer = !j.body || String(j.body).trim() === '';\nconst gueltig = !absenderFehlt && !bodyLeer;\nconst betreff = (j.betreff && String(j.betreff).trim() !== '') ? j.betreff : '(kein Betreff)';\nconst bemerkung = gueltig ? 'OK' : (absenderFehlt && bodyLeer ? 'Absender und Body fehlen' : absenderFehlt ? 'Absender fehlt' : 'Body leer');\nreturn { json: Object.assign({}, j, { betreffNormalisiert: betreff, gueltig: gueltig, bemerkung: bemerkung }) };"
+      },
+      "id": "80f4d91f-3407-4288-8d8e-33bf00f2250c",
+      "name": "Validieren",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        176,
+        -112
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.gueltig }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              },
+              "rightValue": true,
+              "id": "46c2639b-29ea-4cc0-8fd0-93be43a6e6dd"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "0047138d-f0a9-4f33-a307-1d3a36c80be1",
+      "name": "Gueltig?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        384,
+        -112
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "p1",
+              "name": "tatsaechlich",
+              "value": "verarbeitet",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "57d240f5-4860-4b2b-8d9a-10db08e70c05",
+      "name": "E-Mail verarbeiten (Mock)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        608,
+        -208
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "9fb1ffeb-2b71-470c-8749-c61d49ba6d69",
+      "name": "Ergebnisse sammeln",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        832,
+        -112
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e1",
+              "name": "tatsaechlich",
+              "value": "abgefangen",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "22521452-e21e-4eee-abd6-bae20e224cd3",
+      "name": "Fehler abfangen & loggen (Mock)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        608,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst verarbeitet = items.filter(i => i.json.gueltig === true).length;\nconst abgefangen = items.length - verarbeitet;\nreturn [{ json: { getestet: items.length, verarbeitet: verarbeitet, abgefangen: abgefangen } }];"
+      },
+      "id": "9b6b80c1-272e-4f9b-9d1b-d43a7b056280",
+      "name": "Zusammenfassung",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1056,
+        -112
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Systematisches Testing — 3 Kategorien\nDerselbe Workflow, 10 Testfaelle: 3x Happy Path, 4x Edge Cases, 3x Fehler.\n\n**Happy Path:** alles korrekt. **Edge Cases:** kein Betreff, langer Text, Sonderzeichen, andere Sprache. **Fehler:** leerer Body, kein Absender.\n\nDie Validierung trennt gueltig (→ verarbeiten) von ungueltig (→ abfangen). So sieht man, welche Faelle der Workflow haelt — und wo Fehlerbehandlung greifen muss.",
+        "height": 170,
+        "width": 760,
+        "color": 4
+      },
+      "id": "eccd02e5-825a-46cf-98fc-39ac7bcf1525",
+      "name": "Info Testing",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        -352
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Startet den Testlauf.",
+        "height": 100,
+        "width": 190
+      },
+      "id": "d1a37c12-f92e-44d8-bb6c-7a6ffd308313",
+      "name": "n-t",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -256,
+        32
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Erzeugt 10 Testfaelle aus allen 3 Kategorien (Happy/Edge/Fehler).",
+        "height": 120,
+        "width": 190
+      },
+      "id": "f4ad1387-fabe-4b20-8105-6317d72904de",
+      "name": "n-gen",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -48,
+        32
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Validierung: Absender + Body vorhanden? Betreff wird normalisiert. Setzt gueltig + Bemerkung.",
+        "height": 130,
+        "width": 190
+      },
+      "id": "07b7c99b-5856-4b95-bce5-a835fb3b0716",
+      "name": "n-val",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        160,
+        32
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Routet gueltige Faelle zur Verarbeitung, ungueltige in den Fehlerpfad.",
+        "height": 130,
+        "width": 190
+      },
+      "id": "c5a44a11-9574-4996-98d6-08ff836e32d8",
+      "name": "n-if",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        384,
+        32
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Happy/Edge: normal verarbeiten.",
+        "height": 100,
+        "width": 200
+      },
+      "id": "27916053-b00a-4661-93c9-dc5384db230c",
+      "name": "n-ver",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        608,
+        -320
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Fehlerfaelle: abgefangen und geloggt statt Crash.",
+        "height": 100,
+        "width": 200
+      },
+      "id": "4bfcbcad-a135-4409-b82b-e428acf464e1",
+      "name": "n-err",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        608,
+        176
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Zaehlt: getestet / verarbeitet / abgefangen.",
+        "height": 100,
+        "width": 190
+      },
+      "id": "a77fa770-d28d-4a80-8643-3f9338203592",
+      "name": "n-sum",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1040,
+        32
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Testlauf starten": {
+      "main": [
+        [
+          {
+            "node": "Testdaten erzeugen (10 Faelle)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Testdaten erzeugen (10 Faelle)": {
+      "main": [
+        [
+          {
+            "node": "Validieren",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validieren": {
+      "main": [
+        [
+          {
+            "node": "Gueltig?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gueltig?": {
+      "main": [
+        [
+          {
+            "node": "E-Mail verarbeiten (Mock)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fehler abfangen & loggen (Mock)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "E-Mail verarbeiten (Mock)": {
+      "main": [
+        [
+          {
+            "node": "Ergebnisse sammeln",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ergebnisse sammeln": {
+      "main": [
+        [
+          {
+            "node": "Zusammenfassung",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fehler abfangen & loggen (Mock)": {
+      "main": [
+        [
+          {
+            "node": "Ergebnisse sammeln",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "803a6d88-fd52-4d14-a0bf-4f7e0d5c9b78",
+  "meta": {
+    "instanceId": "f032027e20e9709391bcafe9291ae76dc2a07ff2b593bca6936b7404ddb31c33"
+  },
+  "id": "QDcsNo1u6VT9J6vs",
+  "tags": []
+}

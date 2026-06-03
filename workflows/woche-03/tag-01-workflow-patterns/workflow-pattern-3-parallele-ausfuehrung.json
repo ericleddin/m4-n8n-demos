@@ -1,0 +1,377 @@
+{
+  "name": "W3T1 - Pattern 3 - Parallele Ausfuehrung",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "1b7d7d27-3c34-49e9-ae54-8ac982a6c49b",
+      "name": "Neuer Kunde (Demo)",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -272,
+        464
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "k1",
+              "name": "name",
+              "value": "Max Mustermann",
+              "type": "string"
+            },
+            {
+              "id": "k2",
+              "name": "email",
+              "value": "max@example.com",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6bcd6630-7961-4779-af97-d3f629819479",
+      "name": "Kundendaten",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -48,
+        464
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"from\": \"onboarding@resend.dev\", \"to\": [\"<<REPLACE_WITH_YOUR_NOTIFICATION_EMAIL>>\"], \"subject\": \"Willkommen, {{ $json.name }}!\", \"html\": \"<p>Hallo {{ $json.name }}, schoen dass du da bist.</p>\" }",
+        "options": {}
+      },
+      "id": "c15dec63-2e33-4e9f-9196-59b11a15ed30",
+      "name": "Willkommens-Mail (Resend)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        208,
+        96
+      ],
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "SEDyCLA4bLWkBmys",
+          "name": "Resend account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "id": "3904e4e5-dde4-4f41-8478-7ade705a817a",
+      "name": "Ergebnisse zusammenfuehren",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        480,
+        464
+      ]
+    },
+    {
+      "parameters": {
+        "tableId": "demo_kunden",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "name",
+              "fieldValue": "={{ $json.name }}"
+            },
+            {
+              "fieldId": "email",
+              "fieldValue": "={{ $json.email }}"
+            }
+          ]
+        }
+      },
+      "id": "5b99e946-549a-42e6-b7ab-43478a49b9e8",
+      "name": "Kunde in Supabase anlegen",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        208,
+        464
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "56pbxWn3sMCHxPJA",
+          "name": "Supabase account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "s1",
+              "name": "aktion",
+              "value": "Sales-Team intern benachrichtigt",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "f2c4f8c5-c40c-41bf-8948-338c7b205741",
+      "name": "Sales-Team benachrichtigen (Mock)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f1",
+              "name": "status",
+              "value": "fertig",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "4d6b3e0c-44c2-4175-a5a7-0f30e171eac1",
+      "name": "Alle 3 Aktionen erledigt",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        688,
+        464
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Pattern 3 — Parallele Ausfuehrung\nEin Input (\"Neuer Kunde\") → drei **unabhaengige** Aktionen: Willkommens-Mail (Resend), Kunde in Supabase anlegen, Sales-Team benachrichtigen.\n\nGleiche Eingabedaten, keine Aktion wartet auf die andere.\n\n**Ehrlich:** n8n fuehrt Branches nicht echt nebenlaeufig aus, sondern unabhaengig-nacheinander. \"Parallel\" meint hier **Unabhaengigkeit**, nicht OS-Parallelitaet.\n\n**Abgrenzung zu Loop:** Loop = derselbe Schritt fuer viele Datensaetze. Parallel = verschiedene Schritte fuer denselben Datensatz.",
+        "height": 300,
+        "width": 620,
+        "color": 4
+      },
+      "id": "a14a6942-0360-4546-90cb-0abd715d1a98",
+      "name": "Info Parallel",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -304,
+        -272
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Manueller Start: ein neuer Kunde wird angelegt.",
+        "height": 110,
+        "width": 190
+      },
+      "id": "d6ee2b84-dd29-420d-8989-86feb8445e7b",
+      "name": "n-trigger",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -272,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Kundendaten (Name, E-Mail) — gemeinsame Eingabe fuer alle drei Branches.",
+        "height": 110,
+        "width": 190
+      },
+      "id": "4c3100e9-d177-49f3-8a6b-05bcb174fe9c",
+      "name": "n-set",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -48,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Branch 1: Willkommens-Mail via Resend (echter API-Call).",
+        "height": 120,
+        "width": 200
+      },
+      "id": "f89226b5-f070-4e7d-ab97-dfe21cd2ae21",
+      "name": "n-mail",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        336,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Branch 2: Kunde in Supabase-Tabelle demo_kunden anlegen (echt).",
+        "height": 100,
+        "width": 200
+      },
+      "id": "960a39a6-4676-460c-8229-53f3175df63b",
+      "name": "n-supa",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        208,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Branch 3: Sales-Team benachrichtigen (Mock, ersetzt Slack).",
+        "height": 100,
+        "width": 200
+      },
+      "id": "2a6a4171-9508-4613-8857-4308e1d7ff2c",
+      "name": "n-sales",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        208,
+        816
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Merge wartet, bis alle drei Branches fertig sind.",
+        "height": 110,
+        "width": 190
+      },
+      "id": "0b3e31da-cbad-484d-a94c-8a6265ba5d01",
+      "name": "n-merge",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        464,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Abschluss: alle drei Aktionen erledigt.",
+        "height": 110,
+        "width": 190
+      },
+      "id": "40509052-60b1-4378-8bb7-da3fedc8e76a",
+      "name": "n-done",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        688,
+        320
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Neuer Kunde (Demo)": {
+      "main": [
+        [
+          {
+            "node": "Kundendaten",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kundendaten": {
+      "main": [
+        [
+          {
+            "node": "Willkommens-Mail (Resend)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Kunde in Supabase anlegen",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Sales-Team benachrichtigen (Mock)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Willkommens-Mail (Resend)": {
+      "main": [
+        [
+          {
+            "node": "Ergebnisse zusammenfuehren",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ergebnisse zusammenfuehren": {
+      "main": [
+        [
+          {
+            "node": "Alle 3 Aktionen erledigt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kunde in Supabase anlegen": {
+      "main": [
+        [
+          {
+            "node": "Ergebnisse zusammenfuehren",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Sales-Team benachrichtigen (Mock)": {
+      "main": [
+        [
+          {
+            "node": "Ergebnisse zusammenfuehren",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "0b899085-612f-439f-a6a0-e47a0a1c3a2d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f032027e20e9709391bcafe9291ae76dc2a07ff2b593bca6936b7404ddb31c33"
+  },
+  "id": "XOcMCyyEwfLzEXwn",
+  "tags": []
+}
