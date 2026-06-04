@@ -1,0 +1,112 @@
+{
+  "name": "W3T4 - C - Fehler-Erzeuger",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## W3T4 - Fehler-Erzeuger\n\nLoest absichtlich einen Fehler aus, um den zentralen Error Workflow zu testen. Der HTTP-Node ruft eine 500er-URL und hat KEIN Error-Handling - der Workflow crasht, der Error Trigger im Error Workflow springt an.\n\nVoraussetzung: Workflow muss AKTIVIERT sein (Schedule Trigger). Manueller Execute loest den Error Workflow NICHT aus.\n\nIn den Settings dieses Workflows den Error Workflow \"W3T4 - Error Workflow (zentral)\" zuweisen.",
+        "height": 140,
+        "width": 520,
+        "color": 3
+      },
+      "id": "04cfc449-4a3a-4a73-af3c-a8a4960b63c2",
+      "name": "Sticky Note a3a1910c",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -368,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Zum Bauen/Testen auf 1 Minute. Vor dem Vortrag auf ein ruhigeres Intervall stellen (z.B. stuendlich), sonst Dauerfeuer an Alert-Mails.",
+        "width": 220
+      },
+      "id": "04e31e0d-c4bb-4d7b-bba2-1ad2223008a9",
+      "name": "Sticky Note ecbe8ec8",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -336,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Ruft https://httpstat.us/500 - gibt immer 500 zurueck. Kein Error-Handling: der Node wirft, der Workflow schlaegt fehl.",
+        "width": 220
+      },
+      "id": "3f87b261-bc92-4a4a-9d31-9c5fe5efb73f",
+      "name": "Sticky Note 5e492397",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -96,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 1
+            }
+          ]
+        }
+      },
+      "id": "409db165-db80-4020-bc48-c7771c30a400",
+      "name": "Alle 1 Minute",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -336,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://httpstat.us/500",
+        "options": {}
+      },
+      "id": "bf20f098-66b1-46cb-9878-921c3b301356",
+      "name": "HTTP Request (500)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -96,
+        96
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Alle 1 Minute": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request (500)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "gKrLAYlTD36OL8fM",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "85441bfc-6a58-4f7c-adab-000f1a83407c",
+  "meta": {
+    "instanceId": "f032027e20e9709391bcafe9291ae76dc2a07ff2b593bca6936b7404ddb31c33"
+  },
+  "id": "wNLlwcfy6XDQR9yd",
+  "tags": []
+}

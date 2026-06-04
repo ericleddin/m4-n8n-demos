@@ -1,0 +1,183 @@
+{
+  "name": "W3T4 - C - Error Workflow (zentral)",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## W3T4 - Error Workflow (zentral)\n\nZentraler Alert fuer alle Workflows: Bei einem Fehler in einem zugewiesenen Workflow springt der Error Trigger an, baut den Fehler-Kontext und schickt eine Alert-Mail.\n\nZuweisen: In den Settings des zu ueberwachenden Workflows unter \"Error Workflow\" diesen Workflow auswaehlen. Einmal gebaut, beliebig vielen Workflows zuweisbar.\n\nWichtig: Error Trigger feuert nur bei aktivierten (automatischen) Workflows, nicht bei manuellem Execute.",
+        "height": 140,
+        "width": 720,
+        "color": 3
+      },
+      "id": "05339526-a2c5-456f-b6f6-9b456973d844",
+      "name": "Sticky Note c8eaa069",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Faengt Fehler aus allen zugewiesenen Workflows. Liefert Kontext automatisch mit: Workflow-Name, Fehlermeldung, Node, Link zum Lauf.",
+        "width": 220
+      },
+      "id": "dd9698af-9f51-42b1-b5a5-ffe6382de717",
+      "name": "Sticky Note d8a695b2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        32,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Baut Betreff und HTML-Body als fertige Strings. Keypair-Body danach escapt jedes Feld einzeln - Newlines in der Fehlermeldung brechen das JSON nicht.",
+        "width": 220
+      },
+      "id": "40d02dad-db99-4a89-aee8-f485666fb73c",
+      "name": "Sticky Note a1438cb4",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        272,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Schickt die Alert-Mail via Resend (Bearer). Test-Modus: an <<REPLACE_WITH_YOUR_NOTIFICATION_EMAIL>> von onboarding@resend.dev.",
+        "width": 220
+      },
+      "id": "0cda624a-2ba3-44de-a1af-1549e0e82992",
+      "name": "Sticky Note 65b0bae0",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        512,
+        320
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "c23affc9-387e-408c-8d25-4691d3faa265",
+      "name": "Error Trigger",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        32,
+        176
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "subject",
+              "name": "subject",
+              "value": "=Workflow-Fehler: {{ $json.workflow.name }}",
+              "type": "string"
+            },
+            {
+              "id": "htmlBody",
+              "name": "htmlBody",
+              "value": "=<h2>Ein Workflow ist fehlgeschlagen</h2><p><strong>Workflow:</strong> {{ $json.workflow.name }}</p><p><strong>Fehler:</strong> {{ $json.execution.error.message }}</p><p><strong>Node:</strong> {{ $json.execution.lastNodeExecuted }}</p><p><strong>Zeitstempel:</strong> {{ $now.toFormat(\"dd.MM.yyyy HH:mm:ss\") }}</p><p><a href=\"{{ $json.execution.url }}\">Zum fehlgeschlagenen Lauf</a></p>",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "22796401-23b7-4c36-8fef-60adbbaa8353",
+      "name": "Alert-Inhalt bauen",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        272,
+        176
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "from",
+              "value": "onboarding@resend.dev"
+            },
+            {
+              "name": "to",
+              "value": "<<REPLACE_WITH_YOUR_NOTIFICATION_EMAIL>>"
+            },
+            {
+              "name": "subject",
+              "value": "={{ $json.subject }}"
+            },
+            {
+              "name": "html",
+              "value": "={{ $json.htmlBody }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "8ea70a71-a5c4-49df-9e32-cdd5948eb365",
+      "name": "Alert-Mail (Resend)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        512,
+        176
+      ],
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "SEDyCLA4bLWkBmys",
+          "name": "Resend - Eric"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Alert-Inhalt bauen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alert-Inhalt bauen": {
+      "main": [
+        [
+          {
+            "node": "Alert-Mail (Resend)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "5c87440a-d807-4008-8c37-b3cfaf5c65d3",
+  "meta": {
+    "instanceId": "f032027e20e9709391bcafe9291ae76dc2a07ff2b593bca6936b7404ddb31c33"
+  },
+  "id": "gKrLAYlTD36OL8fM",
+  "tags": []
+}

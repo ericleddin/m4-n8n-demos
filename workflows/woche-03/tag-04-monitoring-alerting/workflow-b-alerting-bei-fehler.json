@@ -1,0 +1,202 @@
+{
+  "name": "W3T4 - B - Alerting bei Fehler",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "5043e615-709f-4ff6-8fb8-c02571ac4aa1",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -320,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://httpstat.us/404",
+        "options": {}
+      },
+      "id": "f7e88985-0c91-4990-ad2d-e1f8777d4166",
+      "name": "API-Call (schlaegt fehl)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -96,
+        80
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b1",
+              "name": "errorMessage",
+              "value": "={{ $json.error?.message ?? \"Unbekannter Fehler\" }}",
+              "type": "string"
+            },
+            {
+              "id": "b2",
+              "name": "failedUrl",
+              "value": "https://httpstat.us/404",
+              "type": "string"
+            },
+            {
+              "id": "b3",
+              "name": "timestamp",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ee1e269e-bfde-48ad-b61d-6830fd852ec5",
+      "name": "Fehler-Kontext bauen",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        128,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"from\": \"onboarding@resend.dev\",\n  \"to\": \"<<REPLACE_WITH_YOUR_NOTIFICATION_EMAIL>>\",\n  \"subject\": \"[ALERT] Workflow-Fehler: API-Call fehlgeschlagen\",\n  \"html\": \"<h2>Workflow-Fehler</h2><p><b>Zeitpunkt:</b> {{ $json.timestamp }}</p><p><b>URL:</b> {{ $json.failedUrl }}</p><p><b>Fehler:</b> {{ $json.errorMessage }}</p>\"\n}",
+        "options": {}
+      },
+      "id": "945f310a-c031-444e-8ad9-56f03641229f",
+      "name": "Alert-Mail (Resend)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        352,
+        80
+      ],
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "SEDyCLA4bLWkBmys",
+          "name": "Resend - Eric"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "content": "## W3T4 - B - Alerting bei Fehler\nDeterministischer Fehlerpfad: der API-Call laeuft bewusst auf eine 404-URL. Statt den Workflow zu crashen, wird der Fehler ueber den **Error-Output** abgefangen und loest eine Alert-Mail aus (Fehlermeldung + URL + Zeitstempel).\n**Folien-Bezug:** Alerting - der Workflow meldet sich selbst.",
+        "height": 130,
+        "width": 900,
+        "color": 4
+      },
+      "id": "8353b677-b3d0-497f-97be-cc2175a8eafb",
+      "name": "Beschreibung",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -336,
+        -256
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Bewusst kaputte URL (404). **onError: continueErrorOutput** leitet den Fehler auf den 2. Output statt abzubrechen.",
+        "height": 132,
+        "width": 200
+      },
+      "id": "f273598e-d01d-4f32-8367-6e90c3fdb287",
+      "name": "Notiz API",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -144,
+        -96
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Sammelt den Alert-Kontext: Fehlermeldung, betroffene URL, Zeitstempel.",
+        "height": 132,
+        "width": 200
+      },
+      "id": "13889c45-6d6f-4e9e-86a7-55ac04e368dd",
+      "name": "Notiz Set",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        80,
+        -96
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Schickt die Alert-Mail via Resend (Bearer). Test-Modus: from onboarding@resend.dev.",
+        "height": 132,
+        "width": 200
+      },
+      "id": "debda3f1-354c-48cc-afdc-49de11f6a392",
+      "name": "Notiz Mail",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        320,
+        -96
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "API-Call (schlaegt fehl)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "API-Call (schlaegt fehl)": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Fehler-Kontext bauen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fehler-Kontext bauen": {
+      "main": [
+        [
+          {
+            "node": "Alert-Mail (Resend)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "076b3b6e-ac6c-4341-ae1e-bc36fae278a2",
+  "meta": {
+    "instanceId": "f032027e20e9709391bcafe9291ae76dc2a07ff2b593bca6936b7404ddb31c33"
+  },
+  "id": "WhLTt31g1eO3MtLl",
+  "tags": []
+}

@@ -1,0 +1,264 @@
+{
+  "name": "W3T4 - A - Logging & Kosten-Tracking",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "dc92fea4-7879-48cc-869d-836f8c388c3c",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -320,
+        64
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "userPrompt",
+              "value": "Erklaere Monitoring in einem Satz.",
+              "type": "string"
+            },
+            {
+              "id": "a2",
+              "name": "startTime",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "1284cccc-585a-467c-bdef-4157a6862317",
+      "name": "Eingabe & Start-Zeit",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -96,
+        64
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openRouterApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"openai/gpt-4o-mini\",\n  \"messages\": [\n    { \"role\": \"user\", \"content\": \"{{ $json.userPrompt }}\" }\n  ]\n}",
+        "options": {}
+      },
+      "id": "86eb1788-bdc9-400d-a4fe-a74171b76b91",
+      "name": "LLM Call (OpenRouter)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        128,
+        64
+      ],
+      "credentials": {
+        "openRouterApi": {
+          "id": "iNwU2uwlDz4l7tnF",
+          "name": "OpenRouter account - Eric Leddin"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const start = $('Eingabe & Start-Zeit').first().json.startTime;\nconst durationMs = Date.now() - new Date(start).getTime();\n\nconst resp = $input.first().json;\nconst usage = resp.usage || {};\nconst promptTokens = usage.prompt_tokens || 0;\nconst completionTokens = usage.completion_tokens || 0;\nconst totalTokens = usage.total_tokens || (promptTokens + completionTokens);\n\n// gpt-4o-mini Preise (USD pro 1 Token)\nconst PRICE_INPUT = 0.15 / 1000000;\nconst PRICE_OUTPUT = 0.60 / 1000000;\nconst costUsd = promptTokens * PRICE_INPUT + completionTokens * PRICE_OUTPUT;\n\nreturn [{\n  json: {\n    timestamp: new Date().toISOString(),\n    node: 'LLM Call (OpenRouter)',\n    status: 'success',\n    duration_ms: durationMs,\n    prompt_tokens: promptTokens,\n    completion_tokens: completionTokens,\n    total_tokens: totalTokens,\n    cost_usd: Number(costUsd.toFixed(6))\n  }\n}];"
+      },
+      "id": "6ee3b4f0-9c02-4f44-a752-eaa7365318fe",
+      "name": "Log-Eintrag bauen",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        352,
+        64
+      ]
+    },
+    {
+      "parameters": {
+        "tableId": "demo_logs",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "timestamp",
+              "fieldValue": "={{ $json.timestamp }}"
+            },
+            {
+              "fieldId": "node_name",
+              "fieldValue": "={{ $json.node }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "={{ $json.status }}"
+            },
+            {
+              "fieldId": "duration_ms",
+              "fieldValue": "={{ $json.duration_ms }}"
+            },
+            {
+              "fieldId": "tokens_used",
+              "fieldValue": "={{ $json.total_tokens }}"
+            }
+          ]
+        }
+      },
+      "id": "1f85d1c6-03cb-47db-99f4-3e21461272e2",
+      "name": "Log in Supabase schreiben",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        560,
+        64
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "56pbxWn3sMCHxPJA",
+          "name": "Supabase - Eric (M4)"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "content": "## W3T4 - A - Logging & Kosten-Tracking\nHappy-Path-Workflow: ein echter LLM-Call, danach wird pro Lauf ein strukturierter Log-Eintrag gebaut (Zeitstempel, Node, Status, Dauer, Tokens, Kosten) und nach Supabase geschrieben.\n**Folien-Bezug:** Observability / Logging-Strategien / Kosten-Tracking (Token x Preis).",
+        "height": 120,
+        "width": 1080,
+        "color": 4
+      },
+      "id": "7ed8b334-d2b0-4b03-a0fe-8f4662d89c0c",
+      "name": "Beschreibung",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -320,
+        -256
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Setzt die Eingabe (Prompt) und **startTime** = jetzt. startTime ist der Anker fuer die Dauer-Messung.",
+        "height": 120,
+        "width": 200
+      },
+      "id": "a65bd50f-ec6b-42da-b138-271664463c1b",
+      "name": "Notiz Set",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -96,
+        -96
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Echter Call an OpenRouter via HTTP. Die rohe **usage**-Struktur (prompt/completion_tokens) ist der Lehrpunkt fuers Kosten-Tracking.",
+        "height": 120,
+        "width": 200
+      },
+      "id": "50d65508-f444-4587-b9d7-e67a279b5010",
+      "name": "Notiz LLM",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        128,
+        -96
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Baut den Log-Eintrag: Dauer = jetzt - startTime, Kosten = Tokens x Preis pro Token.",
+        "height": 120,
+        "width": 200
+      },
+      "id": "6b6a0504-761f-42dc-baff-57d537d42dd6",
+      "name": "Notiz Code",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        352,
+        -96
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Schreibt den Log-Eintrag als Zeile in die Tabelle **demo_logs**. So wird das Log dauerhaft sichtbar.",
+        "height": 120,
+        "width": 200
+      },
+      "id": "22aeb7d1-2e4f-4c83-b751-578d1b296f8c",
+      "name": "Notiz Supabase",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        560,
+        -96
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Eingabe & Start-Zeit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Eingabe & Start-Zeit": {
+      "main": [
+        [
+          {
+            "node": "LLM Call (OpenRouter)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM Call (OpenRouter)": {
+      "main": [
+        [
+          {
+            "node": "Log-Eintrag bauen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log-Eintrag bauen": {
+      "main": [
+        [
+          {
+            "node": "Log in Supabase schreiben",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "3e77d8ca-0374-43e2-b70c-5be4d239186f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f032027e20e9709391bcafe9291ae76dc2a07ff2b593bca6936b7404ddb31c33"
+  },
+  "id": "zhbUmheZ5wA8yMHB",
+  "tags": []
+}
