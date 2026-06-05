@@ -7,6 +7,8 @@ weight: 1
 
 Ergänzende Konzept-Dokumentation für den Aufbau einer eigenen LLM-fähigen Anwendung. Die Dokumente hier erklären kein einzelnes Werkzeug — sie zeigen, wie die Werkzeuge aus dem M4-Kurs (FastAPI, LiteLLM, Supabase, Langfuse, n8n) als System zusammenspielen.
 
+**Zwei Sprachen, eine Architektur — und das reicht für fast alles.** Frontend in TypeScript, Backend in Python, klare Trennung dazwischen. Kein Microservices-Overhead, kein Cloud-native von Anfang an — erst ein System das läuft und dessen Teile man versteht.
+
 **Ziel:** Du verstehst, wie eine Client/Server-Anwendung strukturiert ist, kannst einen eigenen Server aufbauen und weißt, wie du von einem lokalen Setup zu einer produktionsnahen Umgebung kommst.
 
 **Voraussetzung:** Keine Programmiererfahrung nötig — ein grundlegendes Verständnis davon, was APIs und Datenbanken sind, hilft.
