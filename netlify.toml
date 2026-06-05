@@ -1,15 +1,15 @@
 [build]
   base    = "docs/website"
-  command = "hugo --minify --baseURL \"$URL\""
+  command = "git clone --depth 1 https://github.com/McShelby/hugo-theme-relearn.git themes/hugo-theme-relearn && hugo --minify --baseURL \"$URL\""
   publish = "public"
 
 [build.environment]
-  HUGO_VERSION = "0.147.0"
+  HUGO_VERSION = "latest"
 
 # Deploy Previews (Pull Requests)
 [context.deploy-preview]
-  command = "hugo --minify --baseURL \"$DEPLOY_PRIME_URL\""
+  command = "git clone --depth 1 https://github.com/McShelby/hugo-theme-relearn.git themes/hugo-theme-relearn && hugo --minify --baseURL \"$DEPLOY_PRIME_URL\""
 
 # Branch Deploys
 [context.branch-deploy]
-  command = "hugo --minify --baseURL \"$DEPLOY_PRIME_URL\""
+  command = "git clone --depth 1 https://github.com/McShelby/hugo-theme-relearn.git themes/hugo-theme-relearn && hugo --minify --baseURL \"$DEPLOY_PRIME_URL\""
