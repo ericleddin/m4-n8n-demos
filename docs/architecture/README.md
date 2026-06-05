@@ -30,6 +30,7 @@ Ergänzende Konzept-Dokumentation für den Aufbau einer eigenen LLM-fähigen Anw
 - **[06 — Supabase Best Practices](06_supabase_best_practices.md)** — Supabase verstehen, lokal entwickeln, Migrations-Workflow, Umgebungen synchronisieren.
 - **[Appendix — Frontend-Optionen](appendix_frontend_optionen.md)** — React, Vue3, Next.js, Nuxt.js: Kurzprofil und Entscheidungshilfe.
 - **[Appendix — Walking Skeleton](appendix_walking_skeleton.md)** — Warum du den Stromkreis zuerst schließt: von localStorage-POC über Walking Skeleton bis zum vollständigen System.
+- **[Appendix — C4-Modell & Architekturdiagramme](appendix_c4_modell.md)** — System Context, Container, Component, Code: Architektur verständlich visualisieren nach Simon Brown.
 
 ### 🔴 Fortgeschritten
 *Für alle, die ihr System produktionsnah absichern wollen.*
@@ -58,6 +59,7 @@ Ergänzende Konzept-Dokumentation für den Aufbau einer eigenen LLM-fähigen Anw
 6. 06_supabase_best_practices.md     ← Datenbank sauber verwalten
 7. appendix_frontend_optionen.md     ← Welches Frontend passt zu mir?
 8. appendix_walking_skeleton.md      ← Wie fange ich ein neues Projekt richtig an?
+9. appendix_c4_modell.md             ← Wie visualisiere ich meine Architektur?
 ```
 
 ### 🔴 Fortgeschrittenen-Pfad
