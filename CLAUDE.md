@@ -296,6 +296,7 @@ Für Repo-weite Änderungen (Doku, Skripte, Setup): konventionelles Format ohne 
 
 ## 8. Tonalität & Sprache
 
+- **Konversationssprache mit dem User: Deutsch.** Claude antwortet immer auf Deutsch, unabhängig davon, in welcher Sprache eine Frage gestellt wird.
 - **Deutsch** durchgängig, **du-Form**
 - **Concise** — keine Füllsätze, keine Sales-Sprache
 - **Konkret** — Beispiele statt Abstraktionen
@@ -318,7 +319,108 @@ Für Repo-weite Änderungen (Doku, Skripte, Setup): konventionelles Format ohne 
 
 ---
 
-## 10. Wenn etwas unklar ist
+## 10. Docs-Site (Hugo)
+
+### Struktur
+
+```
+docs/
+├── llm_learning/       # Konzept-Docs: LLM-Grundlagen, Techstack, Observability
+├── n8n_learning/       # Konzept-Docs: n8n-spezifische Guides und Kompendien
+├── mermaid_color_schema.md  # Verbindliche Farbpalette für alle Mermaid-Diagramme
+├── architecture/       # Einstiegs-Doku: Client/Server-Architektur mit M4-Tech-Stack (für KI-Kurs-Teilnehmer)
+└── website/            # Hugo-Site (gitignored: themes/, public/)
+    ├── hugo.toml       # Site-Konfiguration
+    ├── setup.sh        # Theme klonen (nur einmalig nötig)
+    └── serve.sh        # Interaktiver Start (Dev-Server oder Build & Serve)
+```
+
+Die Docs-Site mount `llm_learning/` und `n8n_learning/` direkt als Hugo-Content — keine Kopien, eine Quelle. Änderungen an `.md`-Dateien dort wirken sich sofort auf die Site aus.
+
+### Befehle
+
+```bash
+# Erstes Setup (Theme klonen):
+cd docs/website && ./setup.sh
+
+# Dev-Server mit Live-Reload starten:
+cd docs/website && ./serve.sh    # dann [1] wählen → http://localhost:1313
+
+# Statischen Build erzeugen:
+cd docs/website && hugo --minify  # Output → public/
+
+# Dry-run (Build prüfen ohne Output):
+cd docs/website && hugo --dryRun
+```
+
+### Mermaid-Diagramme
+
+Alle Mermaid-Diagramme in der Docs-Site folgen der Farbpalette aus `docs/mermaid_color_schema.md`. Kurzreferenz der Kategorien:
+
+| Knoten-Typ | `fill` |
+|---|---|
+| IF / Switch / Entscheidung | `#d4820a` |
+| True-Pfad / Erfolg | `#1e8449` |
+| False-Pfad / Fehler | `#c0392b` |
+| Sub-Workflow / Trigger | `#1771c4` |
+| Edit Fields / Shaping | `#0e6b7a` |
+| Merge | `#7b4dad` |
+| Verworfen / Inaktiv | `#555555` (gestrichelt) |
+
+Immer `color:#fff` setzen (optimiert für Dark Mode).
+
+### Neue Docs-Seiten anlegen
+
+`hugo new` erzeugt eine Seite mit korrektem Frontmatter:
+
+```bash
+cd docs/website
+hugo new n8n_learning/mein-thema.md
+# oder
+hugo new llm_learning/mein-thema.md
+```
+
+Frontmatter-Pflichtfelder: `title` (Anzeigename), `weight` (Reihenfolge in der Sidebar). Sprachlich gilt Abschnitt 8: Deutsch, du-Form, kein Fließtext-Emoji.
+
+---
+
+### `architecture/` — Zweck, Zielgruppe und Regeln
+
+#### Zweck
+
+`docs/architecture/` enthält eine eigenständige Dokumentationsreihe, die erklärt wie man mit dem M4-Tech-Stack (FastAPI, LiteLLM, Supabase, Langfuse, n8n) eine Client/Server-Anwendung mit LLM-Anbindung aufbaut. Die Docs sind kein Kurs-Begleitmaterial zu n8n-Workflows, sondern ein eigenständiger Einstieg in Softwarearchitektur für KI-Anwendungen — von lokal bis produktionsnah.
+
+Die Reihe ergänzt `llm_learning/` und `n8n_learning/` um die **Architektur-Perspektive**: Wie hängen die Bausteine zusammen? Wie strukturiere ich meinen Server? Wie deploye ich sauber?
+
+#### Zielgruppe
+
+KI-Kurs-Teilnehmer (M4) ohne IT-Hintergrund, die nach den n8n-Grundlagen den nächsten Schritt machen wollen: eine eigene LLM-fähige Anwendung mit Backend, Datenbank und Automatisierung aufbauen. Kein Vorwissen in Softwareentwicklung oder Systemarchitektur wird vorausgesetzt.
+
+Schreibstil: Deutsch, du-Form, konkret. Fachbegriffe werden beim ersten Auftreten kurz erklärt. Metaphern nur dort, wo sie ein komplexes Konzept ergänzend vereinfachen — nicht dekorativ.
+
+#### Inhaltliche Regeln
+
+- **Neutral und anbieterunabhängig formulieren** — Beispiele sind generisch (z.B. "Support-System", "Aufgabenverwaltung"), keine Bezüge zu konkreten internen Projekten oder Produkten
+- **Keine persönlichen Verweise** — keine Namen, keine Organisations-Interna, keine realen Kundenprojekte
+- **Keine App-Interna aus bestehenden Projekten** — Architektur-Muster und Verzeichnisstrukturen dürfen als strukturelle Blaupause dienen, aber Domänen-Konzepte, Feldnamen und Business-Logik aus realen Projekten haben hier keinen Platz
+- **Quellenangaben bei übernommenen Konzepten** — z.B. Anthropic Engineering Blog bei Agent-Patterns
+- Mermaid-Diagramme nach `docs/mermaid_color_schema.md`, inkl. der dort definierten Farbe für Automation/n8n
+
+#### Hugo-Mount
+
+`architecture/` muss in `docs/website/hugo.toml` als Mount eingetragen sein:
+
+```toml
+[[module.mounts]]
+  source = "../architecture"
+  target = "content/architecture"
+```
+
+Außerdem in `docs/website/content/_index.md` als Bereich verlinken.
+
+---
+
+## 11. Wenn etwas unklar ist
 
 Bei Mehrdeutigkeit oder fehlenden Informationen: **fragen, nicht raten.** Lieber ein kurzer Klärungs-Round-Trip als eine inkonsistente README, die später korrigiert werden muss.
 

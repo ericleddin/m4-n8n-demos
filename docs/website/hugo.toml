@@ -1,4 +1,4 @@
-baseURL = "/"
+baseURL = "https://geramaya.github.io/m4-n8n-demos/"
 title = "M4 – KI Experte: Workflows & Agenten"
 theme = "hugo-theme-relearn"
 defaultContentLanguage = "de"
@@ -52,3 +52,6 @@ defaultContentLanguage = "de"
   [[module.mounts]]
     source = "data"
     target = "data"
+  [[module.mounts]]
+    source = "../architecture"
+    target = "content/architecture"

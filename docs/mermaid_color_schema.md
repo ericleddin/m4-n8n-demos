@@ -20,6 +20,7 @@ Dieses Dokument definiert das einheitliche Farbmodell für alle Mermaid-Diagramm
 | **Verworfen / Inaktiv** | Verworfene Items, Trash | `#555555` | `#888888` | `#ccc` |
 | **Branch 1 (neutral)** | Erster paralleler Zweig | `#c8860a` | `#a06800` | `#fff` |
 | **Branch 2 (neutral)** | Zweiter paralleler Zweig | `#1771c4` | `#0f4f8c` | `#fff` |
+| **Automation / n8n** | Automation-Layer, n8n-Workflows | `#b5451b` | `#8a3315` | `#fff` |
 
 ---
 
@@ -55,6 +56,9 @@ style NODE fill:#7d3c98,stroke:#5b2c6f,color:#fff
 
 %% Verworfen / Inaktiv (gestrichelt)
 style NODE fill:#555555,stroke:#888888,color:#ccc,stroke-dasharray: 5 5
+
+%% Automation / n8n
+style NODE fill:#b5451b,stroke:#8a3315,color:#fff
 ```
 
 ---

@@ -10,3 +10,4 @@ Begleitende Konzept-Dokumentation zum Kurs. Hier findest du Hintergrundwissen, R
 
 - **[LLM Learning](llm_learning/)** — LLM-Grundlagen, RAG, Prompt Engineering, Kosten, Observability, Agenten-Architektur
 - **[n8n Learning](n8n_learning/)** — n8n-Datenfluss, LLM-Integration, Agent-Ecosystem
+- **[Architektur](architecture/)** — Client/Server-Grundlagen, Tech-Stack, Kommunikationsflüsse, Server-Struktur, von lokal bis Produktion
