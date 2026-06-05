@@ -1,6 +1,6 @@
 [build]
   base    = "docs/website"
-  command = "git clone --depth 1 https://github.com/McShelby/hugo-theme-relearn.git themes/hugo-theme-relearn && hugo --minify --baseURL \"$URL\""
+  command = "[ -d themes/hugo-theme-relearn ] || git clone --depth 1 https://github.com/McShelby/hugo-theme-relearn.git themes/hugo-theme-relearn && hugo --minify --baseURL \"$URL\""
   publish = "public"
 
 [build.environment]
@@ -8,8 +8,8 @@
 
 # Deploy Previews (Pull Requests)
 [context.deploy-preview]
-  command = "git clone --depth 1 https://github.com/McShelby/hugo-theme-relearn.git themes/hugo-theme-relearn && hugo --minify --baseURL \"$DEPLOY_PRIME_URL\""
+  command = "[ -d themes/hugo-theme-relearn ] || git clone --depth 1 https://github.com/McShelby/hugo-theme-relearn.git themes/hugo-theme-relearn && hugo --minify --baseURL \"$DEPLOY_PRIME_URL\""
 
 # Branch Deploys
 [context.branch-deploy]
-  command = "git clone --depth 1 https://github.com/McShelby/hugo-theme-relearn.git themes/hugo-theme-relearn && hugo --minify --baseURL \"$DEPLOY_PRIME_URL\""
+  command = "[ -d themes/hugo-theme-relearn ] || git clone --depth 1 https://github.com/McShelby/hugo-theme-relearn.git themes/hugo-theme-relearn && hugo --minify --baseURL \"$DEPLOY_PRIME_URL\""
