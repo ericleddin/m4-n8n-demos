@@ -8,9 +8,9 @@ Statische Dokumentationsseite für die Konzept-Docs in `docs/llm_learning/` und 
 
 | Tool | Zweck | Mindestversion |
 |---|---|---|
-| `hugo` (extended) | Build & Dev-Server | v0.120+ |
+| `hugo` (extended) | Build & Dev-Server | v0.162+ |
 | `git` | Theme klonen via setup.sh | — |
-| `python3` | Statischen Build lokal servieren (optional) | — |
+| `lsof` | Port-Erkennung als Fallback in serve.sh | — |
 
 Hugo installieren: https://gohugo.io/installation/
 
@@ -34,38 +34,85 @@ cd docs/website
 ./serve.sh
 ```
 
-Interaktives Menü mit zwei Modi:
+Interaktives Menü mit zwei Aktionen:
+
+```
+[1] Dev-Server starten    hugo server mit Live-Reload auf http://localhost:1313
+[2] Build                 hugo --minify → public/
+[s] Stop                  Laufenden Server beenden
+[q] Abbrechen
+```
 
 ### [1] Dev-Server
 
-```
-hugo server — Live-Reload auf http://localhost:1313
-```
-
 - Kein vorheriger Build nötig
 - Änderungen in `docs/llm_learning/` und `docs/n8n_learning/` werden sofort sichtbar
-- Server-Output läuft in `hugo_http.log`, parallel per `tail -f` in der Konsole
-- PID wird nach dem Start angezeigt
+- PID wird in `.hugo.pid` gespeichert und nach dem Start angezeigt
+- Browser öffnet automatisch auf http://localhost:1313 (via `xdg-open`)
+- Beenden mit Ctrl+C
 
-### [2] Build & Serve
+### [2] Build
 
-```
-hugo --minify → public/   dann   python3 -m http.server
-```
-
-- Baut erst den statischen Output nach `public/`
-- Serviert ihn lokal per Python HTTP-Server
-- Simuliert den Produktions-Output — sinnvoll vor einem Deploy
+- Baut den statischen Output nach `public/`
+- Sinnvoll vor einem Deploy, um den Produktions-Output zu prüfen
 
 ### Wenn ein Server läuft
 
-`serve.sh` erkennt ob Port 1313 belegt ist und bietet an:
+`serve.sh` erkennt den laufenden Prozess via `.hugo.pid` (Fallback: Port-Scan) und zeigt:
 
 ```
-[1] Restart              Stop + Dev-Server neu starten
-[2] Rebuild & Restart    Stop + neu bauen + servieren
-[s] Stop                 Nur beenden
-[o] Browser öffnen       Bestehenden Server weiter nutzen
+[1] Dev-Server neu starten
+[2] Build (hugo --minify)
+[s] Stop
+[q] Abbrechen
+```
+
+Hilfe:
+
+```bash
+./serve.sh --help
+```
+
+---
+
+## Windows
+
+`serve.sh` und `setup.sh` sind Bash-Skripte — auf Windows ohne Umweg nicht ausführbar. Hugo selbst läuft nativ auf Windows.
+
+### Empfohlen: WSL2
+
+Mit WSL2 (Windows Subsystem for Linux) funktioniert alles wie auf Linux/macOS — kein Anpassen nötig.
+
+WSL2 einrichten: [learn.microsoft.com/windows/wsl/install](https://learn.microsoft.com/windows/wsl/install)
+
+Danach im WSL-Terminal ganz normal:
+
+```bash
+cd docs/website
+./setup.sh
+./serve.sh
+```
+
+### Alternativ: nativ (CMD / PowerShell)
+
+Hugo-Binary für Windows herunterladen: [gohugo.io/installation/windows](https://gohugo.io/installation/windows/)
+
+Theme einmalig klonen (ersetzt `setup.sh`):
+
+```powershell
+git clone --depth 1 https://github.com/McShelby/hugo-theme-relearn.git themes/hugo-theme-relearn
+```
+
+Dev-Server starten (ersetzt `serve.sh [1]`):
+
+```powershell
+hugo server --port 1313
+```
+
+Statischen Build erzeugen (ersetzt `serve.sh [2]`):
+
+```powershell
+hugo --minify
 ```
 
 ---
