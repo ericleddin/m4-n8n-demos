@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hype-Check – AI News nüchtern einordnen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F7F8F6;
+    --surface: #FFFFFF;
+    --ink: #1B2A33;
+    --ink-soft: #5B6770;
+    --line: #E3E7E4;
+    --calm: #2E7D6B;       /* belegt */
+    --mid: #B98A1F;        /* teilweise belegt */
+    --alarm: #C44536;      /* spekulation */
+    --neutral: #8A949B;    /* nicht prüfbar */
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 48px 20px 80px; }
+
+  header { margin-bottom: 36px; }
+  .wordmark {
+    font-family: 'Archivo', sans-serif;
+    font-weight: 700;
+    font-size: 1.9rem;
+    letter-spacing: -0.02em;
+  }
+  .wordmark .tick { color: var(--calm); }
+  .tagline { color: var(--ink-soft); margin-top: 6px; max-width: 48ch; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 24px;
+  }
+  label { display: block; font-weight: 600; font-size: 0.9rem; margin-bottom: 8px; }
+  textarea {
+    width: 100%;
+    min-height: 140px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font: inherit;
+    resize: vertical;
+    background: var(--bg);
+  }
+  textarea:focus, input:focus, button:focus-visible {
+    outline: 2px solid var(--calm);
+    outline-offset: 1px;
+  }
+  .hint { font-size: 0.82rem; color: var(--ink-soft); margin-top: 6px; }
+  .row { display: flex; gap: 12px; margin-top: 18px; flex-wrap: wrap; align-items: flex-end; }
+  .field { flex: 1; min-width: 220px; }
+  input[type="email"] {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 11px 14px;
+    font: inherit;
+    background: var(--bg);
+  }
+  button.primary {
+    font: inherit;
+    font-weight: 600;
+    color: #fff;
+    background: var(--ink);
+    border: none;
+    border-radius: 8px;
+    padding: 12px 22px;
+    cursor: pointer;
+  }
+  button.primary:hover { background: #2B3E4A; }
+  button.primary:disabled { background: var(--neutral); cursor: wait; }
+
+  /* Loading */
+  #loading { display: none; margin-top: 28px; text-align: center; color: var(--ink-soft); }
+  .spinner {
+    width: 28px; height: 28px;
+    border: 3px solid var(--line);
+    border-top-color: var(--calm);
+    border-radius: 50%;
+    margin: 0 auto 12px;
+    animation: spin 0.9s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .spinner { animation: none; } }
+
+  /* Fehler */
+  #errorBox {
+    display: none;
+    margin-top: 28px;
+    border-left: 4px solid var(--alarm);
+    background: #FBF1EF;
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 16px 18px;
+    font-size: 0.95rem;
+  }
+
+  /* Ergebnis */
+  #result { display: none; margin-top: 36px; }
+  .section-label {
+    font-family: 'Archivo', sans-serif;
+    font-weight: 600;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    color: var(--ink-soft);
+    margin: 28px 0 10px;
+  }
+  .summary { font-size: 1.1rem; font-weight: 500; }
+
+  /* Hype-Meter – Signatur-Element */
+  .meter-card { margin-top: 24px; padding: 22px 24px; }
+  .meter-head { display: flex; justify-content: space-between; align-items: baseline; }
+  .meter-value {
+    font-family: 'Archivo', sans-serif;
+    font-weight: 700;
+    font-size: 2.4rem;
+    line-height: 1;
+  }
+  .meter-value small { font-size: 1rem; color: var(--ink-soft); font-weight: 500; }
+  .meter-track {
+    position: relative;
+    height: 10px;
+    border-radius: 5px;
+    margin-top: 14px;
+    background: linear-gradient(90deg, var(--calm) 0%, var(--mid) 55%, var(--alarm) 100%);
+  }
+  .meter-needle {
+    position: absolute;
+    top: -5px;
+    width: 4px;
+    height: 20px;
+    background: var(--ink);
+    border-radius: 2px;
+    transform: translateX(-50%);
+    transition: left 0.6s ease;
+  }
+  .meter-scale {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: var(--ink-soft);
+    margin-top: 6px;
+  }
+  .meter-reason { margin-top: 14px; color: var(--ink-soft); font-size: 0.95rem; }
+
+  /* Claims */
+  .claim { padding: 18px 20px; margin-bottom: 12px; }
+  .claim-head { display: flex; gap: 12px; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; }
+  .claim-text { font-weight: 600; flex: 1; min-width: 200px; }
+  .badge {
+    font-size: 0.74rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 4px 10px;
+    border-radius: 999px;
+    color: #fff;
+    white-space: nowrap;
+  }
+  .b-belegt { background: var(--calm); }
+  .b-teilweise { background: var(--mid); }
+  .b-spekulation { background: var(--alarm); }
+  .b-neutral { background: var(--neutral); }
+  .claim-reason { margin-top: 8px; font-size: 0.95rem; color: var(--ink-soft); }
+  .claim-sources { margin-top: 10px; font-size: 0.85rem; }
+  .claim-sources a { color: var(--calm); word-break: break-all; }
+
+  /* Takeaways */
+  .takeaways { padding: 20px 22px; }
+  .takeaways li { margin-left: 20px; margin-bottom: 8px; }
+
+  .meta-note { margin-top: 24px; font-size: 0.82rem; color: var(--ink-soft); }
+  footer { margin-top: 56px; font-size: 0.8rem; color: var(--ink-soft); border-top: 1px solid var(--line); padding-top: 16px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="wordmark">Hype-Check<span class="tick">.</span></div>
+    <p class="tagline">AI-News und Social-Media-Posts nüchtern einordnen: Was ist belegt, was ist Spekulation – und was heißt das für dich?</p>
+  </header>
+
+  <div class="card">
+    <label for="inputText">Text oder Link einfügen</label>
+    <textarea id="inputText" placeholder="Kopiere hier den Text eines Posts oder Artikels rein – oder füge eine offene Web-URL ein (Newsseite, Blog)."></textarea>
+    <p class="hint">Instagram-/TikTok-Links können nicht geladen werden – kopiere stattdessen den Text des Posts.</p>
+    <div class="row">
+      <div class="field">
+        <label for="email">E-Mail für das Ergebnis (optional)</label>
+        <input type="email" id="email" placeholder="name@beispiel.de">
+      </div>
+      <button class="primary" id="submitBtn" onclick="analyze()">Einordnung starten</button>
+    </div>
+  </div>
+
+  <div id="loading">
+    <div class="spinner" aria-hidden="true"></div>
+    <p id="loadingText">Analyse läuft …</p>
+  </div>
+
+  <div id="errorBox" role="alert"></div>
+
+  <div id="result">
+    <p class="section-label">Worum geht es</p>
+    <p class="summary" id="rSummary"></p>
+
+    <div class="card meter-card">
+      <div class="meter-head">
+        <p class="section-label" style="margin:0">Hype-Score</p>
+        <div class="meter-value"><span id="rScore">–</span><small> / 10</small></div>
+      </div>
+      <div class="meter-track"><div class="meter-needle" id="rNeedle" style="left:0%"></div></div>
+      <div class="meter-scale"><span>nüchtern</span><span>überhitzt</span></div>
+      <p class="meter-reason" id="rScoreReason"></p>
+    </div>
+
+    <p class="section-label">Behauptungen im Detail</p>
+    <div id="rClaims"></div>
+
+    <p class="section-label">Was du daraus mitnehmen kannst</p>
+    <div class="card takeaways"><ul id="rTakeaways"></ul></div>
+
+    <p class="meta-note" id="rMeta"></p>
+  </div>
+
+  <footer>
+    Hype-Check ist ein Lernprojekt (M4, Projekt 1). Die Einordnung basiert auf einer automatischen Websuche und ist kein abschließender Faktencheck.
+  </footer>
+</div>
+
+<script>
+// === Konfiguration ===
+const WEBHOOK_URL = 'https://DEINE-N8N-INSTANZ/webhook/hype-check';
+
+const LOADING_STEPS = [
+  'Eingabe wird verarbeitet …',
+  'Behauptungen werden extrahiert …',
+  'Websuche zur Verifikation läuft …',
+  'Einordnung wird erstellt …'
+];
+
+const BADGE_CLASS = {
+  'belegt': 'b-belegt',
+  'teilweise belegt': 'b-teilweise',
+  'spekulation': 'b-spekulation',
+  'nicht prüfbar': 'b-neutral'
+};
+
+let loadingTimer = null;
+
+async function analyze() {
+  const input = document.getElementById('inputText').value.trim();
+  const email = document.getElementById('email').value.trim();
+
+  hide('result'); hide('errorBox');
+
+  if (!input) {
+    showError('Bitte füge zuerst einen Text oder einen Link ein.');
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    const res = await fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ input, email })
+    });
+
+    const data = await res.json().catch(() => null);
+
+    if (!res.ok || !data) {
+      showError((data && data.error) || 'Die Analyse ist fehlgeschlagen (Status ' + res.status + '). Versuche es erneut oder füge den Text direkt ein.');
+      return;
+    }
+    if (data.error) {
+      showError(data.error);
+      return;
+    }
+
+    renderResult(data);
+  } catch (e) {
+    showError('Der Server ist nicht erreichbar. Prüfe deine Verbindung und versuche es erneut.');
+  } finally {
+    setLoading(false);
+  }
+}
+
+function renderResult(d) {
+  document.getElementById('rSummary').textContent = d.zusammenfassung || '–';
+
+  const score = clamp(Number(d.hype_score), 0, 10);
+  document.getElementById('rScore').textContent = isNaN(score) ? '–' : score;
+  document.getElementById('rNeedle').style.left = (isNaN(score) ? 0 : score * 10) + '%';
+  document.getElementById('rScoreReason').textContent = d.hype_score_begruendung || '';
+
+  const claimsEl = document.getElementById('rClaims');
+  claimsEl.innerHTML = '';
+  (d.claims || []).forEach(c => {
+    const div = document.createElement('div');
+    div.className = 'card claim';
+    const badge = BADGE_CLASS[(c.bewertung || '').toLowerCase()] || 'b-neutral';
+    const sources = (c.quellen || []).map(u =>
+      '<a href="' + escapeAttr(u) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(shortUrl(u)) + '</a>'
+    ).join(' &middot; ');
+    div.innerHTML =
+      '<div class="claim-head">' +
+        '<div class="claim-text">' + escapeHtml(c.behauptung || '') + '</div>' +
+        '<span class="badge ' + badge + '">' + escapeHtml(c.bewertung || 'nicht prüfbar') + '</span>' +
+      '</div>' +
+      '<p class="claim-reason">' + escapeHtml(c.begruendung || '') + '</p>' +
+      (sources ? '<p class="claim-sources">Quellen: ' + sources + '</p>' : '');
+    claimsEl.appendChild(div);
+  });
+
+  const tw = document.getElementById('rTakeaways');
+  tw.innerHTML = '';
+  (d.takeaways || []).forEach(t => {
+    const li = document.createElement('li');
+    li.textContent = t;
+    tw.appendChild(li);
+  });
+
+  let meta = [];
+  if (d.verifikation_aktiv === false) meta.push('Hinweis: Die Web-Verifikation war nicht verfügbar – diese Einordnung basiert nur auf dem Text selbst.');
+  if (d.quelle_url) meta.push('Analysierte Quelle: ' + d.quelle_url);
+  if (d.analysiert_am) meta.push('Analysiert am ' + new Date(d.analysiert_am).toLocaleString('de-DE'));
+  document.getElementById('rMeta').textContent = meta.join(' · ');
+
+  show('result');
+  document.getElementById('result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function setLoading(on) {
+  document.getElementById('submitBtn').disabled = on;
+  document.getElementById('loading').style.display = on ? 'block' : 'none';
+  clearInterval(loadingTimer);
+  if (on) {
+    let i = 0;
+    const el = document.getElementById('loadingText');
+    el.textContent = LOADING_STEPS[0];
+    loadingTimer = setInterval(() => {
+      i = Math.min(i + 1, LOADING_STEPS.length - 1);
+      el.textContent = LOADING_STEPS[i];
+    }, 6000);
+  }
+}
+
+function showError(msg) {
+  const box = document.getElementById('errorBox');
+  box.textContent = msg;
+  box.style.display = 'block';
+}
+
+function show(id) { document.getElementById(id).style.display = 'block'; }
+function hide(id) { document.getElementById(id).style.display = 'none'; }
+function clamp(n, min, max) { return Math.min(max, Math.max(min, n)); }
+function shortUrl(u) { try { return new URL(u).hostname.replace('www.', ''); } catch { return u; } }
+function escapeHtml(s) { const d = document.createElement('div'); d.textContent = String(s); return d.innerHTML; }
+function escapeAttr(s) { return String(s).replace(/"/g, '&quot;'); }
+</script>
+</body>
+</html>
