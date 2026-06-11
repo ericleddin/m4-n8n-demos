@@ -17,7 +17,7 @@ nur so gut wie deren Ergebnisse.
 
 | In Scope | Out of Scope (bewusste Entscheidung) |
 |---|---|
-| Text-Eingabe (kopierte Captions, Artikel) | Scraping von Instagram/TikTok (Login-Walls) |
+| Text-Eingabe (kopierte Captions, Artikel) | Video-/Social-Media-Links (YouTube, Instagram, TikTok, X, Facebook) – per Blocklist abgewiesen, da Inhalte nicht per Server-Fetch abrufbar |
 | Offene Web-URLs (Newsseiten, Blogs) | Login-/Paywall-Inhalte |
 | Web-Verifikation pro Claim via Tavily | Video-/Audio-Analyse |
 | Ergebnis auf der Seite + optional per E-Mail | Nutzerverwaltung, Historie im Frontend |
@@ -87,7 +87,8 @@ flowchart TD
 | # | Szenario | Verhalten |
 |---|---|---|
 | 1 | Leerer / ungültiger Input | 400 mit Fehlermeldung im Frontend |
-| 2 | URL nicht erreichbar oder zu wenig lesbarer Text | 422 mit Hinweis, Text direkt einzufügen; Log `fehler_url` |
+| 2 | Video-/Social-Media-URL (Blocklist) | 422 mit Hinweis, Titel/Beschreibung bzw. Post-Text einzufügen; Log `fehler_url` |
+| 2b | URL nicht erreichbar oder zu wenig lesbarer Text | 422 mit Hinweis, Text direkt einzufügen; Log `fehler_url` |
 | 3 | Keine prüfbaren Behauptungen im Text | 422 mit Hinweis; Log `fehler_inhalt` |
 | 4 | Tavily-API-Fehler | Einordnung läuft weiter ohne Verifikation, `verifikation_aktiv: false`, Hinweis im Ergebnis |
 | 5 | LLM-Fehler | Automatischer Retry (2x) |

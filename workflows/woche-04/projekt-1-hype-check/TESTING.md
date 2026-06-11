@@ -15,6 +15,7 @@ Durchführung: 11.06.2026, API-seitig via fetch() gegen den Produktiv-Webhook, U
 | 9 | Inhalt-Grenzfall | „Hallo, wie geht es dir? Schönes Wetter heute." | 422 „Keine prüfbaren Behauptungen gefunden" | 422, korrekte Fehlermeldung | ✅ |
 | 10 | Last | ~12.000 Zeichen Text | 200, Analyse läuft durch | 200, Score 6, 3 Claims | ✅ |
 | 11 | API-Ausfall | Tavily-Key temporär ungültig | 200 mit `verifikation_aktiv=false`, Claims „nicht prüfbar", Hinweis im Frontend | Nicht automatisiert (Credential-Wechsel nötig) | offen |
+| 13 | Blocklist | YouTube-Video-Link | 422 „Video- und Social-Media-Links können nicht analysiert werden" statt Analyse der Seiten-Hülle | Nach Fix live verifizieren | offen |
 | 12 | Sicherheit | `<script>alert(1)</script>` + Hype-Behauptung | 200, Inhalt wird analysiert, Frontend rendert escaped | 200, Score 4, 2 Claims; UI-Escaping per `escapeHtml`/`textContent` implementiert | ✅ |
 
 \* Mail-Zustellung und Supabase-Log-Rows (`status` ok / fehler_url / fehler_inhalt) manuell gegenprüfen — MCP-Zugriff auf Supabase ist read-blockiert.
@@ -28,4 +29,4 @@ Durchführung: 11.06.2026, API-seitig via fetch() gegen den Produktiv-Webhook, U
 
 | Gesamt | Bestanden | Fehlgeschlagen | Offen |
 |---|---|---|---|
-| 12 | 11 | 0 | 1 (#11, manuell) |
+| 13 | 11 | 0 | 2 (#11 manuell, #13 nach Publish) |

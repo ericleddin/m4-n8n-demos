@@ -12,19 +12,25 @@
       "name": "Sticky Note Übersicht",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [208, -128]
+      "position": [
+        208,
+        -128
+      ]
     },
     {
       "parameters": {
-        "content": "**URL-Branch**\n\nErkennt URLs per Regex. Seite wird geladen (15s Timeout), HTML zu Text reduziert, auf 8000 Zeichen gekürzt. Fehler-Outputs (Laden UND Extraktion) führen zu Log + 422-Antwort. Social-Media-Links scheitern hier bewusst – Scope-Entscheidung.",
-        "height": 180,
+        "content": "**URL-Branch**\n\nErkennt URLs per Regex. Video-/Social-Media-Links (YouTube, Instagram, TikTok, X, Facebook) werden vorab per Blocklist (\"Blockierte Domain?\") abgewiesen – Log + dedizierte 422-Antwort, da ihr Inhalt nicht per Server-Fetch abrufbar ist. Sonst: Seite wird geladen (15s Timeout), HTML zu Text reduziert, auf 8000 Zeichen gekürzt. Fehler-Outputs (Laden UND Extraktion) führen zu Log + 422-Antwort.",
+        "height": 240,
         "width": 360
       },
       "id": "8c4a7b41-bad9-43b2-8771-fb5e32c2b731",
       "name": "Sticky Note URL-Branch",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [1104, -64]
+      "position": [
+        1104,
+        -64
+      ]
     },
     {
       "parameters": {
@@ -36,7 +42,10 @@
       "name": "Sticky Note Claims",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [1824, 704]
+      "position": [
+        1824,
+        704
+      ]
     },
     {
       "parameters": {
@@ -48,29 +57,58 @@
       "name": "Sticky Note Side Effects",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [3312, 384]
+      "position": [
+        3312,
+        384
+      ]
     },
     {
       "parameters": {
         "httpMethod": "POST",
         "path": "hype-check",
         "responseMode": "responseNode",
-        "options": { "allowedOrigins": "*" }
+        "options": {
+          "allowedOrigins": "*"
+        }
       },
       "id": "2636f4f9-6d46-42b0-8d3c-77fa211fc269",
       "name": "Webhook: Eingabe empfangen",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
-      "position": [240, 304],
+      "position": [
+        240,
+        304
+      ],
       "webhookId": "01cc59f7-2d7f-48e9-b34d-1d04ba957e50"
     },
     {
       "parameters": {
         "assignments": {
           "assignments": [
-            { "id": "inp-1", "name": "input", "value": "={{ ($json.body?.input ?? $json.input ?? \"\").trim() }}", "type": "string" },
-            { "id": "inp-2", "name": "email", "value": "={{ $json.body?.email ?? $json.email ?? \"\" }}", "type": "string" },
-            { "id": "inp-3", "name": "is_url", "value": "={{ /^https?:\\/\\/\\S+$/.test(($json.body?.input ?? $json.input ?? \"\").trim()) }}", "type": "boolean" }
+            {
+              "id": "inp-1",
+              "name": "input",
+              "value": "={{ ($json.body?.input ?? $json.input ?? \"\").trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "inp-2",
+              "name": "email",
+              "value": "={{ $json.body?.email ?? $json.email ?? \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "inp-3",
+              "name": "is_url",
+              "value": "={{ /^https?:\\/\\/\\S+$/.test(($json.body?.input ?? $json.input ?? \"\").trim()) }}",
+              "type": "boolean"
+            },
+            {
+              "id": "inp-4",
+              "name": "is_blocked",
+              "value": "={{ /^https?:\\/\\/([^\\/]*\\.)?(youtube\\.com|youtu\\.be|tiktok\\.com|instagram\\.com|facebook\\.com|twitter\\.com|x\\.com)([\\/:?#]|$)/i.test(($json.body?.input ?? $json.input ?? \"\").trim()) }}",
+              "type": "boolean"
+            }
           ]
         },
         "options": {}
@@ -79,14 +117,28 @@
       "name": "Input normalisieren",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [464, 304]
+      "position": [
+        464,
+        304
+      ]
     },
     {
       "parameters": {
         "conditions": {
-          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 1 },
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
           "conditions": [
-            { "leftValue": "={{ $json.input }}", "operator": { "type": "string", "operation": "notEmpty" } }
+            {
+              "leftValue": "={{ $json.input }}",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
           ],
           "combinator": "and"
         },
@@ -96,14 +148,28 @@
       "name": "Input vorhanden?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
-      "position": [688, 304]
+      "position": [
+        688,
+        304
+      ]
     },
     {
       "parameters": {
         "conditions": {
-          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 1 },
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
           "conditions": [
-            { "leftValue": "={{ $json.is_url }}", "operator": { "type": "boolean", "operation": "true" } }
+            {
+              "leftValue": "={{ $json.is_url }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
           ],
           "combinator": "and"
         },
@@ -113,7 +179,10 @@
       "name": "Ist URL?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
-      "position": [912, 304]
+      "position": [
+        912,
+        304
+      ]
     },
     {
       "parameters": {
@@ -121,11 +190,18 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "User-Agent", "value": "Mozilla/5.0 (compatible; HypeCheck/1.0)" }
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (compatible; HypeCheck/1.0)"
+            }
           ]
         },
         "options": {
-          "response": { "response": { "responseFormat": "text" } },
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          },
           "timeout": 15000
         }
       },
@@ -133,7 +209,10 @@
       "name": "Webseite laden",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.3,
-      "position": [1120, 160],
+      "position": [
+        1120,
+        160
+      ],
       "onError": "continueErrorOutput"
     },
     {
@@ -144,16 +223,34 @@
       "name": "Text aus HTML extrahieren",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1344, 160],
+      "position": [
+        1344,
+        160
+      ],
       "onError": "continueErrorOutput"
     },
     {
       "parameters": {
         "assignments": {
           "assignments": [
-            { "id": "ai-1", "name": "input", "value": "={{ $json.input }}", "type": "string" },
-            { "id": "ai-2", "name": "email", "value": "={{ $json.email }}", "type": "string" },
-            { "id": "ai-3", "name": "quelle_url", "value": "={{ $json.quelle_url ?? \"\" }}", "type": "string" }
+            {
+              "id": "ai-1",
+              "name": "input",
+              "value": "={{ $json.input }}",
+              "type": "string"
+            },
+            {
+              "id": "ai-2",
+              "name": "email",
+              "value": "={{ $json.email }}",
+              "type": "string"
+            },
+            {
+              "id": "ai-3",
+              "name": "quelle_url",
+              "value": "={{ $json.quelle_url ?? \"\" }}",
+              "type": "string"
+            }
           ]
         },
         "options": {}
@@ -162,18 +259,36 @@
       "name": "Analyse-Input",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [1568, 304]
+      "position": [
+        1568,
+        304
+      ]
     },
     {
       "parameters": {
         "tableId": "hype_check_runs",
         "fieldsUi": {
           "fieldValues": [
-            { "fieldId": "input_type", "fieldValue": "url" },
-            { "fieldId": "input_kurz", "fieldValue": "={{ $(\"Input normalisieren\").first().json.input.slice(0, 200) }}" },
-            { "fieldId": "quelle_url", "fieldValue": "={{ $(\"Input normalisieren\").first().json.input }}" },
-            { "fieldId": "status", "fieldValue": "fehler_url" },
-            { "fieldId": "fehler", "fieldValue": "={{ $json.error?.message ?? \"URL nicht ladbar oder zu wenig Text\" }}" }
+            {
+              "fieldId": "input_type",
+              "fieldValue": "url"
+            },
+            {
+              "fieldId": "input_kurz",
+              "fieldValue": "={{ $(\"Input normalisieren\").first().json.input.slice(0, 200) }}"
+            },
+            {
+              "fieldId": "quelle_url",
+              "fieldValue": "={{ $(\"Input normalisieren\").first().json.input }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "fehler_url"
+            },
+            {
+              "fieldId": "fehler",
+              "fieldValue": "={{ $json.error?.message ?? \"URL nicht ladbar oder zu wenig Text\" }}"
+            }
           ]
         }
       },
@@ -181,7 +296,10 @@
       "name": "Log: URL-Fehler",
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
-      "position": [1344, 544],
+      "position": [
+        1344,
+        544
+      ],
       "onError": "continueRegularOutput"
     },
     {
@@ -192,8 +310,14 @@
           "responseCode": 422,
           "responseHeaders": {
             "entries": [
-              { "name": "Access-Control-Allow-Origin", "value": "*" },
-              { "name": "Content-Type", "value": "application/json" }
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
             ]
           }
         }
@@ -202,7 +326,10 @@
       "name": "Fehler: URL nicht lesbar",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.2,
-      "position": [1568, 544]
+      "position": [
+        1568,
+        544
+      ]
     },
     {
       "parameters": {
@@ -212,8 +339,14 @@
           "responseCode": 400,
           "responseHeaders": {
             "entries": [
-              { "name": "Access-Control-Allow-Origin", "value": "*" },
-              { "name": "Content-Type", "value": "application/json" }
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
             ]
           }
         }
@@ -222,7 +355,10 @@
       "name": "Fehler: Leerer Input",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.2,
-      "position": [912, 560]
+      "position": [
+        912,
+        560
+      ]
     },
     {
       "parameters": {
@@ -233,9 +369,18 @@
         "sendBody": true,
         "bodyParameters": {
           "parameters": [
-            { "name": "model", "value": "openai/gpt-4o-mini" },
-            { "name": "response_format", "value": "={{ { \"type\": \"json_object\" } }}" },
-            { "name": "messages", "value": "={{ [ { \"role\": \"system\", \"content\": \"Du extrahierst überprüfbare Behauptungen aus AI-News und Social-Media-Texten. Antworte ausschließlich mit JSON in diesem Format: {\\\"zusammenfassung\\\": \\\"1-2 Sätze worum es geht\\\", \\\"claims\\\": [\\\"Behauptung 1\\\", \\\"Behauptung 2\\\"]}. Extrahiere maximal 3 zentrale, faktisch prüfbare Behauptungen als prägnante, suchbare englische Aussagen.\" }, { \"role\": \"user\", \"content\": $json.input } ] }}" }
+            {
+              "name": "model",
+              "value": "openai/gpt-4o-mini"
+            },
+            {
+              "name": "response_format",
+              "value": "={{ { \"type\": \"json_object\" } }}"
+            },
+            {
+              "name": "messages",
+              "value": "={{ [ { \"role\": \"system\", \"content\": \"Du extrahierst überprüfbare Behauptungen aus AI-News und Social-Media-Texten. Antworte ausschließlich mit JSON in diesem Format: {\\\"zusammenfassung\\\": \\\"1-2 Sätze worum es geht\\\", \\\"claims\\\": [\\\"Behauptung 1\\\", \\\"Behauptung 2\\\"]}. Extrahiere maximal 3 zentrale, faktisch prüfbare Behauptungen als prägnante, suchbare englische Aussagen.\" }, { \"role\": \"user\", \"content\": $json.input } ] }}"
+            }
           ]
         },
         "options": {}
@@ -244,7 +389,10 @@
       "name": "LLM 1: Claims extrahieren",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.3,
-      "position": [1792, 304],
+      "position": [
+        1792,
+        304
+      ],
       "retryOnFail": true
     },
     {
@@ -255,7 +403,10 @@
       "name": "Claims aufteilen",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [2000, 304],
+      "position": [
+        2000,
+        304
+      ],
       "onError": "continueErrorOutput"
     },
     {
@@ -263,10 +414,22 @@
         "tableId": "hype_check_runs",
         "fieldsUi": {
           "fieldValues": [
-            { "fieldId": "input_type", "fieldValue": "={{ $(\"Input normalisieren\").first().json.is_url ? \"url\" : \"text\" }}" },
-            { "fieldId": "input_kurz", "fieldValue": "={{ $(\"Analyse-Input\").first().json.input.slice(0, 200) }}" },
-            { "fieldId": "status", "fieldValue": "fehler_inhalt" },
-            { "fieldId": "fehler", "fieldValue": "={{ $json.error?.message ?? \"Keine prüfbaren Behauptungen\" }}" }
+            {
+              "fieldId": "input_type",
+              "fieldValue": "={{ $(\"Input normalisieren\").first().json.is_url ? \"url\" : \"text\" }}"
+            },
+            {
+              "fieldId": "input_kurz",
+              "fieldValue": "={{ $(\"Analyse-Input\").first().json.input.slice(0, 200) }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "fehler_inhalt"
+            },
+            {
+              "fieldId": "fehler",
+              "fieldValue": "={{ $json.error?.message ?? \"Keine prüfbaren Behauptungen\" }}"
+            }
           ]
         }
       },
@@ -274,7 +437,10 @@
       "name": "Log: Inhalt-Fehler",
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
-      "position": [2224, 544],
+      "position": [
+        2224,
+        544
+      ],
       "onError": "continueRegularOutput"
     },
     {
@@ -285,8 +451,14 @@
           "responseCode": 422,
           "responseHeaders": {
             "entries": [
-              { "name": "Access-Control-Allow-Origin", "value": "*" },
-              { "name": "Content-Type", "value": "application/json" }
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
             ]
           }
         }
@@ -295,7 +467,10 @@
       "name": "Fehler: Keine Claims",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.2,
-      "position": [2448, 544]
+      "position": [
+        2448,
+        544
+      ]
     },
     {
       "parameters": {
@@ -306,10 +481,22 @@
         "sendBody": true,
         "bodyParameters": {
           "parameters": [
-            { "name": "query", "value": "={{ $json.claim }}" },
-            { "name": "max_results", "value": "={{ 3 }}" },
-            { "name": "include_answer", "value": "={{ true }}" },
-            { "name": "search_depth", "value": "basic" }
+            {
+              "name": "query",
+              "value": "={{ $json.claim }}"
+            },
+            {
+              "name": "max_results",
+              "value": "={{ 3 }}"
+            },
+            {
+              "name": "include_answer",
+              "value": "={{ true }}"
+            },
+            {
+              "name": "search_depth",
+              "value": "basic"
+            }
           ]
         },
         "options": {}
@@ -318,7 +505,10 @@
       "name": "Tavily: Claim recherchieren",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.3,
-      "position": [2224, 304],
+      "position": [
+        2224,
+        304
+      ],
       "onError": "continueRegularOutput"
     },
     {
@@ -329,7 +519,10 @@
       "name": "Recherche bündeln",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [2448, 304]
+      "position": [
+        2448,
+        304
+      ]
     },
     {
       "parameters": {
@@ -340,9 +533,18 @@
         "sendBody": true,
         "bodyParameters": {
           "parameters": [
-            { "name": "model", "value": "openai/gpt-4o-mini" },
-            { "name": "response_format", "value": "={{ { \"type\": \"json_object\" } }}" },
-            { "name": "messages", "value": "={{ [ { \"role\": \"system\", \"content\": \"Du bist ein nüchterner Analyst für AI-News. Du bekommst einen Originaltext und Web-Rechercheergebnisse. Erstelle eine Einordnung als JSON, exakt in diesem Format: {\\\"zusammenfassung\\\": \\\"1-2 Sätze\\\", \\\"claims\\\": [{\\\"behauptung\\\": \\\"...\\\", \\\"bewertung\\\": \\\"belegt|teilweise belegt|spekulation|nicht prüfbar\\\", \\\"begruendung\\\": \\\"...\\\", \\\"quellen\\\": [\\\"url\\\"]}], \\\"hype_score\\\": 0-10, \\\"hype_score_begruendung\\\": \\\"...\\\", \\\"takeaways\\\": [\\\"...\\\"]}. Die takeaways richten sich an Lernende im AI-Bereich (Karrierewechsler): Was bedeutet das konkret für sie, ohne Panik, ohne Verharmlosung. Antworte auf Deutsch. Stütze Bewertungen ausschließlich auf die Rechercheergebnisse. Wenn zu einem Claim keine Rechercheergebnisse vorliegen, bewerte ihn als nicht prüfbar.\" }, { \"role\": \"user\", \"content\": \"Originaltext:\\n\" + $(\"Analyse-Input\").first().json.input + \"\\n\\nRechercheergebnisse:\\n\" + JSON.stringify($json.recherche) } ] }}" }
+            {
+              "name": "model",
+              "value": "openai/gpt-4o-mini"
+            },
+            {
+              "name": "response_format",
+              "value": "={{ { \"type\": \"json_object\" } }}"
+            },
+            {
+              "name": "messages",
+              "value": "={{ [ { \"role\": \"system\", \"content\": \"Du bist ein nüchterner Analyst für AI-News. Du bekommst einen Originaltext und Web-Rechercheergebnisse. Erstelle eine Einordnung als JSON, exakt in diesem Format: {\\\"zusammenfassung\\\": \\\"1-2 Sätze\\\", \\\"claims\\\": [{\\\"behauptung\\\": \\\"...\\\", \\\"bewertung\\\": \\\"belegt|teilweise belegt|spekulation|nicht prüfbar\\\", \\\"begruendung\\\": \\\"...\\\", \\\"quellen\\\": [\\\"url\\\"]}], \\\"hype_score\\\": 0-10, \\\"hype_score_begruendung\\\": \\\"...\\\", \\\"takeaways\\\": [\\\"...\\\"]}. Die takeaways richten sich an Lernende im AI-Bereich (Karrierewechsler): Was bedeutet das konkret für sie, ohne Panik, ohne Verharmlosung. Antworte auf Deutsch. Stütze Bewertungen ausschließlich auf die Rechercheergebnisse. Wenn zu einem Claim keine Rechercheergebnisse vorliegen, bewerte ihn als nicht prüfbar.\" }, { \"role\": \"user\", \"content\": \"Originaltext:\\n\" + $(\"Analyse-Input\").first().json.input + \"\\n\\nRechercheergebnisse:\\n\" + JSON.stringify($json.recherche) } ] }}"
+            }
           ]
         },
         "options": {}
@@ -351,7 +553,10 @@
       "name": "LLM 2: Einordnung erstellen",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.3,
-      "position": [2672, 304],
+      "position": [
+        2672,
+        304
+      ],
       "retryOnFail": true
     },
     {
@@ -362,15 +567,24 @@
       "name": "Ergebnis parsen",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [2880, 304]
+      "position": [
+        2880,
+        304
+      ]
     },
     {
       "parameters": {
         "options": {
           "responseHeaders": {
             "entries": [
-              { "name": "Access-Control-Allow-Origin", "value": "*" },
-              { "name": "Content-Type", "value": "application/json" }
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
             ]
           }
         }
@@ -379,19 +593,40 @@
       "name": "Antwort senden",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.2,
-      "position": [3104, 304]
+      "position": [
+        3104,
+        304
+      ]
     },
     {
       "parameters": {
         "tableId": "hype_check_runs",
         "fieldsUi": {
           "fieldValues": [
-            { "fieldId": "input_type", "fieldValue": "={{ $(\"Input normalisieren\").first().json.is_url ? \"url\" : \"text\" }}" },
-            { "fieldId": "input_kurz", "fieldValue": "={{ $(\"Analyse-Input\").first().json.input.slice(0, 200) }}" },
-            { "fieldId": "quelle_url", "fieldValue": "={{ $json.quelle_url ?? \"\" }}" },
-            { "fieldId": "hype_score", "fieldValue": "={{ $json.hype_score }}" },
-            { "fieldId": "verifikation_aktiv", "fieldValue": "={{ $json.verifikation_aktiv }}" },
-            { "fieldId": "status", "fieldValue": "ok" }
+            {
+              "fieldId": "input_type",
+              "fieldValue": "={{ $(\"Input normalisieren\").first().json.is_url ? \"url\" : \"text\" }}"
+            },
+            {
+              "fieldId": "input_kurz",
+              "fieldValue": "={{ $(\"Analyse-Input\").first().json.input.slice(0, 200) }}"
+            },
+            {
+              "fieldId": "quelle_url",
+              "fieldValue": "={{ $json.quelle_url ?? \"\" }}"
+            },
+            {
+              "fieldId": "hype_score",
+              "fieldValue": "={{ $json.hype_score }}"
+            },
+            {
+              "fieldId": "verifikation_aktiv",
+              "fieldValue": "={{ $json.verifikation_aktiv }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "ok"
+            }
           ]
         }
       },
@@ -399,15 +634,29 @@
       "name": "Log: Erfolgreicher Run",
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
-      "position": [3104, 544],
+      "position": [
+        3104,
+        544
+      ],
       "onError": "continueRegularOutput"
     },
     {
       "parameters": {
         "conditions": {
-          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 1 },
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
           "conditions": [
-            { "leftValue": "={{ $(\"Analyse-Input\").first().json.email }}", "operator": { "type": "string", "operation": "notEmpty" } }
+            {
+              "leftValue": "={{ $(\"Analyse-Input\").first().json.email }}",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
           ],
           "combinator": "and"
         },
@@ -417,7 +666,10 @@
       "name": "E-Mail angegeben?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
-      "position": [3104, 768]
+      "position": [
+        3104,
+        768
+      ]
     },
     {
       "parameters": {
@@ -427,7 +679,10 @@
       "name": "Mail erstellen",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [3328, 768]
+      "position": [
+        3328,
+        768
+      ]
     },
     {
       "parameters": {
@@ -438,10 +693,22 @@
         "sendBody": true,
         "bodyParameters": {
           "parameters": [
-            { "name": "from", "value": "onboarding@resend.dev" },
-            { "name": "to", "value": "DEINE-RESEND-VERIFIZIERTE-ADRESSE" },
-            { "name": "subject", "value": "={{ $json.betreff }}" },
-            { "name": "html", "value": "={{ $json.html }}" }
+            {
+              "name": "from",
+              "value": "onboarding@resend.dev"
+            },
+            {
+              "name": "to",
+              "value": "DEINE-RESEND-VERIFIZIERTE-ADRESSE"
+            },
+            {
+              "name": "subject",
+              "value": "={{ $json.betreff }}"
+            },
+            {
+              "name": "html",
+              "value": "={{ $json.html }}"
+            }
           ]
         },
         "options": {}
@@ -450,30 +717,377 @@
       "name": "Resend: Ergebnis-Mail",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.3,
-      "position": [3552, 768],
+      "position": [
+        3552,
+        768
+      ],
       "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.is_blocked }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "blk-if-0001",
+      "name": "Blockierte Domain?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1100,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "tableId": "hype_check_runs",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "input_type",
+              "fieldValue": "url"
+            },
+            {
+              "fieldId": "input_kurz",
+              "fieldValue": "={{ $(\"Input normalisieren\").first().json.input.slice(0, 200) }}"
+            },
+            {
+              "fieldId": "quelle_url",
+              "fieldValue": "={{ $(\"Input normalisieren\").first().json.input }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "fehler_url"
+            },
+            {
+              "fieldId": "fehler",
+              "fieldValue": "Blockierte Domain (Video/Social Media)"
+            }
+          ]
+        }
+      },
+      "id": "blk-log-0001",
+      "name": "Log: Blockierte Domain",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1320,
+        80
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{ \"error\": \"Video- und Social-Media-Links (YouTube, Instagram, TikTok, X, Facebook) können nicht analysiert werden – dort ist der eigentliche Inhalt nicht per Link abrufbar. Kopiere stattdessen Titel + Beschreibung des Videos bzw. den Text des Posts in das Eingabefeld.\" }",
+        "options": {
+          "responseCode": 422,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      "id": "blk-resp-0001",
+      "name": "Fehler: Blockierte Domain",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.2,
+      "position": [
+        1540,
+        80
+      ]
     }
   ],
   "connections": {
-    "Webhook: Eingabe empfangen": { "main": [[{ "node": "Input normalisieren", "type": "main", "index": 0 }]] },
-    "Input normalisieren": { "main": [[{ "node": "Input vorhanden?", "type": "main", "index": 0 }]] },
-    "Input vorhanden?": { "main": [[{ "node": "Ist URL?", "type": "main", "index": 0 }], [{ "node": "Fehler: Leerer Input", "type": "main", "index": 0 }]] },
-    "Ist URL?": { "main": [[{ "node": "Webseite laden", "type": "main", "index": 0 }], [{ "node": "Analyse-Input", "type": "main", "index": 0 }]] },
-    "Webseite laden": { "main": [[{ "node": "Text aus HTML extrahieren", "type": "main", "index": 0 }], [{ "node": "Log: URL-Fehler", "type": "main", "index": 0 }]] },
-    "Text aus HTML extrahieren": { "main": [[{ "node": "Analyse-Input", "type": "main", "index": 0 }], [{ "node": "Log: URL-Fehler", "type": "main", "index": 0 }]] },
-    "Analyse-Input": { "main": [[{ "node": "LLM 1: Claims extrahieren", "type": "main", "index": 0 }]] },
-    "Log: URL-Fehler": { "main": [[{ "node": "Fehler: URL nicht lesbar", "type": "main", "index": 0 }]] },
-    "LLM 1: Claims extrahieren": { "main": [[{ "node": "Claims aufteilen", "type": "main", "index": 0 }]] },
-    "Claims aufteilen": { "main": [[{ "node": "Tavily: Claim recherchieren", "type": "main", "index": 0 }], [{ "node": "Log: Inhalt-Fehler", "type": "main", "index": 0 }]] },
-    "Log: Inhalt-Fehler": { "main": [[{ "node": "Fehler: Keine Claims", "type": "main", "index": 0 }]] },
-    "Tavily: Claim recherchieren": { "main": [[{ "node": "Recherche bündeln", "type": "main", "index": 0 }]] },
-    "Recherche bündeln": { "main": [[{ "node": "LLM 2: Einordnung erstellen", "type": "main", "index": 0 }]] },
-    "LLM 2: Einordnung erstellen": { "main": [[{ "node": "Ergebnis parsen", "type": "main", "index": 0 }]] },
-    "Ergebnis parsen": { "main": [[{ "node": "Antwort senden", "type": "main", "index": 0 }, { "node": "Log: Erfolgreicher Run", "type": "main", "index": 0 }, { "node": "E-Mail angegeben?", "type": "main", "index": 0 }]] },
-    "E-Mail angegeben?": { "main": [[{ "node": "Mail erstellen", "type": "main", "index": 0 }]] },
-    "Mail erstellen": { "main": [[{ "node": "Resend: Ergebnis-Mail", "type": "main", "index": 0 }]] }
+    "Webhook: Eingabe empfangen": {
+      "main": [
+        [
+          {
+            "node": "Input normalisieren",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Input normalisieren": {
+      "main": [
+        [
+          {
+            "node": "Input vorhanden?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Input vorhanden?": {
+      "main": [
+        [
+          {
+            "node": "Ist URL?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fehler: Leerer Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ist URL?": {
+      "main": [
+        [
+          {
+            "node": "Blockierte Domain?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Analyse-Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webseite laden": {
+      "main": [
+        [
+          {
+            "node": "Text aus HTML extrahieren",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log: URL-Fehler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text aus HTML extrahieren": {
+      "main": [
+        [
+          {
+            "node": "Analyse-Input",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log: URL-Fehler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyse-Input": {
+      "main": [
+        [
+          {
+            "node": "LLM 1: Claims extrahieren",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log: URL-Fehler": {
+      "main": [
+        [
+          {
+            "node": "Fehler: URL nicht lesbar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM 1: Claims extrahieren": {
+      "main": [
+        [
+          {
+            "node": "Claims aufteilen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claims aufteilen": {
+      "main": [
+        [
+          {
+            "node": "Tavily: Claim recherchieren",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log: Inhalt-Fehler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log: Inhalt-Fehler": {
+      "main": [
+        [
+          {
+            "node": "Fehler: Keine Claims",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tavily: Claim recherchieren": {
+      "main": [
+        [
+          {
+            "node": "Recherche bündeln",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recherche bündeln": {
+      "main": [
+        [
+          {
+            "node": "LLM 2: Einordnung erstellen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM 2: Einordnung erstellen": {
+      "main": [
+        [
+          {
+            "node": "Ergebnis parsen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ergebnis parsen": {
+      "main": [
+        [
+          {
+            "node": "Antwort senden",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Log: Erfolgreicher Run",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "E-Mail angegeben?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "E-Mail angegeben?": {
+      "main": [
+        [
+          {
+            "node": "Mail erstellen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mail erstellen": {
+      "main": [
+        [
+          {
+            "node": "Resend: Ergebnis-Mail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Blockierte Domain?": {
+      "main": [
+        [
+          {
+            "node": "Log: Blockierte Domain",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Webseite laden",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log: Blockierte Domain": {
+      "main": [
+        [
+          {
+            "node": "Fehler: Blockierte Domain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
   },
-  "settings": { "executionOrder": "v1" },
+  "settings": {
+    "executionOrder": "v1"
+  },
   "pinData": {},
   "active": false
 }
