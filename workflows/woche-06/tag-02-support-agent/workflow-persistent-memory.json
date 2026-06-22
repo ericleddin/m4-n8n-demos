@@ -1,0 +1,376 @@
+{
+  "name": "W6T2 - Support-Agent - Persistent Memory",
+  "nodes": [
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        496,
+        256
+      ],
+      "id": "1d86220d-7dcc-4030-8530-5efdbceadf76",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "JOxIKqPlB5YoEEhu",
+          "name": "OpenAI Account - OpenRouter Key Eric"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "Durchsucht die Voltbox-FAQ nach einer Kundenfrage. Input: die Frage als Text. Gibt die passende FAQ-Antwort als Text zurueck oder den String NICHT_GEFUNDEN, wenn nichts passt.",
+        "jsCode": "const q = (query || '').toLowerCase();\nconst faq = [\n  { keys: ['versand', 'verschick', 'shipping', 'versandkosten'], a: 'Standardversand kostet 3,99 EUR, ab 50 EUR Bestellwert ist der Versand kostenlos.' },\n  { keys: ['lieferzeit', 'wie lange', 'wann kommt', 'dauer'], a: 'Die Lieferzeit betraegt in der Regel 2 bis 4 Werktage innerhalb Deutschlands.' },\n  { keys: ['rueckgabe', 'rückgabe', 'retoure', 'zurueck', 'zurück', 'umtausch', 'widerruf'], a: 'Du kannst Artikel innerhalb von 30 Tagen kostenlos zurueckgeben. Das Retourenlabel findest du in deinem Kundenkonto.' },\n  { keys: ['zahlung', 'bezahlen', 'zahlungsart', 'paypal', 'rechnung', 'kreditkarte', 'klarna'], a: 'Wir akzeptieren PayPal, Kreditkarte, Klarna und Kauf auf Rechnung.' },\n  { keys: ['kontakt', 'erreichen', 'telefon', 'email', 'support', 'hotline'], a: 'Unser Support ist Mo bis Fr von 9 bis 17 Uhr unter support@voltbox.de erreichbar.' }\n];\nfor (const item of faq) {\n  if (item.keys.some(k => q.includes(k))) {\n    return item.a;\n  }\n}\nreturn 'NICHT_GEFUNDEN';"
+      },
+      "id": "ca83f81a-e7c0-4db4-bc4f-ce06fd72e6b3",
+      "name": "FAQ_Suche",
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.3,
+      "position": [
+        720,
+        256
+      ]
+    },
+    {
+      "parameters": {
+        "description": "Prueft den Status einer Bestellung anhand der Bestellnummer. Input: die Bestellnummer (z. B. 10001) als Text. Gibt Status, Tracking und voraussichtliche Lieferung zurueck, oder NICHT_GEFUNDEN. Nutze dies bei Fragen zu einer konkreten Bestellung.",
+        "jsCode": "// Mock-Bestelldatenbank. In T3 wird das durch eine echte Datenquelle ersetzt.\nconst input = (query || '').toString();\nconst match = input.match(/\\d{4,}/);\nconst orders = {\n  '10001': { status: 'Versendet', tracking: 'DHL 00340434290001', eta: 'morgen' },\n  '10002': { status: 'In Bearbeitung', tracking: null, eta: '2 bis 3 Werktage' },\n  '10003': { status: 'Zugestellt', tracking: 'DHL 00340434290003', eta: 'bereits erfolgt' },\n  '10004': { status: 'Storniert', tracking: null, eta: 'entfaellt' }\n};\nif (!match) {\n  return 'KEINE_BESTELLNUMMER: Es wurde keine Bestellnummer erkannt. Bitte den Kunden nach der Bestellnummer fragen.';\n}\nconst id = match[0];\nconst o = orders[id];\nif (!o) {\n  return 'NICHT_GEFUNDEN: Keine Bestellung mit der Nummer ' + id + ' gefunden.';\n}\nlet out = 'Bestellung ' + id + ': Status ' + o.status + '.';\nif (o.tracking) { out += ' Tracking: ' + o.tracking + '.'; }\nout += ' Voraussichtliche Lieferung: ' + o.eta + '.';\nreturn out;"
+      },
+      "id": "eab38c35-bf04-4e77-8b44-f86e7f8e7e92",
+      "name": "Bestellstatus_pruefen",
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.3,
+      "position": [
+        944,
+        256
+      ]
+    },
+    {
+      "parameters": {
+        "description": "Erstellt ein Support-Ticket fuer ein Anliegen, das nicht sofort beantwortet werden kann und ein Mensch bearbeiten muss (nicht dringend). Input: eine kurze Beschreibung des Kundenanliegens als Text. Gibt die Ticket-Nummer zurueck.",
+        "jsCode": "// Mock-Ticketsystem. In echt waere das ein POST-Request an ein Ticket-Tool.\nconst text = (query || '').toString().trim();\nif (!text) {\n  return 'FEHLER: Es wurde kein Anliegen uebergeben.';\n}\nconst ticketId = 'VB-' + Math.floor(100000 + Math.random() * 900000);\nreturn 'Ticket ' + ticketId + ' wurde angelegt. Anliegen: \"' + text + '\". Ein Mitarbeiter meldet sich innerhalb von 24 Stunden.';"
+      },
+      "id": "30a9e3b4-1af7-4a91-add7-f7a29f54ac10",
+      "name": "Ticket_erstellen",
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.3,
+      "position": [
+        1168,
+        256
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        240,
+        32
+      ],
+      "id": "4d9c4a31-debe-4ab3-a247-d523d8217794",
+      "name": "Kundenanfrage (Chat)",
+      "webhookId": "15c7fdf5-75b1-478c-b611-5a4df8744028"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "Du bist der Kundenservice-Agent von Voltbox, einem Online-Shop fuer Elektronik.\n\nDir stehen folgende Tools zur Verfuegung:\n- FAQ_Suche: Allgemeine Fragen zu Versand, Lieferzeit, Rueckgabe, Zahlung und Kontakt.\n- Bestellstatus_pruefen: Status einer konkreten Bestellung anhand der Bestellnummer.\n- Ticket_erstellen: Legt ein Support-Ticket an, wenn ein Anliegen nicht sofort loesbar ist und ein Mitarbeiter es bearbeiten soll (nicht dringend).\n- Eskalation_an_Mensch: Schickt sofort eine E-Mail an das Support-Team. Nur bei dringenden Faellen, Beschwerden oder wenn der Kunde ausdruecklich einen Menschen verlangt.\n\nRegeln zur Tool-Wahl:\n- Allgemeine Info-Frage -> FAQ_Suche.\n- Frage nach einer konkreten Bestellung -> Bestellstatus_pruefen. Fehlt die Bestellnummer, frage zuerst danach.\n- Konkretes Problem, das ein Mensch bearbeiten muss, aber nicht dringend ist -> Ticket_erstellen, nenne dem Kunden die Ticket-Nummer.\n- Dringend, Beschwerde oder ausdruecklicher Wunsch nach einem Menschen -> Eskalation_an_Mensch.\n- Erfinde nie Informationen. Gibt ein Tool NICHT_GEFUNDEN oder NICHT_GEFUNDEN-aehnliches zurueck, sag das ehrlich und biete naechste Schritte an.\n- Nutze den bisherigen Gespraechsverlauf (z. B. eine zuvor genannte Bestellnummer), statt erneut nachzufragen.\n- Antworte freundlich, kurz und auf Deutsch.",
+          "enableStreaming": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        464,
+        32
+      ],
+      "id": "dd9ff336-b80e-4715-903d-3b3c4c36a388",
+      "name": "Support-Agent"
+    },
+    {
+      "parameters": {
+        "content": "#### W6T2 – Voltbox Support-Agent (Single-Agent, Day 2: Tools & Memory)\n\nAufbau auf W6T1. Der Agent hat jetzt **4 Tools** und entscheidet selbst, welches er nutzt:\nFAQ_Suche · Bestellstatus_pruefen · Ticket_erstellen · Eskalation_an_Mensch.\n\nNeu dazu: **Persistent Memory** (Postgres/Supabase) → Folgefragen funktionieren UND der Verlauf überlebt Sessions sowie n8n-Neustarts (Unterschied zum In-RAM Window Buffer).\n\nLernziel: Die **Tool-Beschreibung** steuert die Tool-Wahl. Beobachten: wählt der Agent das richtige Tool?\n\nBestellstatus + Ticket sind **Mocks** (Code). Echte Datenquelle/API kommt in T3. Eskalation ist ein **echter POST** an Resend → die Mail kommt wirklich an.",
+        "height": 408,
+        "width": 320,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -192,
+        -256
+      ],
+      "typeVersion": 1,
+      "id": "4d6d14c7-f0e8-4858-a672-b99cc4df6b78",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "Kundenanfrage (Chat): Chat Trigger. Response Mode = default (lastNode).",
+        "height": 144,
+        "width": 260
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        160,
+        -256
+      ],
+      "typeVersion": 1,
+      "id": "b70eaef5-7f3c-40ee-b8b9-0be3d9f88f77",
+      "name": "Sticky Note 1"
+    },
+    {
+      "parameters": {
+        "content": "Support-Agent: AI Agent. System-Prompt = Rolle + klare Regel, WANN welches Tool. Genau das macht die Tool-Wahl beobachtbar.",
+        "height": 176
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        464,
+        -256
+      ],
+      "typeVersion": 1,
+      "id": "1cb11794-091c-45d5-b97d-d2ecf9a456b3",
+      "name": "Sticky Note 2"
+    },
+    {
+      "parameters": {
+        "content": "Persistent Memory: Postgres Chat Memory → Supabase (postgres).\nSpeichert den Verlauf in der Tabelle n8n_chat_histories statt im RAM.\nBleibt über Sessions UND n8n-Neustarts erhalten — das ist der Unterschied\nzum Window Buffer (V1).",
+        "height": 176
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        176,
+        432
+      ],
+      "typeVersion": 1,
+      "id": "dd3285cc-2795-439e-8d5a-9873f964476a",
+      "name": "Sticky Note 3"
+    },
+    {
+      "parameters": {
+        "content": "OpenAI Chat Model: Modell gpt-4o-mini (nativer OpenAI-Node).",
+        "height": 140,
+        "width": 200
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        432,
+        432
+      ],
+      "typeVersion": 1,
+      "id": "718846a7-0e4e-433c-9ae6-a7e71c7bd98c",
+      "name": "Sticky Note 4"
+    },
+    {
+      "parameters": {
+        "content": "FAQ_Suche: Code Tool. Keyword-Match über 5 FAQ-Einträge. Kein Treffer → NICHT_GEFUNDEN.",
+        "height": 140,
+        "width": 200
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        656,
+        432
+      ],
+      "typeVersion": 1,
+      "id": "d4ceb007-648e-45ad-bec9-f69c3c65bd6f",
+      "name": "Sticky Note 5"
+    },
+    {
+      "parameters": {
+        "content": "Bestellstatus_pruefen: Code Tool (MOCK). Bestellnr → Status. In echt = API/DB-Call (→ T3).",
+        "height": 134,
+        "width": 210
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        880,
+        432
+      ],
+      "typeVersion": 1,
+      "id": "0c914fc3-0442-47ca-9d14-244b0a7aa87c",
+      "name": "Sticky Note 6"
+    },
+    {
+      "parameters": {
+        "content": "Ticket_erstellen: Code Tool (MOCK). Gibt Ticket-ID zurück. In echt = POST ans Ticketsystem.",
+        "height": 134,
+        "width": 210
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1120,
+        432
+      ],
+      "typeVersion": 1,
+      "id": "def585f8-c312-4ee5-a43e-5810f54d57dd",
+      "name": "Sticky Note 7"
+    },
+    {
+      "parameters": {
+        "content": "Eskalation_an_Mensch: Resend Tool (Community Node), **echter POST** an Resend. Sendet Mail an <<REPLACE_WITH_YOUR_NOTIFICATION_EMAIL>>",
+        "height": 176,
+        "width": 250
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1216,
+        -16
+      ],
+      "typeVersion": 1,
+      "id": "3d909780-a7e2-4850-9534-e40711ccf7c3",
+      "name": "Sticky Note 8"
+    },
+    {
+      "parameters": {
+        "from": "onboarding@resend.dev",
+        "to": "<<REPLACE_WITH_YOUR_NOTIFICATION_EMAIL>>",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "html": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('HTML_Content', ``, 'string') }}",
+        "additionalOptions": {}
+      },
+      "type": "n8n-nodes-resend.resendTool",
+      "typeVersion": 1,
+      "position": [
+        1072,
+        16
+      ],
+      "id": "a38f2e26-25b3-4dc3-8a7d-a984d7906449",
+      "name": "Eskalation_an_Mensch",
+      "webhookId": "14f0a163-0360-49f0-a0d8-dec5749ace32",
+      "credentials": {
+        "resendApi": {
+          "id": "00bhUzz5RmMgMjwO",
+          "name": "Resend - <<REPLACE_WITH_YOUR_NOTIFICATION_EMAIL>>"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        256,
+        272
+      ],
+      "id": "2a794cd8-e3ce-436d-99c8-2f92eafe309e",
+      "name": "Persistent Memory",
+      "credentials": {
+        "postgres": {
+          "id": "NoG0GGagTfZTQeFh",
+          "name": "Supabase - KI Kurs M4"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Support-Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FAQ_Suche": {
+      "ai_tool": [
+        [
+          {
+            "node": "Support-Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bestellstatus_pruefen": {
+      "ai_tool": [
+        [
+          {
+            "node": "Support-Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ticket_erstellen": {
+      "ai_tool": [
+        [
+          {
+            "node": "Support-Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kundenanfrage (Chat)": {
+      "main": [
+        [
+          {
+            "node": "Support-Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Support-Agent": {
+      "main": [
+        []
+      ]
+    },
+    "Eskalation_an_Mensch": {
+      "ai_tool": [
+        [
+          {
+            "node": "Support-Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Persistent Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Support-Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "096684bf-55bb-4f17-877e-d9e6b1525725",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f032027e20e9709391bcafe9291ae76dc2a07ff2b593bca6936b7404ddb31c33"
+  },
+  "id": "oHeFexBKJ7wW10D1",
+  "tags": []
+}
