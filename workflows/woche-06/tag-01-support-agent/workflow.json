@@ -1,0 +1,209 @@
+{
+  "name": "W6T1 - Support-Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        112,
+        416
+      ],
+      "id": "bab533ae-6ab9-40a0-bf37-31417aec961e",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "JOxIKqPlB5YoEEhu",
+          "name": "OpenAI Account - OpenRouter Key Eric"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "Durchsucht die Voltbox-FAQ nach einer Kundenfrage. Input: die Frage als Text. Gibt die passende FAQ-Antwort als Text zurueck oder den String NICHT_GEFUNDEN, wenn nichts passt.",
+        "jsCode": "const q = (query || '').toLowerCase();\nconst faq = [\n  { keys: ['versand', 'verschick', 'shipping', 'versandkosten'], a: 'Standardversand kostet 3,99 EUR, ab 50 EUR Bestellwert ist der Versand kostenlos.' },\n  { keys: ['lieferzeit', 'wie lange', 'wann kommt', 'dauer'], a: 'Die Lieferzeit betraegt in der Regel 2 bis 4 Werktage innerhalb Deutschlands.' },\n  { keys: ['rueckgabe', 'rückgabe', 'retoure', 'zurueck', 'zurück', 'umtausch', 'widerruf'], a: 'Du kannst Artikel innerhalb von 30 Tagen kostenlos zurueckgeben. Das Retourenlabel findest du in deinem Kundenkonto.' },\n  { keys: ['zahlung', 'bezahlen', 'zahlungsart', 'paypal', 'rechnung', 'kreditkarte', 'klarna'], a: 'Wir akzeptieren PayPal, Kreditkarte, Klarna und Kauf auf Rechnung.' },\n  { keys: ['kontakt', 'erreichen', 'telefon', 'email', 'support', 'hotline'], a: 'Unser Support ist Mo bis Fr von 9 bis 17 Uhr unter support@voltbox.de erreichbar.' }\n];\nfor (const item of faq) {\n  if (item.keys.some(k => q.includes(k))) {\n    return item.a;\n  }\n}\nreturn 'NICHT_GEFUNDEN';"
+      },
+      "id": "fd166274-5ee1-4d61-a534-8232df43cd08",
+      "name": "FAQ_Suche",
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.3,
+      "position": [
+        384,
+        416
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -64,
+        192
+      ],
+      "id": "dccf5259-6e8f-4d62-8e56-f65343dd9be1",
+      "name": "Kundenanfrage (Chat)",
+      "webhookId": "717a3451-7006-44ad-a8ee-9a5ca06d6498"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "Du bist der Kundenservice-Agent von Voltbox, einem Online-Shop fuer Elektronik.\n\nDir steht ein Tool zur Verfuegung:\n- FAQ_Suche: Durchsucht die Voltbox-FAQ. Nutze es fuer allgemeine Fragen zu Versand, Lieferzeit, Rueckgabe, Zahlung und Kontakt.\n\nRegeln:\n- Nutze FAQ_Suche, wenn die Frage zu einem dieser Themen passt.\n- Gibt das Tool NICHT_GEFUNDEN zurueck, oder passt die Frage zu keinem FAQ-Thema (z. B. konkreter Bestellstatus, persoenliche Kontodaten), dann erfinde keine Antwort. Sag ehrlich, dass du dazu aktuell keine Information hast, und verweise an den menschlichen Support unter support@voltbox.de.\n- Antworte freundlich, kurz und auf Deutsch."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        160,
+        192
+      ],
+      "id": "2f48922f-b4bf-446d-b359-4017b8154e64",
+      "name": "Support-Agent"
+    },
+    {
+      "parameters": {
+        "content": "#### W6T1 – Voltbox Support-Agent (Single-Agent, Day 1)\n\nKundenanfrage (Chat) → Support-Agent. Der Agent entscheidet selbst, ob er FAQ_Suche nutzt.\n\nLernziel: Tool-Nutzung ist eine Entscheidung des Agents, kein fester Schritt.\n\nDay 1 = 1 Tool (FAQ). T2 → Ticket- + Bestellstatus-Tool + Memory.",
+        "height": 272,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -400,
+        -96
+      ],
+      "typeVersion": 1,
+      "id": "729573ac-6b64-4129-9bc5-3a46e8f67b7a",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "Kundenanfrage (Chat): Chat Trigger. Response Mode = Streaming — muss zum Agent-Streaming passen, sonst zeigt das Widget nur „problem executing the workflow\", obwohl die Execution sauber läuft.",
+        "height": 176
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -144,
+        -96
+      ],
+      "typeVersion": 1,
+      "id": "9793495b-2c25-4b23-aa87-46c140f7ca72",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "Support-Agent: AI Agent. System Prompt = Rolle + Eskalationsregel.",
+        "height": 176
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        160,
+        -96
+      ],
+      "typeVersion": 1,
+      "id": "b31bc0a8-ce7d-4a2a-a024-d3fa9a70fd1e",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "OpenAI Chat Model: Modell gpt-4o-mini (nativer OpenAI-Node).",
+        "height": 176
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        32,
+        544
+      ],
+      "typeVersion": 1,
+      "id": "275445fe-a522-4297-8a98-8471780b0706",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "FAQ_Suche: Code Tool (JS). Keyword-Match über 5 FAQ-Einträge. Kein Treffer → NICHT_GEFUNDEN → Agent verweist an Support.",
+        "height": 176
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        320,
+        544
+      ],
+      "typeVersion": 1,
+      "id": "c1820512-ed52-470f-a4c7-6ae43cae9c81",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "#### Testfragen:\n\n„Was kostet der Versand?\" → Tool genutzt, Treffer\n„Wie lange dauert die Lieferung?\" → Tool genutzt, Treffer\n„Wie kann ich zahlen?\" → Tool genutzt, Treffer\n„Wo ist meine Bestellung #12345?\" → Tool liefert NICHT_GEFUNDEN → Agent gibt ehrlich zu, verweist an Support (das „was passiert ohne Antwort\"-Moment)\n„Hi, wie geht's dir?\" → Agent ruft das Tool nicht auf, antwortet direkt (zeigt: Agent entscheidet selbst, wann das Tool nötig ist)",
+        "height": 208,
+        "width": 560,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -704,
+        512
+      ],
+      "typeVersion": 1,
+      "id": "326925ed-eeea-4948-8ac6-53b97fb9b8ce",
+      "name": "Sticky Note5"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Support-Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FAQ_Suche": {
+      "ai_tool": [
+        [
+          {
+            "node": "Support-Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kundenanfrage (Chat)": {
+      "main": [
+        [
+          {
+            "node": "Support-Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "37ad8cee-84df-432e-ba4d-eefb47923a8d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f032027e20e9709391bcafe9291ae76dc2a07ff2b593bca6936b7404ddb31c33"
+  },
+  "id": "0Abd1bDkN3mXcY0P",
+  "tags": []
+}
