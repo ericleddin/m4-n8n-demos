@@ -1,0 +1,626 @@
+{
+  "name": "W6T3 - Support-Agent - RAG & API",
+  "nodes": [
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        272,
+        288
+      ],
+      "id": "161af2de-8456-48d4-81aa-a0e5eeb21040",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        240,
+        32
+      ],
+      "id": "9370109b-2a53-4418-a2c8-012cc4a55c8f",
+      "name": "Kundenanfrage (Chat)"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "Du bist der Kundenservice-Agent von Voltbox, einem Online-Shop für tragbare Powerstations und Solarmodule.\n\nTools:\n- search_knowledge_base: Wissensdatenbank (Produkte, Versand, Rückgabe, Garantie, Zahlung, Nutzung/Pflege). Für allgemeine Fragen zu Produkten, Richtlinien und Prozessen.\n- bestellstatus_abfragen: Status einer konkreten Bestellung. Nur bei genannter Bestellnummer (Format VB-XXXXX).\n- Ticket_erstellen: Legt ein Support-Ticket in der Datenbank an. Nutze es, wenn das Anliegen nicht über die Wissensdatenbank lösbar ist oder der Kunde ausdrücklich ein Ticket bzw. Rückmeldung wünscht. Nenne dem Kunden die zurückgegebene Ticket-ID.\n- Eskalation_an_Mensch: Sendet eine E-Mail an das Support-Team. Nutze es nur bei dringenden oder eskalierenden Fällen (Beschwerde, Defekt, Zeitdruck), zusätzlich zum Ticket.\n\nStabiles Grundwissen (kein Tool nötig):\n- Firmenname: Voltbox\n- Support-Kontakt: support@voltbox.de, erreichbar Mo–Fr 9–17 Uhr\n\nRegeln:\n- Wähle die richtige Quelle: Wissensfrage → search_knowledge_base; konkrete Bestellung mit Nummer → bestellstatus_abfragen; Grundwissen → direkt aus dieser Anweisung.\n- Nennt der Kunde eine Bestellung ohne Nummer, frage zuerst nach der Bestellnummer.\n- Erstelle ein Ticket erst, wenn du das Anliegen nicht selbst beantworten konntest oder der Kunde es wünscht. Bestätige anschließend die Ticket-ID.\n- Eskaliere per E-Mail nur bei dringenden Fällen, zusätzlich zum Ticket.\n- Erfinde nichts. Liefert ein Tool keinen Treffer, sag das ehrlich und verweise auf support@voltbox.de.\n- Antworte freundlich, kurz und auf Deutsch.",
+          "enableStreaming": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        464,
+        32
+      ],
+      "id": "0817c24a-c39e-41d7-9640-4ea0b9c1e92d",
+      "name": "Support-Agent"
+    },
+    {
+      "parameters": {
+        "content": "OpenAI Chat Model: Modell gpt-4o-mini (nativer OpenAI-Node).",
+        "height": 140,
+        "width": 200
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        224,
+        416
+      ],
+      "typeVersion": 1,
+      "id": "eac3694a-5ddf-41f9-a075-26790df4f489",
+      "name": "Sticky Note 4"
+    },
+    {
+      "parameters": {
+        "content": "Eskalation_an_Mensch: Resend-Tool, **echter Mailversand** an die Support-Adresse. Empfänger im Feld `to` (Default `your-support@example.com`) auf deine eigene Adresse setzen.",
+        "height": 176,
+        "width": 250
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1216,
+        -16
+      ],
+      "typeVersion": 1,
+      "id": "ae2231f8-09f6-4e6f-ab87-b2d9195b267e",
+      "name": "Sticky Note 8"
+    },
+    {
+      "parameters": {
+        "from": "onboarding@resend.dev",
+        "to": "your-support@example.com",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "html": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('HTML_Content', ``, 'string') }}",
+        "additionalOptions": {}
+      },
+      "type": "n8n-nodes-resend.resendTool",
+      "typeVersion": 1,
+      "position": [
+        1072,
+        16
+      ],
+      "id": "28f9c863-41f9-47e3-8bdf-e7c2a34c7454",
+      "name": "Eskalation_an_Mensch",
+      "credentials": {
+        "resendApi": {
+          "name": "Resend"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "formTitle": "Voltbox Wissensdatenbank – Dokument hochladen",
+        "formDescription": "Lade ein Voltbox-PDF hoch. Es wird gechunkt, embedded und in Supabase gespeichert. Bitte pro Upload genau ein PDF.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "PDF-Dokument",
+              "fieldType": "file",
+              "fieldName": "pdf",
+              "multipleFiles": false,
+              "acceptFileTypes": ".pdf",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "fafd9fe0-19f5-4dcd-8659-b96d12cdf1aa",
+      "name": "Voltbox-Dokument hochladen",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        208,
+        -784
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "pdf",
+        "options": {}
+      },
+      "id": "5d42a36c-cac9-42a6-ab26-0015767d26ee",
+      "name": "Extract from File",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        448,
+        -784
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "tableName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "documents",
+          "cachedResultName": "documents"
+        },
+        "options": {
+          "queryName": "match_documents"
+        }
+      },
+      "id": "4212c11c-de6d-4fc8-b5ad-017d9786b8c3",
+      "name": "Add to Supabase Vector Store",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        688,
+        -784
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "c13d9867-947d-4f72-87f1-3903323c2d5b",
+      "name": "Embeddings OpenAI",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        608,
+        -544
+      ],
+      "credentials": {
+        "openAiApi": {
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "fd838be4-4b96-49db-bcd1-14126a0a0d06",
+      "name": "Default Data Loader",
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        784,
+        -544
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 📥 Ingestion Pipeline – Voltbox\nForm-Upload → Text-Extraktion → Chunk/Embed → Supabase. Pro Upload genau ein PDF. Zieltabelle: documents / match_documents.",
+        "height": 120,
+        "width": 820,
+        "color": 3
+      },
+      "id": "7e3792b0-c3e0-4bb6-8b00-ddbd862778eb",
+      "name": "Sticky Note f5c329c6",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        192,
+        -1088
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Form-Trigger\nFile-Upload (.pdf). Binary-Feld: \"pdf\". Pro Submission ein PDF.",
+        "height": 120,
+        "width": 220
+      },
+      "id": "c6fe97b6-d0c1-4b21-8eee-f7697b351724",
+      "name": "Sticky Note 23e36cf5",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        208,
+        -928
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Extract from File\noperation=pdf, liest Binary \"pdf\" und gibt den Rohtext als JSON weiter.",
+        "height": 120,
+        "width": 220
+      },
+      "id": "ec38cc17-b26d-425e-ac76-9abffe16dbbf",
+      "name": "Sticky Note ccd8774b",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        448,
+        -928
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Supabase Vector Store (insert)\nChunked (Default Data Loader), embedded (OpenAI) und in documents gespeichert.",
+        "height": 120
+      },
+      "id": "d28d6b38-d579-4f4d-994c-333ef01f84c5",
+      "name": "Sticky Note 2ebe150c",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        688,
+        -928
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 🤖 W6T3 – Support-Agent\nRAG (search_knowledge_base) · API (bestellstatus_abfragen) · System Prompt (Grundwissen) – plus Action-Tools: Ticket_erstellen (Supabase) und Eskalation_an_Mensch (Resend).",
+        "height": 110,
+        "width": 1020,
+        "color": 3
+      },
+      "id": "94975ae7-c559-4dd3-a26f-01d721c796cc",
+      "name": "Sticky Note 416f3f12",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        192,
+        -224
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Support-Agent\nEntscheidet pro Frage, welche Quelle/welches Tool passt. Routing-Regeln im System Prompt.",
+        "height": 100,
+        "width": 250
+      },
+      "id": "675b04f0-0f51-4efb-8459-57d9453c0286",
+      "name": "Sticky Note 55c1d340",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        448,
+        -96
+      ]
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        448,
+        288
+      ],
+      "id": "cbf3c529-b82e-4781-ab55-a0a4acde2105",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Durchsucht die interne Voltbox-Wissensdatenbank nach Informationen zu Produkten, Versand, Rückgabe, Garantie, Zahlung sowie Nutzung und Pflege. Nutze dieses Tool für allgemeine Fragen zu Produkten, Richtlinien und Prozessen – nicht für konkrete Bestellungen.",
+        "tableName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "documents",
+          "cachedResultName": "documents"
+        },
+        "options": {
+          "queryName": "match_documents"
+        }
+      },
+      "id": "1a1437f0-f11e-4618-a990-ab099ed3c45f",
+      "name": "search_knowledge_base",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        592,
+        288
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        592,
+        448
+      ],
+      "id": "afa9dfdf-22e4-4838-a94c-3145db346f62",
+      "name": "Embeddings OpenAI1",
+      "credentials": {
+        "openAiApi": {
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Liefert Status, Artikel, Bestelldatum, voraussichtliche Lieferung und Trackingnummer zu EINER konkreten Bestellnummer (Format VB-XXXXX). Nutze dieses Tool nur, wenn der Kunde eine Bestellnummer nennt.",
+        "operation": "getAll",
+        "tableId": "orders",
+        "limit": 1,
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "order_number",
+              "condition": "eq",
+              "keyValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('order_number', 'Die Bestellnummer des Kunden, z. B. VB-10001') }}"
+            }
+          ]
+        }
+      },
+      "id": "d162389e-dfdb-4817-883a-a7779d794453",
+      "name": "bestellstatus_abfragen",
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        896,
+        288
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Legt ein Support-Ticket in der Datenbank an, wenn ein Anliegen nicht über die Wissensdatenbank lösbar ist oder der Kunde ausdrücklich ein Ticket bzw. Rückmeldung wünscht. Gibt die Ticket-ID zurück.",
+        "tableId": "tickets",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "subject",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('subject', 'Kurzer Betreff des Tickets') }}"
+            },
+            {
+              "fieldId": "message",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('message', 'Das Anliegen des Kunden im Detail') }}"
+            },
+            {
+              "fieldId": "customer_email",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('customer_email', 'E-Mail des Kunden, falls genannt, sonst leer') }}"
+            },
+            {
+              "fieldId": "order_number",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('order_number', 'Bestellnummer, falls genannt, z. B. VB-10001, sonst leer') }}"
+            }
+          ]
+        }
+      },
+      "id": "5420d126-92c8-4bec-8fe6-58e45c81f284",
+      "name": "Ticket_erstellen",
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        1152,
+        272
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "### Bestellstatus (API)\nStrukturierte Echtzeitdaten: eine Bestellung aus orders per order_number.",
+        "height": 100,
+        "width": 230
+      },
+      "id": "8b900a56-15e2-440f-8f48-ed8ad8a48c32",
+      "name": "Sticky Note d10bf8fe",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        864,
+        464
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Ticket_erstellen\nLegt eine Zeile in der Supabase-Tabelle tickets an. Kein Mock mehr.",
+        "height": 100,
+        "width": 220
+      },
+      "id": "5b31d80e-8af3-4d9f-9a60-ec2ae2530988",
+      "name": "Sticky Note 2063624d",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        464
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### RAG\nUnstrukturiertes Wissen aus documents (Top-K Chunks).",
+        "height": 90,
+        "width": 220
+      },
+      "id": "cef8f1ee-71bc-4370-bc9b-95aa32514efa",
+      "name": "Sticky Note 4bb939fa",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        576,
+        608
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Support-Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kundenanfrage (Chat)": {
+      "main": [
+        [
+          {
+            "node": "Support-Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Support-Agent": {
+      "main": [
+        []
+      ]
+    },
+    "Eskalation_an_Mensch": {
+      "ai_tool": [
+        [
+          {
+            "node": "Support-Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Voltbox-Dokument hochladen": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Add to Supabase Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Add to Supabase Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Add to Supabase Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Support-Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "search_knowledge_base": {
+      "ai_tool": [
+        [
+          {
+            "node": "Support-Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "search_knowledge_base",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "bestellstatus_abfragen": {
+      "ai_tool": [
+        [
+          {
+            "node": "Support-Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ticket_erstellen": {
+      "ai_tool": [
+        [
+          {
+            "node": "Support-Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": []
+}
