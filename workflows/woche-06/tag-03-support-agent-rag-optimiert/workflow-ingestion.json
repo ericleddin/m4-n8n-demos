@@ -1,0 +1,216 @@
+{
+  "name": "W6T3 - Ingestion Pipeline (RAG optimiert)",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Voltbox Wissensdatenbank — Dokument hinzufügen",
+        "formDescription": "PDF hochladen. Die Kategorie wird automatisch aus dem Dateinamen abgeleitet (Schema: Voltbox_<Kategorie>.pdf).",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "PDF-Dokument",
+              "fieldType": "file",
+              "fieldName": "dokument",
+              "multipleFiles": false,
+              "acceptFileTypes": ".pdf",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f056623b-90f8-4cb8-be62-6a7a99847cc7",
+      "name": "Dokument hochladen",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        -400,
+        160
+      ],
+      "webhookId": "6c020696-695c-4226-af27-0897828938a2"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "dokument",
+        "options": {
+          "joinPages": true
+        }
+      },
+      "id": "8a9396a1-0d6e-4841-96e0-0b914547951f",
+      "name": "PDF-Text extrahieren",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        -176,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "tableName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "documents",
+          "cachedResultName": "documents"
+        },
+        "options": {}
+      },
+      "id": "ba055da0-4eb6-4635-9c60-b7ea1ae7e0f7",
+      "name": "In Wissensdatenbank speichern",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        64,
+        160
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "9bbd5e36-73db-4a24-a004-cbd7a6f2eb7f",
+      "name": "Embeddings OpenAI",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        80,
+        384
+      ],
+      "credentials": {
+        "openAiApi": {
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonMode": "expressionData",
+        "jsonData": "={{ $('PDF-Text extrahieren').item.json.text }}",
+        "textSplittingMode": "custom",
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "kategorie",
+                "value": "={{ $('Dokument hochladen').item.binary.dokument.fileName.replace('Voltbox_', '').replace('.pdf', '') }}"
+              }
+            ]
+          }
+        }
+      },
+      "id": "4d63bb54-3841-4b87-8401-c6d4d28772b5",
+      "name": "Data Loader (Kategorie aus Dateiname)",
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        208,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "chunkSize": 800,
+        "chunkOverlap": 100,
+        "options": {}
+      },
+      "id": "6c55bd51-5879-42b5-809f-41012b183012",
+      "name": "Recursive Splitter (800/100)",
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        208,
+        592
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 📥 Ingestion-Pipeline (W6T3)\nEine PDF pro Upload → Text extrahieren → Chunks in die Wissensdatenbank. Drei der vier Optimierungs-Hebel sind hier sichtbar:\n• Chunk-Größe + Overlap → Recursive Splitter (800/100)\n• Embedding-Modell → Embeddings OpenAI (Dimension muss zur documents-Tabelle passen)\n• Metadaten → Data Loader setzt kategorie aus dem Dateinamen\nDie kategorie steuert später den Metadaten-Filter im Retrieval-Inspektor.\n\nHinweis: PDF-Text wird per Extract-from-File-Node gelesen (umgeht den pdf-parse-v1-Bug des Default Loaders).",
+        "height": 200,
+        "width": 300,
+        "color": 3
+      },
+      "id": "b994bb2a-f9e0-428a-a694-6d3b213e8f4a",
+      "name": "Sticky Note 1c6f3884",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -448,
+        -96
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Dokument hochladen": {
+      "main": [
+        [
+          {
+            "node": "PDF-Text extrahieren",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PDF-Text extrahieren": {
+      "main": [
+        [
+          {
+            "node": "In Wissensdatenbank speichern",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "In Wissensdatenbank speichern",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data Loader (Kategorie aus Dateiname)": {
+      "ai_document": [
+        [
+          {
+            "node": "In Wissensdatenbank speichern",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Splitter (800/100)": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Data Loader (Kategorie aus Dateiname)",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": []
+}
