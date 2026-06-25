@@ -1,0 +1,498 @@
+{
+  "name": "W6T4 - Support-Agent - Prompt Testing",
+  "nodes": [
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        272,
+        288
+      ],
+      "id": "8b9491e6-026f-4359-8f84-5503d9ae3d09",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "JOxIKqPlB5YoEEhu",
+          "name": "OpenAI Account - OpenRouter Key Eric"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        240,
+        32
+      ],
+      "id": "2c74ade1-c154-4638-bb9a-56974f290e05",
+      "name": "Kundenanfrage (Chat)",
+      "webhookId": "0a8cc38c-a449-4f0e-8bf8-050e2239143a"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "Du bist der Kundenservice-Agent von Voltbox, einem Online-Shop für tragbare Powerstations und Solarmodule.\n\nTools:\n- search_knowledge_base: Wissensdatenbank (Produkte, Versand, Rückgabe, Garantie, Zahlung, Nutzung/Pflege). Für allgemeine Fragen zu Produkten, Richtlinien und Prozessen.\n- bestellstatus_abfragen: Status einer konkreten Bestellung. Nur bei genannter Bestellnummer (Format VB-XXXXX).\n- Ticket_erstellen: Legt ein Support-Ticket in der Datenbank an. Nutze es, wenn das Anliegen nicht über die Wissensdatenbank lösbar ist oder der Kunde ausdrücklich ein Ticket bzw. Rückmeldung wünscht. Nenne dem Kunden die zurückgegebene Ticket-ID.\n- Eskalation_an_Mensch: Sendet eine E-Mail an das Support-Team. Nutze es nur bei dringenden oder eskalierenden Fällen (Beschwerde, Defekt, Zeitdruck), zusätzlich zum Ticket.\n- bestellung_stornieren: Storniert eine Bestellung endgültig. Nur nach ausdrücklicher Kundenbestätigung nutzen.\n\nStabiles Grundwissen (kein Tool nötig):\n- Firmenname: Voltbox\n- Support-Kontakt: support@voltbox.de, erreichbar Mo–Fr 9–17 Uhr\n\nRegeln:\n- Wähle die richtige Quelle: Wissensfrage → search_knowledge_base; konkrete Bestellung mit Nummer → bestellstatus_abfragen; Grundwissen → direkt aus dieser Anweisung.\n- Nennt der Kunde eine Bestellung ohne Nummer, frage zuerst nach der Bestellnummer.\n- Erstelle ein Ticket erst, wenn du das Anliegen nicht selbst beantworten konntest oder der Kunde es wünscht. Bestätige anschließend die Ticket-ID.\n- Eskaliere per E-Mail nur bei dringenden Fällen, zusätzlich zum Ticket.\n- Erfinde nichts. Liefert ein Tool keinen Treffer, sag das ehrlich und verweise auf support@voltbox.de.\n- Stornierungen sind endgültig. Bevor du bestellung_stornieren nutzt: Nenne dem Kunden Bestellnummer und Artikel und frage ausdrücklich nach Bestätigung. Storniere ERST nach klarem \"Ja\". Bei Ablehnung oder Unklarheit: nicht stornieren.\n- Antworte freundlich, kurz und auf Deutsch.",
+          "enableStreaming": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        464,
+        32
+      ],
+      "id": "8873d9a1-e7d3-4ab1-abf8-afd77d9574be",
+      "name": "Support-Agent"
+    },
+    {
+      "parameters": {
+        "content": "OpenAI Chat Model: Modell gpt-4o-mini (nativer OpenAI-Node).",
+        "height": 140,
+        "width": 200
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        224,
+        416
+      ],
+      "typeVersion": 1,
+      "id": "29f7851c-4fd2-4cbe-aa79-041e9a0bc51c",
+      "name": "Sticky Note 4"
+    },
+    {
+      "parameters": {
+        "content": "Eskalation_an_Mensch: Resend-Tool, **echter Mailversand** an die Benachrichtigungs-Adresse <<REPLACE_WITH_YOUR_NOTIFICATION_EMAIL>>",
+        "height": 176,
+        "width": 250
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1520,
+        -16
+      ],
+      "typeVersion": 1,
+      "id": "04145d53-37b7-4f20-84f6-80c06a03d811",
+      "name": "Sticky Note 8"
+    },
+    {
+      "parameters": {
+        "from": "onboarding@resend.dev",
+        "to": "<<REPLACE_WITH_YOUR_NOTIFICATION_EMAIL>>",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "html": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('HTML_Content', ``, 'string') }}",
+        "additionalOptions": {}
+      },
+      "type": "n8n-nodes-resend.resendTool",
+      "typeVersion": 1,
+      "position": [
+        1344,
+        16
+      ],
+      "id": "7a647e69-358b-4412-9391-a7d6d52d009b",
+      "name": "Eskalation_an_Mensch",
+      "webhookId": "ac59691b-7fa4-440a-a14e-539fbe660a83",
+      "credentials": {
+        "resendApi": {
+          "id": "00bhUzz5RmMgMjwO",
+          "name": "Resend - <<REPLACE_WITH_YOUR_NOTIFICATION_EMAIL>>"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 🤖 W6T4 – Support-Agent\nRAG (search_knowledge_base) · API (bestellstatus_abfragen) · System Prompt (Grundwissen) – plus Action-Tools: Ticket_erstellen (Supabase), Eskalation_an_Mensch (Resend) und bestellung_stornieren (Supabase).",
+        "height": 110,
+        "width": 1020,
+        "color": 3
+      },
+      "id": "5ce08622-3d4b-47c3-bb41-086ae31d6797",
+      "name": "Sticky Note 416f3f12",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        192,
+        -224
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Support-Agent\nEntscheidet pro Frage, welche Quelle/welches Tool passt. Routing-Regeln im System Prompt.",
+        "height": 100,
+        "width": 250
+      },
+      "id": "2f336286-0810-4ab2-8f78-5f69c86492a6",
+      "name": "Sticky Note 55c1d340",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        448,
+        -96
+      ]
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        448,
+        288
+      ],
+      "id": "fe238d14-d158-41fe-bfba-34e6a227622c",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Durchsucht die interne Voltbox-Wissensdatenbank nach Informationen zu Produkten, Versand, Rückgabe, Garantie, Zahlung sowie Nutzung und Pflege. Nutze dieses Tool für allgemeine Fragen zu Produkten, Richtlinien und Prozessen – nicht für konkrete Bestellungen.",
+        "tableName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "documents",
+          "cachedResultName": "documents"
+        },
+        "options": {
+          "queryName": "match_documents"
+        }
+      },
+      "id": "10cf102c-bc8a-4c7a-9c1f-bef4731c7415",
+      "name": "search_knowledge_base",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        592,
+        288
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "W0eyn3oDYgO1uj3u",
+          "name": "Supabase - Eric (RAG)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        592,
+        448
+      ],
+      "id": "6cd85764-4b1f-491e-8f23-8061d36417da",
+      "name": "Embeddings OpenAI1",
+      "credentials": {
+        "openAiApi": {
+          "id": "JOxIKqPlB5YoEEhu",
+          "name": "OpenAI Account - OpenRouter Key Eric"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Liefert Status, Artikel, Bestelldatum, voraussichtliche Lieferung und Trackingnummer zu EINER konkreten Bestellnummer (Format VB-XXXXX). Nutze dieses Tool nur, wenn der Kunde eine Bestellnummer nennt.",
+        "operation": "getAll",
+        "tableId": "orders",
+        "limit": 1,
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "order_number",
+              "condition": "eq",
+              "keyValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('order_number', 'Die Bestellnummer des Kunden, z. B. VB-10001') }}"
+            }
+          ]
+        }
+      },
+      "id": "93702a7c-f4b6-4e1d-8227-80d67c5785b7",
+      "name": "bestellstatus_abfragen",
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        896,
+        288
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "W0eyn3oDYgO1uj3u",
+          "name": "Supabase - Eric (RAG)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Legt ein Support-Ticket in der Datenbank an, wenn ein Anliegen nicht über die Wissensdatenbank lösbar ist oder der Kunde ausdrücklich ein Ticket bzw. Rückmeldung wünscht. Gibt die Ticket-ID zurück.",
+        "tableId": "tickets",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "subject",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('subject', 'Kurzer Betreff des Tickets') }}"
+            },
+            {
+              "fieldId": "message",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('message', 'Das Anliegen des Kunden im Detail') }}"
+            },
+            {
+              "fieldId": "customer_email",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('customer_email', 'E-Mail des Kunden, falls genannt, sonst leer') }}"
+            },
+            {
+              "fieldId": "order_number",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('order_number', 'Bestellnummer, falls genannt, z. B. VB-10001, sonst leer') }}"
+            }
+          ]
+        }
+      },
+      "id": "f85b7381-8571-4f64-8483-638b7d472917",
+      "name": "Ticket_erstellen",
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        1152,
+        272
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "W0eyn3oDYgO1uj3u",
+          "name": "Supabase - Eric (RAG)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "### Bestellstatus (API)\nStrukturierte Echtzeitdaten: eine Bestellung aus orders per order_number.",
+        "height": 100,
+        "width": 230
+      },
+      "id": "d5df650c-8323-4039-959f-61e4497fb436",
+      "name": "Sticky Note d10bf8fe",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        864,
+        464
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Ticket_erstellen\nLegt eine Zeile in der Supabase-Tabelle tickets an. Kein Mock mehr.",
+        "height": 100,
+        "width": 220
+      },
+      "id": "4214a18e-e2f8-4c65-8ecb-54a7a3052c21",
+      "name": "Sticky Note 2063624d",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        464
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### RAG\nUnstrukturiertes Wissen aus documents (Top-K Chunks).",
+        "height": 90,
+        "width": 220
+      },
+      "id": "480369c2-9978-47b5-a76a-7b56b9768378",
+      "name": "Sticky Note 4bb939fa",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        576,
+        608
+      ]
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Storniert EINE Bestellung anhand der Bestellnummer (Format VB-XXXXX), indem der Status auf 'storniert' gesetzt wird. Nutze dieses Tool nur nach ausdrücklicher Bestätigung des Kunden.",
+        "operation": "update",
+        "tableId": "orders",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "order_number",
+              "condition": "eq",
+              "keyValue": "={{ $fromAI('order_number', 'Die zu stornierende Bestellnummer, z. B. VB-10001') }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status",
+              "fieldValue": "storniert"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        1424,
+        272
+      ],
+      "id": "171ce1cf-1c7e-4546-969e-a8a060047ea4",
+      "name": "bestellung_stornieren",
+      "credentials": {
+        "supabaseApi": {
+          "id": "W0eyn3oDYgO1uj3u",
+          "name": "Supabase - Eric (RAG)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "### bestellung_stornieren\nSetzt orders.status → storniert per order_number. Gegated: Agent fragt erst nach Bestätigung, storniert erst nach \"Ja\"",
+        "height": 148,
+        "width": 220
+      },
+      "id": "df0e5e45-e2ec-470d-85fb-1d7e24acbb0d",
+      "name": "Sticky Note 2063624d1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1376,
+        464
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Support-Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kundenanfrage (Chat)": {
+      "main": [
+        [
+          {
+            "node": "Support-Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Support-Agent": {
+      "main": [
+        []
+      ]
+    },
+    "Eskalation_an_Mensch": {
+      "ai_tool": [
+        [
+          {
+            "node": "Support-Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Support-Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "search_knowledge_base": {
+      "ai_tool": [
+        [
+          {
+            "node": "Support-Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "search_knowledge_base",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "bestellstatus_abfragen": {
+      "ai_tool": [
+        [
+          {
+            "node": "Support-Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ticket_erstellen": {
+      "ai_tool": [
+        [
+          {
+            "node": "Support-Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "bestellung_stornieren": {
+      "ai_tool": [
+        [
+          {
+            "node": "Support-Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "3a86a501-99e6-4ccb-8e22-c46aeb91211a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f032027e20e9709391bcafe9291ae76dc2a07ff2b593bca6936b7404ddb31c33"
+  },
+  "id": "ptMACBt7oy4uLtrt",
+  "tags": []
+}
