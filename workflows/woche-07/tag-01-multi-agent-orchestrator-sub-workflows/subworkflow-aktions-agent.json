@@ -1,0 +1,343 @@
+{
+  "name": "W7T1c - Aktions-Agent (Sub)",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "query"
+            }
+          ]
+        }
+      },
+      "id": "078603df-dc00-42c0-92e7-197ab4343513",
+      "name": "Vom Orchestrator aufgerufen",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -240,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.query }}",
+        "options": {
+          "systemMessage": "Du bist der Aktions-Agent von Voltbox. Du führst Vorgänge mit Seiteneffekt aus.\n\nTools:\n- Ticket_erstellen: legt ein Support-Ticket an. Nenne dem Kunden die Ticket-ID.\n- Eskalation_an_Mensch: E-Mail ans Support-Team. Nur bei dringenden/eskalierenden Fällen (Beschwerde, Defekt, Zeitdruck), zusätzlich zum Ticket.\n- bestellung_stornieren: storniert eine Bestellung ENDGÜLTIG anhand der Bestellnummer. Nur nach ausdrücklicher Bestätigung.\n\nRegeln:\n- Stornierung ist endgültig und erfolgt allein anhand der Bestellnummer (Format VB-XXXXX). Frage NICHT nach dem Artikel. Wiederhole dem Kunden die Bestellnummer und frage ausdrücklich nach Bestätigung (z. B. „Möchten Sie Bestellung VB-XXXXX wirklich endgültig stornieren?\"). Storniere ERST nach klarem „Ja\". Bei Ablehnung oder Unklarheit: nicht stornieren.\n- Erstelle ein Ticket, wenn ein Anliegen Rückmeldung braucht; bestätige danach die Ticket-ID.\n- Eskaliere per E-Mail nur bei dringenden Fällen, zusätzlich zum Ticket.\n- Antworte kurz, freundlich, auf Deutsch."
+        }
+      },
+      "id": "921e5452-25f6-4fb7-af90-92d17cc4371d",
+      "name": "Aktions-Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        32,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "62432077-eecf-4015-b241-6f054abf8170",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -128,
+        448
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "JOxIKqPlB5YoEEhu",
+          "name": "OpenAI Account - OpenRouter Key Eric"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Legt ein Support-Ticket in der Datenbank an, wenn ein Anliegen nicht über die Wissensdatenbank lösbar ist oder der Kunde ausdrücklich ein Ticket bzw. Rückmeldung wünscht. Gibt die Ticket-ID zurück.",
+        "tableId": "tickets",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('subject', 'Kurzer Betreff des Tickets') }}"
+            },
+            {
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('message', 'Das Anliegen des Kunden im Detail') }}"
+            },
+            {
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('customer_email', 'E-Mail des Kunden, falls genannt, sonst leer') }}"
+            },
+            {
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('order_number', 'Bestellnummer, falls genannt, z. B. VB-10001, sonst leer') }}"
+            }
+          ]
+        }
+      },
+      "id": "4631a600-d1b3-4bdf-84e6-8538e2c1bf85",
+      "name": "Ticket_erstellen",
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        80,
+        448
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "W0eyn3oDYgO1uj3u",
+          "name": "Supabase - Eric (RAG)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "from": "onboarding@resend.dev",
+        "to": "<<REPLACE_WITH_YOUR_NOTIFICATION_EMAIL>>",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', '') }}",
+        "html": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('HTML_Content', '') }}",
+        "additionalOptions": {}
+      },
+      "id": "f723b2e2-6664-4ea1-bcf5-209a954af633",
+      "name": "Eskalation_an_Mensch",
+      "type": "n8n-nodes-resend.resendTool",
+      "typeVersion": 1,
+      "position": [
+        320,
+        448
+      ],
+      "webhookId": "3e118ddb-5049-43f5-be22-b62ba1bb1b6c",
+      "credentials": {
+        "resendApi": {
+          "id": "00bhUzz5RmMgMjwO",
+          "name": "Resend - <<REPLACE_WITH_YOUR_NOTIFICATION_EMAIL>>"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Storniert EINE Bestellung anhand der Bestellnummer (Format VB-XXXXX), indem der Status auf 'storniert' gesetzt wird. Nutze dieses Tool nur nach ausdrücklicher Bestätigung des Kunden.",
+        "operation": "update",
+        "tableId": "orders",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "order_number",
+              "condition": "eq",
+              "keyValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('order_number', 'Die zu stornierende Bestellnummer, z. B. VB-10001') }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status",
+              "fieldValue": "storniert"
+            }
+          ]
+        }
+      },
+      "id": "0cbc6f7c-49e6-4f7a-aa94-93fea9f0a3e7",
+      "name": "bestellung_stornieren",
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        544,
+        448
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "W0eyn3oDYgO1uj3u",
+          "name": "Supabase - Eric (RAG)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## ⚙️ W7T1c – Aktions-Agent (Sub-Workflow)\nWird vom Orchestrator als Tool aufgerufen. Input: `query`. Write / Seiteneffekte: Ticket, Eskalation, Stornierung. Stornierung erst nach Bestätigung.",
+        "height": 120,
+        "width": 980,
+        "color": 3
+      },
+      "id": "9c8b1a37-8781-4978-94fa-f0a7b06955fe",
+      "name": "Sticky Note 7ac1f11f",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        -112
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Trigger (Execute Workflow)\nMacht den Agenten als Sub-Workflow aufrufbar. Input-Feld `query` = der Vorgang vom Orchestrator. Auch einzeln testbar.",
+        "height": 178,
+        "width": 235
+      },
+      "id": "51d3972a-0b45-4622-8ea6-6a955040dc4a",
+      "name": "Sticky Note 59afb43d",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -528,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Aktions-Agent\nEigener Prompt/Model/Tools. Liest `{{ $json.query }}`. Bündelt bewusst alle Tools MIT Seiteneffekt – so sind die „gefährlichen\" Aktionen an einer Stelle und streng geprompted.",
+        "height": 168,
+        "width": 250
+      },
+      "id": "be31211f-c8c2-4580-84da-54ca9662415a",
+      "name": "Sticky Note c4204239",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        16,
+        32
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Chat Model\ngpt-4o-mini. Eigenes Model des Aktions-Agenten.",
+        "height": 90,
+        "width": 235
+      },
+      "id": "f71f038a-ea04-4b30-968c-2abf44d43558",
+      "name": "Sticky Note 6b70e9d1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -256,
+        592
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Ticket_erstellen\nSchreibt eine Zeile in Supabase `tickets`. Gibt Ticket-ID zurück, die der Agent dem Kunden nennt.",
+        "height": 190,
+        "width": 220
+      },
+      "id": "32f31a16-350a-48ef-a717-f9a8d17ee1d4",
+      "name": "Sticky Note e875c057",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        592
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Eskalation_an_Mensch\nResend-Node, echter POST. Mail ans Support-Team (Test-Modus → <<REPLACE_WITH_YOUR_NOTIFICATION_EMAIL>>). Nur bei dringenden Fällen, zusätzlich zum Ticket.",
+        "height": 194,
+        "width": 230
+      },
+      "id": "78127c5b-3fbf-45b4-9f8f-889b818dca5a",
+      "name": "Sticky Note 216267b9",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        240,
+        592
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### bestellung_stornieren\n⚠️ Irreversibel: setzt `orders.status` → storniert anhand der `order_number`. Kein Artikel nötig. Gegated über den Prompt: Agent wiederholt die Bestellnummer und storniert ERST nach klarem „Ja\".",
+        "height": 198,
+        "width": 230
+      },
+      "id": "0ceac568-e6b6-4689-9d10-42e1ef1ce94b",
+      "name": "Sticky Note 5df8c32d",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        480,
+        592
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Vom Orchestrator aufgerufen": {
+      "main": [
+        [
+          {
+            "node": "Aktions-Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Aktions-Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ticket_erstellen": {
+      "ai_tool": [
+        [
+          {
+            "node": "Aktions-Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Eskalation_an_Mensch": {
+      "ai_tool": [
+        [
+          {
+            "node": "Aktions-Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "bestellung_stornieren": {
+      "ai_tool": [
+        [
+          {
+            "node": "Aktions-Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "ec492cfe-e755-40fe-999b-bb39070bea6a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f032027e20e9709391bcafe9291ae76dc2a07ff2b593bca6936b7404ddb31c33"
+  },
+  "id": "Ku2i4xuisX3itTPm",
+  "tags": []
+}

@@ -1,0 +1,310 @@
+{
+  "name": "W7T1b - Auskunfts-Agent (Sub)",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "query"
+            }
+          ]
+        }
+      },
+      "id": "87820f1b-807f-449c-9fcc-89152698abb0",
+      "name": "Vom Orchestrator aufgerufen",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        48,
+        368
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.query }}",
+        "options": {
+          "systemMessage": "Du bist der Auskunfts-Agent von Voltbox (Online-Shop für tragbare Powerstations und Solarmodule). Du gibst ausschließlich Auskünfte – keine Aktionen.\n\nTools:\n- search_knowledge_base: Wissensdatenbank (Produkte, Versand, Rückgabe, Garantie, Zahlung, Nutzung/Pflege).\n- bestellstatus_abfragen: Status EINER Bestellung per Bestellnummer (Format VB-XXXXX).\n\nGrundwissen (kein Tool nötig): Firmenname Voltbox; Support support@voltbox.de, Mo–Fr 9–17 Uhr.\n\nRegeln:\n- Wissensfrage → search_knowledge_base. Konkrete Bestellung mit Nummer → bestellstatus_abfragen. Bestellung ohne Nummer → zuerst nach der Bestellnummer fragen.\n- Erfinde nichts. Kein Treffer → sag es ehrlich und verweise auf support@voltbox.de.\n- Antworte kurz, freundlich, auf Deutsch."
+        }
+      },
+      "id": "bd9dc2b1-7eec-453b-ac8d-60837da1c7dd",
+      "name": "Auskunfts-Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        320,
+        368
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "d5645286-8d5a-4df0-a525-bdf3399cd1d3",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        160,
+        592
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "JOxIKqPlB5YoEEhu",
+          "name": "OpenAI Account - OpenRouter Key Eric"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Durchsucht die interne Voltbox-Wissensdatenbank nach Informationen zu Produkten, Versand, Rückgabe, Garantie, Zahlung sowie Nutzung und Pflege. Nutze dieses Tool für allgemeine Fragen zu Produkten, Richtlinien und Prozessen – nicht für konkrete Bestellungen.",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "options": {
+          "queryName": "match_documents"
+        }
+      },
+      "id": "d93a11e1-1c5c-4f68-8ed9-809aee22180b",
+      "name": "search_knowledge_base",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        368,
+        592
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "W0eyn3oDYgO1uj3u",
+          "name": "Supabase - Eric (RAG)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "=text-embedding-3-small",
+        "options": {}
+      },
+      "id": "723d528c-5d2c-4f7e-8efa-4f62127388e2",
+      "name": "Embeddings OpenAI",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        368,
+        752
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "JOxIKqPlB5YoEEhu",
+          "name": "OpenAI Account - OpenRouter Key Eric"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Liefert Status, Artikel, Bestelldatum, voraussichtliche Lieferung und Trackingnummer zu EINER konkreten Bestellnummer (Format VB-XXXXX). Nutze dieses Tool nur, wenn der Kunde eine Bestellnummer nennt.",
+        "operation": "getAll",
+        "tableId": "orders",
+        "limit": 1,
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "order_number",
+              "condition": "eq",
+              "keyValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('order_number', 'Die Bestellnummer des Kunden, z. B. VB-10001') }}"
+            }
+          ]
+        }
+      },
+      "id": "5d1babc2-5d7e-4833-9803-be6d139c823e",
+      "name": "bestellstatus_abfragen",
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        704,
+        592
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "W0eyn3oDYgO1uj3u",
+          "name": "Supabase - Eric (RAG)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 📥 W7T1b – Auskunfts-Agent (Sub-Workflow)\nWird vom Orchestrator als Tool aufgerufen. Input: `query`. Read-only: RAG + Bestellstatus. Eigenständig testbar über den Execute-Trigger.",
+        "height": 120,
+        "width": 760,
+        "color": 3
+      },
+      "id": "4e99b581-bea0-4c01-bf22-63014e8df184",
+      "name": "Sticky Note 0cb3da26",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Trigger (Execute Workflow)\nMacht den Agenten als Sub-Workflow aufrufbar. Input-Feld `query` = die Anfrage vom Orchestrator. Praktisch: hier auch einzeln testbar (Test-Query eingeben).",
+        "height": 140,
+        "width": 235
+      },
+      "id": "38a87e1c-80d7-466f-af2c-c181ddaf6fa4",
+      "name": "Sticky Note 4f1caa08",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -256,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Auskunfts-Agent\nEigener System Prompt, eigenes Model, eigene Tools. Liest die Anfrage aus `{{ $json.query }}`. Bewusst read-only – keine Seiteneffekte.",
+        "height": 142,
+        "width": 250
+      },
+      "id": "9cab33a5-9e5e-43d5-9f51-76b43bc1626a",
+      "name": "Sticky Note 22f06344",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        304,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Chat Model\ngpt-4o-mini. Jeder Sub-Agent hat sein eigenes Model – so lässt sich pro Spezialist ein anderes Modell/Temperatur wählen.",
+        "height": 142,
+        "width": 235
+      },
+      "id": "1b833954-f1d8-43d3-88f2-e94bf2a0fc6f",
+      "name": "Sticky Note b62f180b",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        32,
+        736
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### RAG (search_knowledge_base)\nSupabase Vector Store im retrieve-as-tool-Modus + Embeddings. Unstrukturiertes Wissen (Produkte, Versand, Garantie …) aus `documents`.",
+        "height": 184,
+        "width": 250
+      },
+      "id": "dd865e08-2d34-423f-af21-78148741421e",
+      "name": "Sticky Note 2a50f56e",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        320,
+        896
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### bestellstatus_abfragen\nStrukturierte API-Abfrage: eine Bestellung aus `orders` per `order_number`. Read-only.",
+        "height": 110,
+        "width": 235
+      },
+      "id": "f31a46c3-23ea-439b-84ea-a9ed380ac261",
+      "name": "Sticky Note 4f40df31",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        640,
+        768
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Vom Orchestrator aufgerufen": {
+      "main": [
+        [
+          {
+            "node": "Auskunfts-Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Auskunfts-Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "search_knowledge_base": {
+      "ai_tool": [
+        [
+          {
+            "node": "Auskunfts-Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "search_knowledge_base",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "bestellstatus_abfragen": {
+      "ai_tool": [
+        [
+          {
+            "node": "Auskunfts-Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "572a0c58-569b-4283-9e54-ff28f040f8a3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f032027e20e9709391bcafe9291ae76dc2a07ff2b593bca6936b7404ddb31c33"
+  },
+  "id": "WMUW4Bt2XJ1GYgrV",
+  "tags": []
+}

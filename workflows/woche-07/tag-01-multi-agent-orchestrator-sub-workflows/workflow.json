@@ -1,0 +1,813 @@
+{
+  "name": "W7T1 - Multi-Agent Orchestrator (Sub-Workflows)",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "98029de0-5acd-47e7-a008-74418bb539fc",
+      "name": "Kundenanfrage (Chat)",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -272,
+        272
+      ],
+      "webhookId": "d7b4c80c-fdd8-45b6-9241-9215ac609e33"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "Du bist der Orchestrator im Voltbox-Kundenservice. Du beantwortest fachliche Anfragen NICHT selbst, sondern delegierst an den richtigen Spezialisten und gibst dessen Antwort zurück.\n\nSpezialisten (als Tools):\n- Auskunfts_Agent: reine Auskünfte (read-only) – Wissensfragen (Produkte, Versand, Rückgabe, Garantie, Zahlung, Pflege) und Bestellstatus per Bestellnummer.\n- Aktions_Agent: Vorgänge mit Seiteneffekt (write) – Ticket erstellen, an Mensch eskalieren, Bestellung stornieren.\n\nRouting:\n- Reine Auskunft oder Status → Auskunfts_Agent.\n- Ticket oder Eskalation → Aktions_Agent (direkt).\n- Unklar → zuerst Auskunfts_Agent.\n\nSonderfall Stornierung (endgültig, daher mit Bestätigung – du steuerst das selbst, weil nur du den Gesprächsverlauf kennst):\n- Wünscht der Kunde eine Stornierung, frage ZUERST DU SELBST nach Bestätigung und nenne die Bestellnummer (z. B. „Möchten Sie Bestellung VB-XXXXX wirklich endgültig stornieren?\"). Rufe den Aktions_Agent dafür noch NICHT auf.\n- Erst wenn der Kunde im weiteren Verlauf ausdrücklich bestätigt (z. B. „Ja\"), rufe den Aktions_Agent auf und übergib als query einen klaren Auftrag MIT Bestätigung, z. B. „Storniere Bestellung VB-XXXXX. Der Kunde hat die Stornierung ausdrücklich bestätigt.\"\n- Lehnt der Kunde ab oder ist unklar: nicht stornieren, kurz bestätigen.\n\nGib die Antwort des Spezialisten unverändert, freundlich und auf Deutsch zurück. Erfinde nichts.",
+          "maxIterations": 5,
+          "enableStreaming": false
+        }
+      },
+      "id": "91e2497b-c16e-496e-8e4e-c6235c7b8745",
+      "name": "Orchestrator",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        0,
+        272
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "b4f755ac-f195-4135-b46a-a79f369480fe",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -160,
+        496
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "JOxIKqPlB5YoEEhu",
+          "name": "OpenAI Account - OpenRouter Key Eric"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "0e5ef150-a380-4f96-aa55-bb20df5e5bdc",
+      "name": "Simple Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "description": "Spezialist für reine Auskünfte (read-only): Wissensfragen zu Produkten, Versand, Rückgabe, Garantie, Zahlung, Pflege sowie Bestellstatus per Bestellnummer. KEINE Aktionen. Übergib die Kundenanfrage als query.",
+        "workflowId": {
+          "__rl": true,
+          "value": "WMUW4Bt2XJ1GYgrV",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/WMUW4Bt2XJ1GYgrV",
+          "cachedResultName": "W7T1b - Auskunfts-Agent (Sub)"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "query": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('query', `Die Kundenanfrage, die der Auskunfts-Agent beantworten soll`, 'string') }}"
+          },
+          "matchingColumns": [
+            "query"
+          ],
+          "schema": [
+            {
+              "id": "query",
+              "displayName": "query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "id": "522810e1-5234-409b-9582-8a8d243f0926",
+      "name": "Auskunfts_Agent",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        304,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "description": "Spezialist für Vorgänge mit Seiteneffekt (write): Support-Ticket erstellen, an Mensch eskalieren, Bestellung stornieren. Nutze diesen Agenten, wenn das Anliegen eine Aktion erfordert. Übergib die Kundenanfrage als query.",
+        "workflowId": {
+          "__rl": true,
+          "value": "Ku2i4xuisX3itTPm",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/Ku2i4xuisX3itTPm",
+          "cachedResultName": "W7T1c - Aktions-Agent (Sub)"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "query": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('query', `Der auszuführende Vorgang für den Aktions-Agent. Bei Stornierungen nur senden, wenn der Kunde bereits bestätigt hat – und die Bestätigung im Text mitgeben.`, 'string') }}"
+          },
+          "matchingColumns": [
+            "query"
+          ],
+          "schema": [
+            {
+              "id": "query",
+              "displayName": "query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "id": "ac2a62d1-bc46-4edb-9558-cab742d06b95",
+      "name": "Aktions_Agent",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        1264,
+        704
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 🧭 W7T1 – Multi-Agent Support (Sub-Workflows)\nOrchestrator delegiert per **Call-Workflow-Tool** an zwei eigenständige Sub-Workflows. Best Practice: jeder Agent ist ein separater, isoliert testbarer und wiederverwendbarer Workflow.",
+        "height": 120,
+        "width": 900,
+        "color": 3
+      },
+      "id": "9fc9474f-0b19-494c-8741-ba27af52f6a0",
+      "name": "Sticky Note 0ba94e5c",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -320,
+        -96
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Orchestrator\nRoutet jede Anfrage an genau einen Spezialisten (Auskunft/Aktion). Triage = Routing-Entscheidung des LLM. Beantwortet selbst nichts – delegiert nur und gibt die Antwort zurück.",
+        "height": 188,
+        "width": 250
+      },
+      "id": "be1d28e2-6941-4742-8fdf-f43d1559d9c8",
+      "name": "Sticky Note 44a4915e",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -16,
+        64
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Chat Model\ngpt-4o-mini. Model des Orchestrators – nur fürs Routing zuständig, nicht für die Fachantwort.",
+        "height": 164,
+        "width": 220
+      },
+      "id": "8d860fdf-3248-4b60-8be7-6b69a743b35e",
+      "name": "Sticky Note 3872c6fa",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        656
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Simple Memory\nHält den Gesprächsverlauf. Wichtig: die Sub-Workflows sind zustandslos – der Kontext über mehrere Turns (z. B. die Storno-Bestätigung) lebt HIER im Orchestrator.",
+        "height": 172,
+        "width": 230
+      },
+      "id": "0912432e-26cb-4b11-b571-df641c26f3ea",
+      "name": "Sticky Note 90d589a5",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -48,
+        656
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Call-Workflow-Tools (Delegation)\nDie zwei Nodes sind der Kern des Musters: je ein Call-Workflow-Tool ruft W7T1b bzw. W7T1c, übergibt `query` und bekommt die Antwort zurück. Hier neue Spezialisten andocken = neuer Call-Node.",
+        "height": 92,
+        "width": 1816
+      },
+      "id": "832cc8f2-afa4-4f91-9685-989fe1ea3459",
+      "name": "Sticky Note 58a751d9",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        336,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Fragen:\n\nWie lange dauert der Versand?\nWo ist meine Bestellung VB-10001?\nMeine Powerstation ist defekt, ich brauche dringend Hilfe!\nBitte storniere VB-10002\nHabt ihr Solarmodule mit 200W?",
+        "width": 432,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -784,
+        256
+      ],
+      "typeVersion": 1,
+      "id": "7c0d32b6-cce8-479c-8b9a-204407cd8e9e",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Auskunfts_Agent",
+        "height": 976,
+        "width": 912,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        240,
+        640
+      ],
+      "typeVersion": 1,
+      "id": "f6bf522f-1ea2-4c22-b95b-04c5320f85fc",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Aktions_Agent",
+        "height": 976,
+        "width": 1072,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1200,
+        640
+      ],
+      "typeVersion": 1,
+      "id": "9e72d5af-35e1-4bd8-bead-bceb5aef95de",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.query }}",
+        "options": {
+          "systemMessage": "Du bist der Auskunfts-Agent von Voltbox (Online-Shop für tragbare Powerstations und Solarmodule). Du gibst ausschließlich Auskünfte – keine Aktionen.\n\nTools:\n- search_knowledge_base: Wissensdatenbank (Produkte, Versand, Rückgabe, Garantie, Zahlung, Nutzung/Pflege).\n- bestellstatus_abfragen: Status EINER Bestellung per Bestellnummer (Format VB-XXXXX).\n\nGrundwissen (kein Tool nötig): Firmenname Voltbox; Support support@voltbox.de, Mo–Fr 9–17 Uhr.\n\nRegeln:\n- Wissensfrage → search_knowledge_base. Konkrete Bestellung mit Nummer → bestellstatus_abfragen. Bestellung ohne Nummer → zuerst nach der Bestellnummer fragen.\n- Erfinde nichts. Kein Treffer → sag es ehrlich und verweise auf support@voltbox.de.\n- Antworte kurz, freundlich, auf Deutsch."
+        }
+      },
+      "id": "2b0ea9b7-351b-4869-bcd8-a46255582b86",
+      "name": "Auskunfts-Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        560,
+        880
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Durchsucht die interne Voltbox-Wissensdatenbank nach Informationen zu Produkten, Versand, Rückgabe, Garantie, Zahlung sowie Nutzung und Pflege. Nutze dieses Tool für allgemeine Fragen zu Produkten, Richtlinien und Prozessen – nicht für konkrete Bestellungen.",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "options": {
+          "queryName": "match_documents"
+        }
+      },
+      "id": "a8034565-4c86-40a3-acf8-9ad69b0272db",
+      "name": "search_knowledge_base",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        608,
+        1104
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "W0eyn3oDYgO1uj3u",
+          "name": "Supabase - Eric (RAG)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "=text-embedding-3-small",
+        "options": {}
+      },
+      "id": "9f477e80-a6c9-4510-8d53-83364a4612d5",
+      "name": "Embeddings OpenAI",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        608,
+        1264
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "JOxIKqPlB5YoEEhu",
+          "name": "OpenAI Account - OpenRouter Key Eric"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Liefert Status, Artikel, Bestelldatum, voraussichtliche Lieferung und Trackingnummer zu EINER konkreten Bestellnummer (Format VB-XXXXX). Nutze dieses Tool nur, wenn der Kunde eine Bestellnummer nennt.",
+        "operation": "getAll",
+        "tableId": "orders",
+        "limit": 1,
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "order_number",
+              "condition": "eq",
+              "keyValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('order_number', 'Die Bestellnummer des Kunden, z. B. VB-10001') }}"
+            }
+          ]
+        }
+      },
+      "id": "14d48add-0e9a-4114-aa4c-c4e48bf31980",
+      "name": "bestellstatus_abfragen",
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        944,
+        1104
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "W0eyn3oDYgO1uj3u",
+          "name": "Supabase - Eric (RAG)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "### Chat Model\ngpt-4o-mini. Jeder Sub-Agent hat sein eigenes Model – so lässt sich pro Spezialist ein anderes Modell/Temperatur wählen.",
+        "height": 142,
+        "width": 235
+      },
+      "id": "84472213-704d-4b39-bb29-03a9f36be572",
+      "name": "Sticky Note b62f180b",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        272,
+        1248
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### RAG (search_knowledge_base)\nSupabase Vector Store im retrieve-as-tool-Modus + Embeddings. Unstrukturiertes Wissen (Produkte, Versand, Garantie …) aus `documents`.",
+        "height": 184,
+        "width": 250
+      },
+      "id": "17734f43-a348-4506-8182-4c6728f7c24e",
+      "name": "Sticky Note 2a50f56e",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        560,
+        1408
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### bestellstatus_abfragen\nStrukturierte API-Abfrage: eine Bestellung aus `orders` per `order_number`. Read-only.",
+        "height": 110,
+        "width": 235
+      },
+      "id": "c177b0ff-f65c-4dfc-8f19-54ed69d86c1c",
+      "name": "Sticky Note 4f40df31",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        880,
+        1280
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "75d74904-d9ad-4f69-a502-21025f372b85",
+      "name": "OpenAI Chat Model1",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        400,
+        1104
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "JOxIKqPlB5YoEEhu",
+          "name": "OpenAI Account - OpenRouter Key Eric"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.query }}",
+        "options": {
+          "systemMessage": "Du bist der Aktions-Agent von Voltbox. Du führst Vorgänge mit Seiteneffekt aus.\n\nTools:\n- Ticket_erstellen: legt ein Support-Ticket an. Nenne dem Kunden die Ticket-ID.\n- Eskalation_an_Mensch: E-Mail ans Support-Team. Nur bei dringenden/eskalierenden Fällen (Beschwerde, Defekt, Zeitdruck), zusätzlich zum Ticket.\n- bestellung_stornieren: storniert eine Bestellung ENDGÜLTIG anhand der Bestellnummer. Nur nach ausdrücklicher Bestätigung.\n\nRegeln:\n- Stornierung ist endgültig und erfolgt allein anhand der Bestellnummer (Format VB-XXXXX). Frage NICHT nach dem Artikel. Wiederhole dem Kunden die Bestellnummer und frage ausdrücklich nach Bestätigung (z. B. „Möchten Sie Bestellung VB-XXXXX wirklich endgültig stornieren?\"). Storniere ERST nach klarem „Ja\". Bei Ablehnung oder Unklarheit: nicht stornieren.\n- Erstelle ein Ticket, wenn ein Anliegen Rückmeldung braucht; bestätige danach die Ticket-ID.\n- Eskaliere per E-Mail nur bei dringenden Fällen, zusätzlich zum Ticket.\n- Antworte kurz, freundlich, auf Deutsch."
+        }
+      },
+      "id": "45f6e336-5dfc-4373-ab98-77fe7faa03fc",
+      "name": "Aktions-Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1536,
+        864
+      ]
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Legt ein Support-Ticket in der Datenbank an, wenn ein Anliegen nicht über die Wissensdatenbank lösbar ist oder der Kunde ausdrücklich ein Ticket bzw. Rückmeldung wünscht. Gibt die Ticket-ID zurück.",
+        "tableId": "tickets",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('subject', 'Kurzer Betreff des Tickets') }}"
+            },
+            {
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('message', 'Das Anliegen des Kunden im Detail') }}"
+            },
+            {
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('customer_email', 'E-Mail des Kunden, falls genannt, sonst leer') }}"
+            },
+            {
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('order_number', 'Bestellnummer, falls genannt, z. B. VB-10001, sonst leer') }}"
+            }
+          ]
+        }
+      },
+      "id": "879055b1-4246-447c-86b2-4bca9632ce62",
+      "name": "Ticket_erstellen",
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        1584,
+        1088
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "W0eyn3oDYgO1uj3u",
+          "name": "Supabase - Eric (RAG)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "from": "onboarding@resend.dev",
+        "to": "<<REPLACE_WITH_YOUR_NOTIFICATION_EMAIL>>",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', '') }}",
+        "html": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('HTML_Content', '') }}",
+        "additionalOptions": {}
+      },
+      "id": "8c796907-fcdc-4d87-8b94-269cf4736c9f",
+      "name": "Eskalation_an_Mensch",
+      "type": "n8n-nodes-resend.resendTool",
+      "typeVersion": 1,
+      "position": [
+        1824,
+        1088
+      ],
+      "webhookId": "3e118ddb-5049-43f5-be22-b62ba1bb1b6c",
+      "credentials": {
+        "resendApi": {
+          "id": "00bhUzz5RmMgMjwO",
+          "name": "Resend - <<REPLACE_WITH_YOUR_NOTIFICATION_EMAIL>>"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Storniert EINE Bestellung anhand der Bestellnummer (Format VB-XXXXX), indem der Status auf 'storniert' gesetzt wird. Nutze dieses Tool nur nach ausdrücklicher Bestätigung des Kunden.",
+        "operation": "update",
+        "tableId": "orders",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "order_number",
+              "condition": "eq",
+              "keyValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('order_number', 'Die zu stornierende Bestellnummer, z. B. VB-10001') }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status",
+              "fieldValue": "storniert"
+            }
+          ]
+        }
+      },
+      "id": "364ea93a-7dfa-48e8-b8ec-4982b6445561",
+      "name": "bestellung_stornieren",
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        2048,
+        1088
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "W0eyn3oDYgO1uj3u",
+          "name": "Supabase - Eric (RAG)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "### Chat Model\ngpt-4o-mini. Eigenes Model des Aktions-Agenten.",
+        "height": 90,
+        "width": 235
+      },
+      "id": "c912e6fb-b076-41b3-bdac-ad36cf4f43d4",
+      "name": "Sticky Note 6b70e9d1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1248,
+        1232
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Ticket_erstellen\nSchreibt eine Zeile in Supabase `tickets`. Gibt Ticket-ID zurück, die der Agent dem Kunden nennt.",
+        "height": 190,
+        "width": 220
+      },
+      "id": "49bb10c1-71a3-44f7-a3f7-c66625dbcebd",
+      "name": "Sticky Note e875c057",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1504,
+        1232
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Eskalation_an_Mensch\nResend-Node, echter POST. Mail ans Support-Team (Test-Modus → <<REPLACE_WITH_YOUR_NOTIFICATION_EMAIL>>). Nur bei dringenden Fällen, zusätzlich zum Ticket.",
+        "height": 194,
+        "width": 230
+      },
+      "id": "909fee4e-d75f-41c6-a8fa-fded6a2e5145",
+      "name": "Sticky Note 216267b9",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1744,
+        1232
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### bestellung_stornieren\n⚠️ Irreversibel: setzt `orders.status` → storniert anhand der `order_number`. Kein Artikel nötig. Gegated über den Prompt: Agent wiederholt die Bestellnummer und storniert ERST nach klarem „Ja\".",
+        "height": 198,
+        "width": 230
+      },
+      "id": "abe91cc5-a31f-4987-8586-1f655c40a927",
+      "name": "Sticky Note 5df8c32d",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1984,
+        1232
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "50dd429c-aff7-4a12-b2c6-66916983cceb",
+      "name": "OpenAI Chat Model2",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1376,
+        1088
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "JOxIKqPlB5YoEEhu",
+          "name": "OpenAI Account - OpenRouter Key Eric"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Kundenanfrage (Chat)": {
+      "main": [
+        [
+          {
+            "node": "Orchestrator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Orchestrator",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Orchestrator",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Auskunfts_Agent": {
+      "ai_tool": [
+        [
+          {
+            "node": "Orchestrator",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aktions_Agent": {
+      "ai_tool": [
+        [
+          {
+            "node": "Orchestrator",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "search_knowledge_base": {
+      "ai_tool": [
+        [
+          {
+            "node": "Auskunfts-Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "search_knowledge_base",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "bestellstatus_abfragen": {
+      "ai_tool": [
+        [
+          {
+            "node": "Auskunfts-Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Auskunfts-Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ticket_erstellen": {
+      "ai_tool": [
+        [
+          {
+            "node": "Aktions-Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Eskalation_an_Mensch": {
+      "ai_tool": [
+        [
+          {
+            "node": "Aktions-Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "bestellung_stornieren": {
+      "ai_tool": [
+        [
+          {
+            "node": "Aktions-Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Aktions-Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "ea7c6f19-d332-4825-916b-7e46ef0fd726",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f032027e20e9709391bcafe9291ae76dc2a07ff2b593bca6936b7404ddb31c33"
+  },
+  "id": "V419j4zFppDsLKeK",
+  "tags": []
+}
