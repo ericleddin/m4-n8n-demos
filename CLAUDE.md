@@ -48,7 +48,7 @@ Bei Batch-Verarbeitung mehrerer Demos: vor den Commits einmal `git status` zeige
 
 ### Eingabe-Schemata
 
-Alle Inbox-Dateien folgen einem dieser drei Schemata:
+Alle Inbox-Dateien folgen einem dieser vier Schemata:
 
 **Hauptworkflow:**
 ```
@@ -60,6 +60,11 @@ W<X>T<Y> - <Title>.json
 W<X>T<Y> - <Title> (<Variant>).json
 ```
 
+**Zusammengehöriger Workflow** (eigenständiger weiterer Workflow derselben Demo, z.B. Sub-Workflow eines Orchestrators oder Client eines MCP-Servers):
+```
+W<X>T<Y><Letter> - <Title>.json
+```
+
 **Companion-File** (Frontend, Script, Daten):
 ```
 W<X>T<Y> - <Title> - <SubName>.<ext>
@@ -67,7 +72,8 @@ W<X>T<Y> - <Title> - <SubName>.<ext>
 
 Wobei:
 - `<X>` = Wochennummer (1–10), `<Y>` = Tag innerhalb der Woche (1–5)
-- `<Title>` = identisch über Hauptworkflow und alle zugehörigen Files (Linking-Mechanismus → bestimmt den Zielordner)
+- `<Title>` = beim Hauptworkflow und seinen Companion-Files identisch (Linking-Mechanismus → bestimmt den Zielordner). Bei zusammengehörigen Workflows beschreibt `<Title>` dagegen die **eigene Rolle** (z.B. `Auskunfts-Agent (Sub)`) und ist bewusst verschieden.
+- `<Letter>` = `a`, `b`, `c` … kennzeichnet einen weiteren eigenständigen Workflow desselben Tags. Das Linking läuft hier über das `W<X>T<Y>`-Präfix (ohne Buchstabe) → derselbe Tag-Ordner wie der Hauptworkflow. Der Dateiname im Ordner ergibt sich aus der **Rolle**, nicht aus dem Buchstaben (siehe unten).
 - `<Variant>` = z.B. `Bonus`, `Advanced` — wird zum Datei-Suffix
 - `<SubName>` = z.B. `kontakt`, `dashboard` — wird zum Companion-Filename
 - ` - ` (Space-Dash-Space) ist reservierter Separator und darf nicht innerhalb von `<Title>`, `<Variant>`, `<SubName>` vorkommen
@@ -86,6 +92,15 @@ Wobei:
 4. Mehrfach-`-` zu einzelnem `-` zusammenziehen
 5. Führende und abschließende `-` entfernen
 
+**Zusammengehörige Workflows** (`<Letter>`-Schema) landen alle im Tag-Ordner des Hauptworkflows. Der Dateiname folgt der **Rolle**, nicht dem Buchstaben — Präfix nach Funktion:
+
+| Rolle | Trigger / Node | Dateiname-Präfix | Beispiel |
+|---|---|---|---|
+| Sub-Workflow (vom Orchestrator gerufen) | `executeWorkflowTrigger` + `toolWorkflow` | `subworkflow-` | `subworkflow-auskunfts-agent.json` |
+| MCP-Client (eigenständiger Agent gegen MCP-Server) | `mcpClientTool` | `client-` | `client-voltbox-kundenservice.json` |
+
+Der Hauptworkflow selbst bleibt `workflow.json` (bzw. `workflow-<variant>.json` bei Varianten). Bei Bedarf neue Rollen-Präfixe hier ergänzen, nicht ad-hoc erfinden.
+
 ### Mapping-Tabelle
 
 | Original-Dateiname | Zielpfad |
@@ -96,6 +111,11 @@ Wobei:
 | `W2T1 - Daten senden - kontakt.html` | `workflows/woche-02/tag-01-daten-senden/frontend/kontakt.html` |
 | `W3T2 - Tool-Agent (Advanced).json` | `workflows/woche-03/tag-02-tool-agent/workflow-advanced.json` |
 | `W3T2 - Tool-Agent - seed.sql` | `workflows/woche-03/tag-02-tool-agent/data/seed.sql` |
+| `W7T1 - Multi-Agent Orchestrator (Sub-Workflows).json` | `workflows/woche-07/tag-01-multi-agent-orchestrator-sub-workflows/workflow.json` |
+| `W7T1b - Auskunfts-Agent (Sub).json` | `workflows/woche-07/tag-01-multi-agent-orchestrator-sub-workflows/subworkflow-auskunfts-agent.json` |
+| `W7T1c - Aktions-Agent (Sub).json` | `workflows/woche-07/tag-01-multi-agent-orchestrator-sub-workflows/subworkflow-aktions-agent.json` |
+| `W7T3 - Voltbox MCP-Server.json` | `workflows/woche-07/tag-03-voltbox-mcp-server/workflow.json` |
+| `W7T3a - Voltbox Kundenservice (MCP).json` | `workflows/woche-07/tag-03-voltbox-mcp-server/client-voltbox-kundenservice.json` |
 
 ### Companion-File Unterordner nach Extension
 
@@ -111,6 +131,7 @@ Bei Bedarf neue Kategorien hier ergänzen, nicht ad-hoc erfinden.
 
 - **Dateinamen, die keinem Schema entsprechen**: nicht raten, sondern beim User nachfragen
 - **Mehrere Varianten in einer Demo**: `workflow-bonus.json`, `workflow-advanced.json` etc. nebeneinander im gleichen Ordner
+- **Zusammengehörige Workflows (`<Letter>`-Schema)**: Der Hauptworkflow ist immer der **ohne** Buchstabe; die Buchstaben der zugehörigen Workflows können je nach Demo bei `a` oder `b` beginnen (irrelevant — der Dateiname folgt der Rolle, nicht dem Buchstaben). Ist die Rolle eines zugehörigen Workflows unklar (weder Sub-Workflow noch MCP-Client), beim User nach dem Präfix fragen statt eines zu erfinden.
 
 ---
 
