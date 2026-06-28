@@ -1,0 +1,331 @@
+{
+  "name": "W7T3 - Voltbox MCP-Server",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "voltbox-tools"
+      },
+      "id": "b209bbf5-52a9-4e52-95ed-bb72bf85e908",
+      "name": "Voltbox MCP-Server",
+      "type": "@n8n/n8n-nodes-langchain.mcpTrigger",
+      "typeVersion": 2,
+      "position": [
+        128,
+        192
+      ],
+      "webhookId": "866a58e8-d491-4b5c-8f47-463a82a68c8a"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Durchsucht die interne Voltbox-Wissensdatenbank nach Informationen zu Produkten, Versand, Rückgabe, Garantie, Zahlung sowie Nutzung und Pflege. Nutze dieses Tool für allgemeine Fragen zu Produkten, Richtlinien und Prozessen – nicht für konkrete Bestellungen.",
+        "tableName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "documents",
+          "cachedResultName": "documents"
+        },
+        "options": {
+          "queryName": "match_documents"
+        }
+      },
+      "id": "96d5432b-56c8-4102-b011-d7e827c9e29b",
+      "name": "search_knowledge_base",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        -240,
+        464
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "W0eyn3oDYgO1uj3u",
+          "name": "Supabase - Eric (RAG)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "d64a5e80-8b1b-4822-ad13-3a5efe228b90",
+      "name": "Embeddings OpenAI",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -240,
+        656
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "JOxIKqPlB5YoEEhu",
+          "name": "OpenAI Account - OpenRouter Key Eric"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Liefert Status, Artikel, Bestelldatum, voraussichtliche Lieferung und Trackingnummer zu EINER konkreten Bestellnummer (Format VB-XXXXX). Nutze dieses Tool nur, wenn der Kunde eine Bestellnummer nennt.",
+        "operation": "getAll",
+        "tableId": "orders",
+        "limit": 1,
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "order_number",
+              "condition": "eq",
+              "keyValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('order_number', 'Die Bestellnummer des Kunden, z. B. VB-10001') }}"
+            }
+          ]
+        }
+      },
+      "id": "0cb59396-74c1-4248-bd85-8ef7a61a2527",
+      "name": "bestellstatus_abfragen",
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        80,
+        464
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "W0eyn3oDYgO1uj3u",
+          "name": "Supabase - Eric (RAG)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Legt ein Support-Ticket in der Datenbank an, wenn ein Anliegen nicht über die Wissensdatenbank lösbar ist oder der Kunde ausdrücklich ein Ticket bzw. Rückmeldung wünscht. Gibt die Ticket-ID zurück.",
+        "tableId": "tickets",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "subject",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('subject', 'Kurzer Betreff des Tickets') }}"
+            },
+            {
+              "fieldId": "message",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('message', 'Das Anliegen des Kunden im Detail') }}"
+            },
+            {
+              "fieldId": "customer_email",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('customer_email', 'E-Mail des Kunden, falls genannt, sonst leer') }}"
+            },
+            {
+              "fieldId": "order_number",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('order_number', 'Bestellnummer, falls genannt, z. B. VB-10001, sonst leer') }}"
+            }
+          ]
+        }
+      },
+      "id": "d1dfc33a-66c6-47f7-ab4d-d92c417753c9",
+      "name": "Ticket_erstellen",
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        496,
+        432
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "W0eyn3oDYgO1uj3u",
+          "name": "Supabase - Eric (RAG)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "from": "onboarding@resend.dev",
+        "to": "<<REPLACE_WITH_YOUR_NOTIFICATION_EMAIL>>",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', 'Betreff der Eskalations-Mail') }}",
+        "html": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('HTML_Content', 'Inhalt der Eskalations-Mail als HTML') }}",
+        "additionalOptions": {}
+      },
+      "id": "fd52318f-d3b3-498a-b13f-00cdea5dd393",
+      "name": "Eskalation_an_Mensch",
+      "type": "n8n-nodes-resend.resendTool",
+      "typeVersion": 1,
+      "position": [
+        656,
+        432
+      ],
+      "webhookId": "d765f0f3-9d74-4200-a91f-2ae63023e6a4",
+      "credentials": {
+        "resendApi": {
+          "id": "00bhUzz5RmMgMjwO",
+          "name": "Resend - <<REPLACE_WITH_YOUR_NOTIFICATION_EMAIL>>"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Storniert EINE Bestellung anhand der Bestellnummer (Format VB-XXXXX), indem der Status auf 'storniert' gesetzt wird. Nutze dieses Tool nur, wenn der Auftrag eine ausdrückliche Bestätigung des Kunden enthält.",
+        "operation": "update",
+        "tableId": "orders",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "order_number",
+              "condition": "eq",
+              "keyValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('order_number', 'Die zu stornierende Bestellnummer, z. B. VB-10001') }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status",
+              "fieldValue": "storniert"
+            }
+          ]
+        }
+      },
+      "id": "131a7099-4459-40e6-be15-f79a8e090933",
+      "name": "bestellung_stornieren",
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        832,
+        432
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "W0eyn3oDYgO1uj3u",
+          "name": "Supabase - Eric (RAG)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 🔌 W7T3 – Voltbox MCP-Server\nEinmal aufgesetzt: alle Voltbox-Tools hängen an EINEM mcpTrigger und werden als MCP-Server bereitgestellt. Mehrere Agenten verbinden sich per MCP-Client – keine API muss pro Agent neu verdrahtet werden.\nServer-Pfad: `voltbox-tools`.",
+        "height": 168,
+        "width": 476,
+        "color": 3
+      },
+      "id": "db7c2725-20d1-4349-b68d-13bb1b6f6959",
+      "name": "Sticky Note 3247a559",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### 📖 read-Tools\nAuskünfte ohne Seiteneffekt: Wissensdatenbank (RAG) + Bestellstatus. Der Auskunfts-Agent zieht per MCP-Client NUR diese beiden.",
+        "height": 120,
+        "width": 460
+      },
+      "id": "0ecd0d15-d4a7-4f17-8f05-e7a18fd92742",
+      "name": "Sticky Note 4abc7043",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -256,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### ✍️ write-Tools\nVorgänge mit Seiteneffekt: Ticket, Eskalation (Mail), Stornierung. Nur der Aktions-Agent zieht diese – Scoping passiert im MCP-Client (include: selected), nicht am Server.",
+        "height": 120,
+        "width": 492
+      },
+      "id": "f6648be5-e595-46c8-bb88-201009ead04d",
+      "name": "Sticky Note a9415017",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        448,
+        304
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "search_knowledge_base": {
+      "ai_tool": [
+        [
+          {
+            "node": "Voltbox MCP-Server",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "search_knowledge_base",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "bestellstatus_abfragen": {
+      "ai_tool": [
+        [
+          {
+            "node": "Voltbox MCP-Server",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ticket_erstellen": {
+      "ai_tool": [
+        [
+          {
+            "node": "Voltbox MCP-Server",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Eskalation_an_Mensch": {
+      "ai_tool": [
+        [
+          {
+            "node": "Voltbox MCP-Server",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "bestellung_stornieren": {
+      "ai_tool": [
+        [
+          {
+            "node": "Voltbox MCP-Server",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "9c47822c-2409-4641-b4b0-64fac5a2c2de",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f032027e20e9709391bcafe9291ae76dc2a07ff2b593bca6936b7404ddb31c33"
+  },
+  "id": "8tSTBR526xwqvUZk",
+  "tags": []
+}

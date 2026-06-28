@@ -1,0 +1,199 @@
+{
+  "name": "W7T3b - Support-Team-Assistent (MCP)",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "487bf65a-093e-403a-be43-de268ccefa21",
+      "name": "Mitarbeiter-Anfrage (Chat)",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        48,
+        272
+      ],
+      "webhookId": "d4c82d44-b9fc-40f4-b7f9-fe547f2f20d0"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "Du bist der interne Assistent für das Voltbox Support-Team. Du sprichst mit Support-Mitarbeitern (nicht mit Endkunden) und hilfst ihnen, Vorgänge schnell abzuwickeln.\n\nTools (über den Voltbox MCP-Server):\n- bestellstatus_abfragen: Status EINER Bestellung per Bestellnummer (Format VB-XXXXX).\n- bestellung_stornieren: storniert eine Bestellung ENDGÜLTIG anhand der Bestellnummer.\n- Eskalation_an_Mensch: schickt eine E-Mail an das Support-Team (z. B. zur Weitergabe an eine Fachabteilung).\n\nWICHTIG – deine Grenzen:\n- Du hast KEINEN Zugriff auf die Wissensdatenbank und kannst KEINE Tickets erstellen – diese Tools liegen außerhalb deines Scopes.\n- Beantworte Wissens- und Produktfragen (Rückgabefristen, Garantie, Versand, Zahlung, Nutzung/Pflege) NICHT aus eigenem Wissen – du würdest nur raten. Sag stattdessen ehrlich, dass du das nicht nachschlagen kannst und dass solche Auskünfte der Kundenservice-Agent (mit Wissensdatenbank) gibt. Erfinde NIEMALS Fristen, Bedingungen oder Zahlen.\n\nStornierung (endgültig, daher mit Bestätigung):\n- Bei einem Storno-Wunsch frage ZUERST nach ausdrücklicher Bestätigung und nenne die Bestellnummer (z. B. „Bestellung VB-XXXXX wirklich endgültig stornieren?\"). Storniere noch NICHT.\n- Erst wenn der Mitarbeiter ausdrücklich bestätigt (z. B. „Ja\"), rufe bestellung_stornieren auf und melde das Ergebnis. Du hältst den Gesprächsverlauf selbst im Gedächtnis.\n- Wird abgelehnt oder ist es unklar: nicht stornieren.\n\nRegeln:\n- Bestellung mit Nummer → bestellstatus_abfragen. Eskalation an eine Fachabteilung → Eskalation_an_Mensch.\n- Antworte kurz, sachlich und auf Deutsch.",
+          "enableStreaming": false
+        }
+      },
+      "id": "fc9088f9-de41-44d5-a021-462aeff1fca7",
+      "name": "Support-Team-Assistent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        320,
+        272
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "f0a64dd0-f2b8-4267-8272-d73a65e9ed37",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        160,
+        496
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "JOxIKqPlB5YoEEhu",
+          "name": "OpenAI Account - OpenRouter Key Eric"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "998d6d0a-8346-4438-829c-953cb6652d23",
+      "name": "Simple Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        320,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "endpointUrl": "<<REPLACE_WITH_YOUR_N8N_HOST>>/mcp/voltbox-tools",
+        "include": "selected",
+        "includeTools": [
+          "bestellstatus_abfragen",
+          "bestellung_stornieren",
+          "Eskalation_an_Mensch"
+        ],
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "id": "d7abbac4-146a-4b37-bc04-2242bc9c4726",
+      "name": "Voltbox-Tools (Support-Team)",
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.2,
+      "position": [
+        528,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 🛠️ W7T3b – Support-Team-Assistent (intern)\nEigenständiger Chat-Agent für Support-Mitarbeiter. Greift über einen MCP-Client auf DENSELBEN Voltbox MCP-Server zu wie der Kundenservice – aber mit anderem Scope: Bestellstatus, Storno, Eskalation. Die Storno-Bestätigung führt der Agent selbst (eigenes Memory), kein Orchestrator nötig.",
+        "height": 200,
+        "width": 572,
+        "color": 3
+      },
+      "id": "26f63803-fa50-48e4-ac1d-ee492ad919c1",
+      "name": "Sticky Note 086117d2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### MCP-Client (Support-Scope)\n`/mcp/voltbox-tools`, include: selected → bestellstatus_abfragen, bestellung_stornieren, Eskalation_an_Mensch. search_knowledge_base und Ticket_erstellen sind hier nicht im Scope. Ein Server, zwei Anwendungen, getrennte Berechtigungen.",
+        "height": 200,
+        "width": 300
+      },
+      "id": "c071f973-647e-4671-a010-4472f9e04e85",
+      "name": "Sticky Note 6f189b43",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        672,
+        432
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 🛎️ Voltbox Kundenservice (extern)\n\n**Im Scope (funktioniert):**\n- Wie lange ist die Rückgabefrist? \n- Wie ist der Status von VB-10001? \n- Mein Akku lädt nicht, ich brauche Rückmeldung. \n\n---\n\n\n## 🛠️ Support-Team-Assistent (intern)\n\n**Im Scope (funktioniert):**\n- Status von VB-10001? \n- Storniere VB-10002. \n- Schick eine Eskalations-Mail zum Defektfall an das Team.\n\n---\n\n\n## 🎯 dieselbe Frage an beide\n\n| Frage | Kundenservice | Support-Team |\n|---|---|---|\n| „Storniere VB-10002\" | ❌ kein Tool → Ticket/Verweis | ✅ mit Bestätigung |\n| „Wie ist die Garantie?\" | ✅ RAG | ❌ kein RAG |\n\n\nZwei Agenten, ein Server – die Grenze des einen ist die Stärke des anderen. Hängt am Server-Scope, nicht am Prompt.",
+        "height": 528,
+        "width": 656
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -960,
+        192
+      ],
+      "typeVersion": 1,
+      "id": "504998ca-dee2-4792-8d0a-2739e9fc027b",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Mitarbeiter-Anfrage (Chat)": {
+      "main": [
+        [
+          {
+            "node": "Support-Team-Assistent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Support-Team-Assistent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Support-Team-Assistent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Voltbox-Tools (Support-Team)": {
+      "ai_tool": [
+        [
+          {
+            "node": "Support-Team-Assistent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "af5b27be-9261-4962-ba10-501b46daafcf",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f032027e20e9709391bcafe9291ae76dc2a07ff2b593bca6936b7404ddb31c33"
+  },
+  "id": "47ZnC27nIfAxuW5A",
+  "tags": []
+}
