@@ -1,0 +1,429 @@
+{
+  "name": "W7T4 - Produkt-Radar (Compounding)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [
+                1
+              ],
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "id": "231fe090-c3c9-4f98-ba24-218999e899cf",
+      "name": "Woechentlich (Mo 08:00)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -272,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "Sammle das aktuelle Produkt-Feedback aus der Datenbank.",
+        "options": {
+          "systemMessage": "Du bist der Sammler im Voltbox Produkt-Radar. Deine Aufgabe: Produkt-Feedback aus der Datenbank zusammentragen - nicht bewerten, nicht interpretieren.\n\nRufe das Tool product_feedback_lesen auf und trage ALLE zurueckgegebenen Eintraege strukturiert zusammen. Pro Eintrag: Produkt, Quelle (source), Bewertung (rating, falls vorhanden) und den Feedback-Text.\n\nGib eine vollstaendige, unkommentierte Liste zurueck. Lass nichts weg und fasse noch nicht zusammen - das macht die naechste Stufe.",
+          "enableStreaming": false
+        }
+      },
+      "id": "b82c7dcf-487c-43ca-a8dd-1c01338d9a60",
+      "name": "Sammler",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        80,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "c77328b3-32ae-43cd-8e69-513af15ee78c",
+      "name": "Model (Sammler)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -32,
+        544
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "JOxIKqPlB5YoEEhu",
+          "name": "OpenAI Account - OpenRouter Key Eric"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Liest Produkt-Feedback (Rezensionen, Feature-Requests, Umfragen, Support, Social) aus der Voltbox-Datenbank. Gibt alle Eintraege mit product, source, feedback und rating zurueck. Nutze dieses Tool, um das Roh-Feedback zu sammeln.",
+        "operation": "getAll",
+        "tableId": "product_feedback",
+        "limit": 20
+      },
+      "id": "07c84e13-6ff6-4a66-92e5-334e5e208fcd",
+      "name": "product_feedback_lesen",
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        128,
+        544
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "W0eyn3oDYgO1uj3u",
+          "name": "Supabase - Eric (RAG)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.output }}",
+        "options": {
+          "systemMessage": "Du bist der Analyst im Voltbox Produkt-Radar. Input ist die rohe Feedback-Liste des Sammlers.\n\nDeine Aufgabe: Muster finden. Clustere das Feedback nach Pain Points / Themen. Pro Cluster: Thema, Haeufigkeit (Anzahl Nennungen), betroffene Produkte, durchschnittliches Sentiment (positiv/neutral/negativ). Trenne klar zwischen Problemen, Feature-Wuenschen und Positivem.\n\nErfinde nichts - nur was in den Daten steht. Gib die Cluster sortiert nach Haeufigkeit zurueck.",
+          "enableStreaming": false
+        }
+      },
+      "id": "91287deb-308f-4d7a-9316-ccf690cfeec2",
+      "name": "Analyst",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        416,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "644f03a8-457c-495a-b605-bded97caf941",
+      "name": "Model (Analyst)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        416,
+        544
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "JOxIKqPlB5YoEEhu",
+          "name": "OpenAI Account - OpenRouter Key Eric"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.output }}",
+        "options": {
+          "systemMessage": "Du bist der Reporter im Voltbox Produkt-Radar. Input ist die Cluster-Analyse.\n\nDeine Aufgabe: ein priorisierter Produkt-Brief fuers Team. Pro Empfehlung: Was sollten wir als naechstes angehen, warum (gestuetzt auf Haeufigkeit/Sentiment aus der Analyse), welches Produkt betroffen ist. Sortiere nach Prioritaet (groesster Schmerz zuerst).\n\nNimm Positives auf als \"beibehalten / nicht anfassen\". Halte den Brief knapp und handlungsorientiert. Erfinde keine Pain Points, die nicht in der Analyse stehen.",
+          "enableStreaming": false
+        }
+      },
+      "id": "895d779a-c73e-440f-9dc6-604b50c4185a",
+      "name": "Reporter",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        752,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "7c3933de-a9ab-415e-a9b7-63362a675e08",
+      "name": "Model (Reporter)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        752,
+        544
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "JOxIKqPlB5YoEEhu",
+          "name": "OpenAI Account - OpenRouter Key Eric"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 🔗 W7T4 - Produkt-Radar (Compounding-Kette)\nDrei Agenten in REIHE: Sammler → Analyst → Reporter. Jede Stufe veredelt den Output der vorigen (Rohdaten → Cluster → Brief). Kontrast zu W7T1/T2: KEIN Router, KEINE Delegation - reine Reihenschaltung (main → main → main). Nur Stufe 1 hat ein Tool; Stufe 2+3 sind reines Reasoning (= eigentlich Prompt-Chaining). Trigger laeuft geplant; im Demo per \"Execute workflow\" starten.",
+        "height": 95,
+        "width": 1860,
+        "color": 3
+      },
+      "id": "3e5a520b-228a-4814-85f2-123923107060",
+      "name": "Sticky Note 296d5881",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -256,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Sammler (Stufe 1)\nEinziger Agent MIT Tool. Liest product_feedback (getAll, 20) und traegt das Roh-Feedback zusammen. Bewertet noch nicht.",
+        "height": 168,
+        "width": 250
+      },
+      "id": "2c98af27-70ad-44f4-a69e-f8cd3989c8cb",
+      "name": "Sticky Note 81384fd4",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        48,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Analyst (Stufe 2)\nKein Tool. Liest {{ $json.output }} des Sammlers, clustert nach Pain Points + Haeufigkeit + Sentiment.",
+        "height": 152,
+        "width": 250
+      },
+      "id": "ad2adaf1-ffca-4c89-bedd-ea6e3b2e0815",
+      "name": "Sticky Note 711c32dc",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        384,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Reporter (Stufe 3)\nKein Tool. Liest {{ $json.output }} des Analysten, schreibt den priorisierten Feature-Brief.",
+        "height": 152,
+        "width": 250
+      },
+      "id": "fe166834-3014-484c-87b9-c1b99823d0e8",
+      "name": "Sticky Note 09f429cd",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        736,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "markdownToHtml",
+        "markdown": "={{ $json.output }}",
+        "options": {
+          "simpleLineBreaks": true
+        }
+      },
+      "id": "1c116833-e02d-4c35-8d52-4264b66b6748",
+      "name": "Brief formatieren",
+      "type": "n8n-nodes-base.markdown",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "from": "onboarding@resend.dev",
+        "to": "<<REPLACE_WITH_YOUR_NOTIFICATION_EMAIL>>",
+        "subject": "Voltbox Produkt-Radar - Report",
+        "html": "=<div style=\"font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;max-width:640px;margin:0 auto;padding:24px;color:#1a1a2e;line-height:1.55;font-size:15px\">{{ $json.data }}</div>",
+        "additionalOptions": {}
+      },
+      "id": "1c2ad4fc-a233-49a6-a219-6fd67ac0e735",
+      "name": "Report senden",
+      "type": "n8n-nodes-resend.resend",
+      "typeVersion": 1,
+      "position": [
+        1360,
+        288
+      ],
+      "webhookId": "48e3a132-deef-4d9d-a532-991a7c6a4a1c",
+      "credentials": {
+        "resendApi": {
+          "id": "00bhUzz5RmMgMjwO",
+          "name": "Resend - <<REPLACE_WITH_YOUR_NOTIFICATION_EMAIL>>"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "### Brief formatieren\nMarkdown → HTML (deterministisch, kein LLM). Macht aus dem Reporter-Markdown sauberes HTML fuer die Mail.",
+        "height": 168,
+        "width": 218
+      },
+      "id": "fd170970-52d0-4464-835a-82f436c4b26d",
+      "name": "Sticky Note 37f3c10b",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1056,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Report senden\nKEIN Agenten-Tool - fixer Node am Ketten-Ende. Report geht IMMER raus (keine LLM-Entscheidung), so bleibt der Reporter tool-los (Folie 5). Test-Modus an <<REPLACE_WITH_YOUR_NOTIFICATION_EMAIL>>.",
+        "height": 178,
+        "width": 280
+      },
+      "id": "74e5bc12-c36f-4337-b898-96ce12cf74be",
+      "name": "Sticky Note b3666ea8",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1328,
+        80
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Woechentlich (Mo 08:00)": {
+      "main": [
+        [
+          {
+            "node": "Sammler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sammler": {
+      "main": [
+        [
+          {
+            "node": "Analyst",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Model (Sammler)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Sammler",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "product_feedback_lesen": {
+      "ai_tool": [
+        [
+          {
+            "node": "Sammler",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyst": {
+      "main": [
+        [
+          {
+            "node": "Reporter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Model (Analyst)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Analyst",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reporter": {
+      "main": [
+        [
+          {
+            "node": "Brief formatieren",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Model (Reporter)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Reporter",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Brief formatieren": {
+      "main": [
+        [
+          {
+            "node": "Report senden",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "e3de1e60-5dec-4a81-9b7f-c4d268c76ede",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f032027e20e9709391bcafe9291ae76dc2a07ff2b593bca6936b7404ddb31c33"
+  },
+  "id": "4KxUjOJCPVuyjufU",
+  "tags": []
+}
