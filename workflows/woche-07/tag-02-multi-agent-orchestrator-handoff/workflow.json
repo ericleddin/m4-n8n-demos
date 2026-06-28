@@ -1,0 +1,306 @@
+{
+  "name": "W7T2 - Multi-Agent Orchestrator (Handoff)",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "93cdae19-d5e7-4ebf-9fd5-a97de7a73e0d",
+      "name": "Kundenanfrage (Chat)",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        48,
+        368
+      ],
+      "webhookId": "db15fe42-1cb4-4ed3-aa48-bbede47bc3fb"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "Du bist der Orchestrator im Voltbox-Kundenservice. Du beantwortest fachliche Anfragen NICHT selbst, sondern delegierst an den richtigen Spezialisten und gibst dessen Antwort zurück.\n\nSpezialisten (als Tools):\n- Auskunfts_Agent: reine Auskünfte (read-only) – Wissensfragen und Bestellstatus.\n- Aktions_Agent: Vorgänge mit Seiteneffekt (write) – Ticket, Eskalation, Stornierung.\n\nRouting:\n- Reine Auskunft oder Status → Auskunfts_Agent.\n- Ticket oder Eskalation → Aktions_Agent (direkt).\n- Unklar → zuerst Auskunfts_Agent.\n\nHandoff an den Auskunfts_Agent (strukturiert, nicht die rohe History):\n- anfrage: die eigentliche Frage, klar formuliert.\n- sprache: die Sprache der Kundennachricht (z. B. Deutsch, Englisch) – damit der Spezialist in derselben Sprache antwortet.\n- prioritaet: \"hoch\" bei Dringlichkeit, Beschwerde, Defekt oder Zeitdruck, sonst \"normal\".\n\nSonderfall Stornierung (endgültig, daher mit Bestätigung – du steuerst das selbst, weil nur du den Gesprächsverlauf kennst):\n- Wünscht der Kunde eine Stornierung, frage ZUERST DU SELBST nach Bestätigung und nenne die Bestellnummer (z. B. „Möchten Sie Bestellung VB-XXXXX wirklich endgültig stornieren?\"). Rufe den Aktions_Agent dafür noch NICHT auf.\n- Erst wenn der Kunde im weiteren Verlauf ausdrücklich bestätigt (z. B. „Ja\"), rufe den Aktions_Agent auf und übergib als query einen klaren Auftrag MIT Bestätigung, z. B. „Storniere Bestellung VB-XXXXX. Der Kunde hat die Stornierung ausdrücklich bestätigt.\"\n- Lehnt der Kunde ab oder ist unklar: nicht stornieren, kurz bestätigen.\n\nGib die Antwort des Spezialisten unverändert zurück. Erfinde nichts.",
+          "maxIterations": 5,
+          "enableStreaming": false
+        }
+      },
+      "id": "6c70655b-0fdb-4ddd-86ee-ca40e93a97ca",
+      "name": "Orchestrator",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        320,
+        368
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "a11085b7-7ff5-4144-b8a9-365781c1c312",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        160,
+        592
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "JOxIKqPlB5YoEEhu",
+          "name": "OpenAI Account - OpenRouter Key Eric"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "42701d11-f5b0-4500-a497-ebf4fa3759e5",
+      "name": "Simple Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        320,
+        592
+      ]
+    },
+    {
+      "parameters": {
+        "description": "Spezialist für reine Auskünfte (read-only): Wissensfragen und Bestellstatus. KEINE Aktionen. Übergib ein Handoff mit anfrage, sprache und prioritaet.",
+        "workflowId": {
+          "__rl": true,
+          "value": "XD2ctmUm27gtMlZI",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/XD2ctmUm27gtMlZI",
+          "cachedResultName": "W7T2b - Auskunfts-Agent (Handoff)"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "anfrage": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('anfrage', `Die eigentliche Kundenfrage, klar formuliert`, 'string') }}",
+            "sprache": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('sprache', `Die Sprache der Kundennachricht, z. B. Deutsch, Englisch`, 'string') }}",
+            "prioritaet": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('prioritaet', `normal oder hoch (hoch bei Dringlichkeit, Beschwerde, Defekt, Zeitdruck)`, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "anfrage",
+              "displayName": "anfrage",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "sprache",
+              "displayName": "sprache",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "prioritaet",
+              "displayName": "prioritaet",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "id": "d799d637-fe56-42cc-acf5-3684dd2fe021",
+      "name": "Auskunfts_Agent",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        528,
+        592
+      ]
+    },
+    {
+      "parameters": {
+        "description": "Spezialist für Vorgänge mit Seiteneffekt (write): Ticket erstellen, an Mensch eskalieren, Bestellung stornieren. Übergib die Kundenanfrage als query.",
+        "workflowId": {
+          "__rl": true,
+          "value": "xytSDvpsYlryzh0o",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/xytSDvpsYlryzh0o",
+          "cachedResultName": "W7T2c - Aktions-Agent (Handoff)"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "query": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('query', `Der auszuführende Vorgang für den Aktions-Agent. Bei Stornierungen nur senden, wenn der Kunde bereits bestätigt hat – und die Bestätigung im Text mitgeben.`, 'string') }}"
+          },
+          "matchingColumns": [
+            "query"
+          ],
+          "schema": [
+            {
+              "id": "query",
+              "displayName": "query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "id": "f6727e6a-d8eb-4672-939a-2c40b870b531",
+      "name": "Aktions_Agent",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        688,
+        592
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 🧭 W7T2 – Multi-Agent Support (Handoff)\nWie W7T1, aber der Orchestrator baut für den Auskunfts_Agent ein **strukturiertes Handoff** (anfrage · sprache · prioritaet) statt nur einen String durchzureichen. Der Aktions_Agent bleibt bewusst beim einfachen query – Handoff strukturieren, wo es zahlt.",
+        "height": 130,
+        "width": 920,
+        "color": 3
+      },
+      "id": "bdfd647e-1bc7-4811-b96b-0f695210c0e9",
+      "name": "Sticky Note 6ea5d890",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Orchestrator\nRoutet UND baut das Handoff: erkennt Sprache, klassifiziert Priorität, formuliert die anfrage. Das ist Message Passing – gezielt die richtigen Felder, nicht die ganze History.",
+        "height": 150,
+        "width": 250
+      },
+      "id": "c7091596-d2bb-416c-a88c-cc13fb49d785",
+      "name": "Sticky Note 2c072619",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        304,
+        176
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Call-Workflow-Tools (Handoff)\nAuskunfts_Agent → 3 Felder (anfrage, sprache, prioritaet), vom LLM gefüllt → W7T2b.\nAktions_Agent → 1 Feld (query) → W7T2c.\nDie Asymmetrie ist Absicht: strukturiert, wo der Empfänger die Felder nutzt.",
+        "width": 380
+      },
+      "id": "f667c79d-1fdb-460d-ba89-66927e264d4d",
+      "name": "Sticky Note 20012aa4",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        480,
+        752
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Fragen:\n\nWie lange dauert der Versand?\nWo ist meine Bestellung VB-10001?\nMeine Powerstation ist defekt, ich brauche dringend Hilfe!\nBitte storniere VB-10002\nHabt ihr Solarmodule mit 200W?",
+        "width": 432,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -400,
+        752
+      ],
+      "typeVersion": 1,
+      "id": "77967c1a-3d53-4d61-8568-263d2f4d7cd7",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Kundenanfrage (Chat)": {
+      "main": [
+        [
+          {
+            "node": "Orchestrator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Orchestrator",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Orchestrator",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Auskunfts_Agent": {
+      "ai_tool": [
+        [
+          {
+            "node": "Orchestrator",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aktions_Agent": {
+      "ai_tool": [
+        [
+          {
+            "node": "Orchestrator",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "caaef549-f24e-4586-b971-a7376ed95389",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f032027e20e9709391bcafe9291ae76dc2a07ff2b593bca6936b7404ddb31c33"
+  },
+  "id": "bXYJ92hl2TxJSueL",
+  "tags": []
+}
