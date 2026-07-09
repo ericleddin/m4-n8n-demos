@@ -1,0 +1,252 @@
+{
+  "name": "W8T5 - Storno Send and Wait",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## W8T5 - Send and Wait\n\nHITL in seiner einfachsten Form - ohne Agent, ohne Sub-Workflow:\n\n1. Manual Trigger: Storno-Anfrage kommt rein (hartkodiert)\n2. **Gmail Send and Wait**: Execution PAUSIERT hier - live auf dem Canvas sichtbar\n3. E-Mail mit zwei Buttons: Freigeben / Ablehnen\n4. Erst nach dem Klick geht es weiter: loeschen oder nichts tun\n\n**Kernaussage:** Die irreversible Aktion (loeschen) liegt HINTER der Freigabe. Kein Klick, keine Loeschung.",
+        "height": 340,
+        "width": 620,
+        "color": 3
+      },
+      "id": "4f7d6cb4-252d-4f8d-9f9c-86ba4dd94ebe",
+      "name": "Sticky Note cd6e3c1f",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        208,
+        -144
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Hier pausiert die Execution\nStatus \"Waiting\" - unbegrenzt, bis der Mensch in der E-Mail entscheidet. Antwort landet in $json.data.approved.",
+        "width": 300
+      },
+      "id": "487e3f02-87b1-4110-bcc9-df444cc6306f",
+      "name": "Sticky Note a2189919",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        608,
+        464
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "2fe4458f-9dee-4cb8-8184-028dfb3a9d98",
+      "name": "Demo starten",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        208,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "sa-1",
+              "name": "orderId",
+              "value": "VB-1002",
+              "type": "string"
+            },
+            {
+              "id": "sa-2",
+              "name": "product",
+              "value": "Voltbox Pro 2000",
+              "type": "string"
+            },
+            {
+              "id": "sa-3",
+              "name": "amount",
+              "value": 2499,
+              "type": "number"
+            },
+            {
+              "id": "sa-4",
+              "name": "reason",
+              "value": "Versehentlich falsches Modell bestellt",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e6597386-a23c-4d70-b25a-06a8912ef7aa",
+      "name": "Storno-Anfrage (Kunde)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        432,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "sendTo": "<<REPLACE_WITH_YOUR_NOTIFICATION_EMAIL>>",
+        "subject": "=Freigabe erforderlich: Storno {{ $json.orderId }} ({{ $json.amount }} EUR)",
+        "message": "=Storno-Anfrage:\n\nBestellung: {{ $json.orderId }}\nProdukt: {{ $json.product }}\nBetrag: {{ $json.amount }} EUR\nGrund: {{ $json.reason }}\n\nSoll die Bestellung storniert und geloescht werden?",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double",
+            "approveLabel": "Storno freigeben",
+            "disapproveLabel": "Ablehnen"
+          }
+        },
+        "options": {}
+      },
+      "id": "c2a12d8c-7648-46e0-906a-979823b5f0e8",
+      "name": "Freigabe anfordern (Send and Wait)",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        656,
+        288
+      ],
+      "webhookId": "04ceb449-7cf8-4759-9956-854d887a1afe"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.data.approved }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "9fce106d-453e-425c-856d-35835f1494ec",
+      "name": "Freigegeben?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        880,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Simuliert das Loeschen der Bestellung aus dem System\nconst order = $('Storno-Anfrage (Kunde)').first().json;\n\nreturn [{\n  json: {\n    status: 'geloescht',\n    orderId: order.orderId,\n    product: order.product,\n    amount: order.amount,\n    deletedAt: new Date().toISOString(),\n    message: `Bestellung ${order.orderId} wurde nach menschlicher Freigabe storniert und geloescht.`\n  }\n}];"
+      },
+      "id": "f0e640a3-06ba-40df-88fc-27c0853ae856",
+      "name": "Bestellung loeschen",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1088,
+        176
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "de-1",
+              "name": "status",
+              "value": "abgelehnt",
+              "type": "string"
+            },
+            {
+              "id": "de-2",
+              "name": "message",
+              "value": "=Storno fuer {{ $(\"Storno-Anfrage (Kunde)\").item.json.orderId }} wurde abgelehnt. Es wurde nichts geloescht.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "290721e5-5605-4189-afa5-a39d28787a85",
+      "name": "Abgelehnt - keine Aktion",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1088,
+        416
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Demo starten": {
+      "main": [
+        [
+          {
+            "node": "Storno-Anfrage (Kunde)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Storno-Anfrage (Kunde)": {
+      "main": [
+        [
+          {
+            "node": "Freigabe anfordern (Send and Wait)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Freigabe anfordern (Send and Wait)": {
+      "main": [
+        [
+          {
+            "node": "Freigegeben?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Freigegeben?": {
+      "main": [
+        [
+          {
+            "node": "Bestellung loeschen",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Abgelehnt - keine Aktion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "0c42b37a-8453-4fae-87a4-95a31086df9f",
+  "meta": {
+    "instanceId": "f032027e20e9709391bcafe9291ae76dc2a07ff2b593bca6936b7404ddb31c33"
+  },
+  "id": "pAc4Cm65BtpMEn8z",
+  "tags": []
+}
