@@ -1,0 +1,406 @@
+{
+  "name": "W9T3 - Voltbox Web-Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "voltbox-agent",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "834a1436-f12d-4d08-a4f9-f13645f30085",
+      "name": "Voltbox Web-Chat (Webhook)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -288,
+        80
+      ],
+      "webhookId": "3d51888d-5dc8-4daa-b646-a3f959fad141"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.message }}",
+        "options": {
+          "systemMessage": "Du bist der Kundenservice-Agent von Voltbox, einem Online-Shop für tragbare Powerstations und Solarmodule.\n\nTools:\n- search_knowledge_base: Wissensdatenbank (Produkte, Versand, Rückgabe, Garantie, Zahlung, Nutzung/Pflege). Für allgemeine Fragen zu Produkten, Richtlinien und Prozessen.\n- bestellstatus_abfragen: Status einer konkreten Bestellung. Nur bei genannter Bestellnummer (Format VB-XXXXX).\n- Ticket_erstellen: Legt ein Support-Ticket in der Datenbank an. Nutze es, wenn das Anliegen nicht über die Wissensdatenbank lösbar ist oder der Kunde ausdrücklich ein Ticket bzw. Rückmeldung wünscht. Nenne dem Kunden die zurückgegebene Ticket-ID.\n- Eskalation_an_Mensch: Sendet eine E-Mail an das Support-Team. Nutze es nur bei dringenden oder eskalierenden Fällen (Beschwerde, Defekt, Zeitdruck), zusätzlich zum Ticket.\n\nStabiles Grundwissen (kein Tool nötig):\n- Firmenname: Voltbox\n- Support-Kontakt: support@voltbox.de, erreichbar Mo–Fr 9–17 Uhr\n\nRegeln:\n- Wähle die richtige Quelle: Wissensfrage → search_knowledge_base; konkrete Bestellung mit Nummer → bestellstatus_abfragen; Grundwissen → direkt aus dieser Anweisung.\n- Nennt der Kunde eine Bestellung ohne Nummer, frage zuerst nach der Bestellnummer.\n- Erstelle ein Ticket erst, wenn du das Anliegen nicht selbst beantworten konntest oder der Kunde es wünscht. Bestätige anschließend die Ticket-ID.\n- Eskaliere per E-Mail nur bei dringenden Fällen, zusätzlich zum Ticket.\n- Erfinde nichts. Liefert ein Tool keinen Treffer, sag das ehrlich und verweise auf support@voltbox.de.\n- Antworte freundlich, kurz und auf Deutsch.",
+          "returnIntermediateSteps": true,
+          "enableStreaming": false
+        }
+      },
+      "id": "3df94586-065a-4b20-a345-ece17bf1c5b6",
+      "name": "Support-Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        304,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-4o-mini",
+        "options": {
+          "maxTokens": 20000
+        }
+      },
+      "id": "b13c0735-482d-402a-a6af-264f59bee2f4",
+      "name": "OpenRouter Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -64,
+        304
+      ],
+      "credentials": {
+        "openRouterApi": {
+          "id": "iNwU2uwlDz4l7tnF",
+          "name": "OpenRouter account - Eric Leddin"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Durchsucht die interne Voltbox-Wissensdatenbank nach Informationen zu Produkten, Versand, Rückgabe, Garantie, Zahlung sowie Nutzung und Pflege. Nutze dieses Tool für allgemeine Fragen zu Produkten, Richtlinien und Prozessen – nicht für konkrete Bestellungen.",
+        "tableName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "documents",
+          "cachedResultName": "documents"
+        },
+        "options": {
+          "queryName": "match_documents"
+        }
+      },
+      "id": "c8f2d2c8-b60d-44a6-a8bc-a96c54c7b830",
+      "name": "search_knowledge_base",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        192,
+        304
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "W0eyn3oDYgO1uj3u",
+          "name": "Supabase - Eric (RAG)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "be7413dc-0343-41a8-a8ae-a7adcf97c788",
+      "name": "Embeddings OpenAI",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        272,
+        512
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "JOxIKqPlB5YoEEhu",
+          "name": "OpenAI Account - OpenRouter Key Eric"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Liefert Status, Artikel, Bestelldatum, voraussichtliche Lieferung und Trackingnummer zu EINER konkreten Bestellnummer (Format VB-XXXXX). Nutze dieses Tool nur, wenn der Kunde eine Bestellnummer nennt.",
+        "operation": "getAll",
+        "tableId": "orders",
+        "limit": 1,
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "order_number",
+              "condition": "eq",
+              "keyValue": "={{ $fromAI('order_number', 'Die Bestellnummer des Kunden, z. B. VB-10001') }}"
+            }
+          ]
+        }
+      },
+      "id": "88fcb62a-c570-4045-8294-22561472dc41",
+      "name": "bestellstatus_abfragen",
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        480,
+        304
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "W0eyn3oDYgO1uj3u",
+          "name": "Supabase - Eric (RAG)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Legt ein Support-Ticket in der Datenbank an, wenn ein Anliegen nicht über die Wissensdatenbank lösbar ist oder der Kunde ausdrücklich ein Ticket bzw. Rückmeldung wünscht. Gibt die Ticket-ID zurück.",
+        "tableId": "tickets",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "subject",
+              "fieldValue": "={{ $fromAI('subject', 'Kurzer Betreff des Tickets') }}"
+            },
+            {
+              "fieldId": "message",
+              "fieldValue": "={{ $fromAI('message', 'Das Anliegen des Kunden im Detail') }}"
+            },
+            {
+              "fieldId": "customer_email",
+              "fieldValue": "={{ $fromAI('customer_email', 'E-Mail des Kunden, falls genannt, sonst leer') }}"
+            },
+            {
+              "fieldId": "order_number",
+              "fieldValue": "={{ $fromAI('order_number', 'Bestellnummer, falls genannt, z. B. VB-10001, sonst leer') }}"
+            }
+          ]
+        }
+      },
+      "id": "1182ac77-137e-405b-9bb1-18c22ac32f58",
+      "name": "Ticket_erstellen",
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        672,
+        304
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "W0eyn3oDYgO1uj3u",
+          "name": "Supabase - Eric (RAG)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "Sendet eine E-Mail an das menschliche Support-Team. Nutze dies nur bei dringenden oder eskalierenden Fällen (Beschwerde, Defekt, Zeitdruck), zusätzlich zum Ticket.",
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "from",
+              "value": "onboarding@resend.dev"
+            },
+            {
+              "name": "to",
+              "value": "<<REPLACE_WITH_YOUR_NOTIFICATION_EMAIL>>"
+            },
+            {
+              "name": "subject",
+              "value": "={{ $fromAI('subject', 'Kurzer Betreff der Eskalation') }}"
+            },
+            {
+              "name": "html",
+              "value": "={{ $fromAI('message', 'Beschreibung des Anliegens inkl. Kundenfrage und ggf. Bestellnummer') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5278c1f3-c849-4adc-a075-d4031f5aa8e4",
+      "name": "Eskalation_an_Mensch",
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        864,
+        304
+      ],
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "SEDyCLA4bLWkBmys",
+          "name": "Resend - Eric"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { reply: $json.output, steps: $json.intermediateSteps || [] } }}",
+        "options": {}
+      },
+      "id": "3020c80e-6f47-4837-b98c-ce16d3c94bb2",
+      "name": "Antwort an Web-Chat",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        944,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 🌐 W9T3 – Voltbox Web-Agent\nWebhook → Support-Agent (RAG · Bestellstatus · Ticket · Eskalation) → Respond to Webhook (JSON). Für externes Chat-Widget auf Vercel. CORS: allowedOrigins am Webhook. Session-Memory per sessionId aus dem Payload.",
+        "height": 120,
+        "width": 1040,
+        "color": 3
+      },
+      "id": "e309cf8c-3ad7-4a50-ae3a-17d7c37f9fab",
+      "name": "Sticky Note e80b3389",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -320,
+        -96
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Contract\nPOST /webhook/voltbox-agent\nRequest: { message, sessionId }\nResponse: { reply, steps[] }",
+        "height": 120,
+        "width": 260
+      },
+      "id": "9809da81-70fd-4fc1-a8ba-53894e0a11d9",
+      "name": "Sticky Note 561f09e2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        272
+      ]
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Voltbox Web-Chat (Webhook)').item.json.body.sessionId }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        64,
+        304
+      ],
+      "id": "3981a0b6-f08f-47ff-8466-2038c3fcce56",
+      "name": "Simple Memory"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Voltbox Web-Chat (Webhook)": {
+      "main": [
+        [
+          {
+            "node": "Support-Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Support-Agent": {
+      "main": [
+        [
+          {
+            "node": "Antwort an Web-Chat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Support-Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "search_knowledge_base": {
+      "ai_tool": [
+        [
+          {
+            "node": "Support-Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "search_knowledge_base",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "bestellstatus_abfragen": {
+      "ai_tool": [
+        [
+          {
+            "node": "Support-Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ticket_erstellen": {
+      "ai_tool": [
+        [
+          {
+            "node": "Support-Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Eskalation_an_Mensch": {
+      "ai_tool": [
+        [
+          {
+            "node": "Support-Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Support-Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "58da8a47-da2e-430b-8f63-daed084a01f6",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f032027e20e9709391bcafe9291ae76dc2a07ff2b593bca6936b7404ddb31c33"
+  },
+  "id": "DmdnBngpqoxMvEB8",
+  "tags": []
+}
